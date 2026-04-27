@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: '3'
+
+vars:
+  GREETING: Hello, world!
+
+tasks:
+  generate:
+    desc: Generate Rust-Dart bindings
+    cmds:
+      - flutter_rust_bridge_codegen generate
+    silent: true
+  clean:
+    desc: Clean Flutter and Rust build artifacts
+    cmds:
+      - flutter clean
+      - cd core && cargo clean
+      - flutter pub get --no-example

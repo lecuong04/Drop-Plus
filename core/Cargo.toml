@@ -1,0 +1,46 @@
+[package]
+name = "drop_plus_core"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "staticlib"]
+
+[dependencies]
+flutter_rust_bridge = "=2.12.0"
+anyhow = "1.0.102"
+iroh-blobs = { version = "0.100.0" }
+iroh = { version = "0.98.1", features = [
+    "tls-aws-lc-rs",
+    "fast-apple-datapath",
+    "portmapper",
+], default-features = false }
+tokio = { version = "1.52.1", features = ["full"] }
+tokio-util = "0.7.18"
+futures-util = "0.3.32"
+futures-buffered = "0.2.13"
+walkdir = "2.5.0"
+uuid = { version = "1.23.1", features = ["v7"] }
+parking_lot = "0.12.5"
+tracing = "0.1.44"
+tracing-subscriber = "0.3.23"
+hashbrown = "0.17.0"
+num_cpus = "1.17.0"
+tempfile = "3.27.0"
+miniz_oxide = "0.9.1"
+rxing = { version = "0.8.5", features = ["image"] }
+irpc = "0.14.0"
+irpc-iroh = "0.14.0"
+serde = { version = "1.0.228", features = ["derive"] }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+incremental = false
+overflow-checks = false
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }

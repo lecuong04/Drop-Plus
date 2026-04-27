@@ -1,0 +1,35 @@
+name: drop_plus
+description: "A new Flutter project."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  drop_plus_core:
+    path: rust_builder
+  flutter_rust_bridge: 2.12.0
+  flutter_bloc: ^9.1.1
+  file_picker: ^11.0.2
+  mobile_scanner: ^7.2.0
+  pretty_qr_code: ^3.6.0
+  file_sizes: ^1.0.6
+  flex_color_scheme: ^8.4.0
+  freezed_annotation: ^3.1.0
+  material_symbols_icons: ^4.2928.1
+  particles_flutter: ^2.0.2
+  two_dimensional_scrollables: ^0.4.2
+  collection: ^1.19.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  freezed: ^3.2.5
+  build_runner: ^2.14.1
+  flutter_lints: ^6.0.0
+  
+flutter:
+  uses-material-design: true
