@@ -24,7 +24,9 @@ use anyhow::{anyhow, Result};
 use hashbrown::HashMap;
 use iroh::{endpoint::presets::Minimal, protocol::Router, Endpoint, RelayMap, RelayMode, RelayUrl};
 use iroh_blobs::{
-    provider::events::{ConnectMode, EventMask, EventSender, ProviderMessage},
+    provider::events::{
+        ConnectMode, EventMask, EventSender, ProviderMessage, RequestMode, RequestUpdate,
+    },
     store::fs::FsStore,
     ticket::BlobTicket,
     BlobFormat, BlobsProtocol,
@@ -35,9 +37,11 @@ use parking_lot::{Mutex, RwLock};
 use tempfile::{Builder, TempDir};
 use tokio::{
     sync::mpsc::{self, Receiver},
+    task::JoinSet,
     time,
 };
 use tokio_util::{sync::CancellationToken, task::AbortOnDropHandle};
+use uuid::Uuid;
 
 static TOKENS: LazyLock<Mutex<HashMap<String, CancellationToken>>> =
     LazyLock::new(|| Mutex::new(HashMap::with_capacity(2)));
@@ -109,22 +113,67 @@ fn listen_rpc(files: Vec<BlobInfo>) -> IrohProtocol<SendServiceProtocol> {
     IrohProtocol::with_sender(client.as_local().unwrap())
 }
 
-async fn provide_progress(mp: Arc<MultiProgress>, mut recv: Receiver<ProviderMessage>) {
-    let conns = Arc::new(RwLock::new(BTreeMap::new()));
+async fn request_progress(
+    is_all: bool,
+    connection_id: u64,
+    connections: Arc<RwLock<BTreeMap<u64, Uuid>>>,
+    mp: Arc<MultiProgress>,
+    mut rx: irpc::channel::mpsc::Receiver<RequestUpdate>,
+) -> Result<()> {
+    let id = connections
+        .read()
+        .get(&connection_id)
+        .ok_or(anyhow!(
+            "got request for unknown connection {connection_id}"
+        ))?
+        .clone();
+    let mut size = 0;
+    while let Ok(Some(r)) = rx.recv().await {
+        if is_all {
+            match r {
+                RequestUpdate::Started(r) => {
+                    size = r.size;
+                }
+                RequestUpdate::Progress(r) => {
+                    if r.end_offset.eq(&size) {
+                        mp.increase(&id, size);
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+    Ok(())
+}
+
+async fn provide_progress(
+    mp: Arc<MultiProgress>,
+    mut recv: Receiver<ProviderMessage>,
+) -> Result<()> {
+    let connections = Arc::new(RwLock::new(BTreeMap::new()));
+    let mut tasks = JoinSet::new();
     loop {
         match recv.recv().await {
             Some(item) => {
                 match item {
                     ProviderMessage::ClientConnectedNotify(msg) => {
-                        let id = mp.add(Phase::Uploading {
-                            connection_id: msg.connection_id,
-                        });
-                        conns.write().insert(msg.connection_id, id);
+                        let connection_id = msg.connection_id;
+                        let id = mp.add(Phase::Uploading { connection_id });
+                        connections.write().insert(msg.connection_id, id);
                     }
                     ProviderMessage::ConnectionClosed(msg) => {
-                        if let Some(id) = conns.write().remove(&msg.connection_id) {
+                        if let Some(id) = connections.write().remove(&msg.connection_id) {
                             mp.remove(&id);
                         }
+                    }
+                    ProviderMessage::GetRequestReceivedNotify(msg) => {
+                        tasks.spawn(request_progress(
+                            msg.request.ranges.is_all(),
+                            msg.connection_id,
+                            connections.clone(),
+                            mp.clone(),
+                            msg.rx,
+                        ));
                     }
                     _ => {}
                 };
@@ -132,6 +181,10 @@ async fn provide_progress(mp: Arc<MultiProgress>, mut recv: Receiver<ProviderMes
             None => break,
         }
     }
+    while let Some(task) = tasks.join_next().await {
+        task??
+    }
+    Ok(())
 }
 
 pub(super) async fn start(
@@ -164,6 +217,7 @@ pub(super) async fn start(
             tx,
             EventMask {
                 connected: ConnectMode::Notify,
+                get: RequestMode::NotifyLog,
                 ..EventMask::DEFAULT
             },
         )),
