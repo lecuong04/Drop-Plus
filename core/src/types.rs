@@ -25,14 +25,8 @@ impl SendResult {
 }
 
 pub enum ReceiveResult {
-    Pending {
-        files: Vec<BlobInfo>,
-    },
-    Ok {
-        total_files: u64,
-        payload_size: u64,
-        elapsed_secs: u64,
-    },
+    Pending { files: Vec<BlobInfo> },
+    Ok { total_files: u64, payload_size: u64, elapsed_secs: u64 },
     Err,
 }
 
@@ -65,10 +59,7 @@ pub struct LogEntry {
 impl LogEntry {
     pub fn new(level: String, target: String, data: HashMap<String, String>) -> Self {
         Self {
-            time: SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .unwrap_or_default()
-                .as_millis() as u64,
+            time: SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_millis() as u64,
             level,
             target,
             data,

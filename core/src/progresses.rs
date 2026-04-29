@@ -1,6 +1,5 @@
-use std::{sync::Arc, time::Duration};
+use std::{collections::HashMap, sync::Arc, time::Duration};
 
-use hashbrown::HashMap;
 use parking_lot::{Mutex, RwLock};
 use tokio::{runtime::Handle, time};
 use uuid::Uuid;
@@ -9,21 +8,13 @@ const PROGRESS_DEBOUNCE: Duration = Duration::from_millis(200);
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Phase {
-    Importing {
-        name: String,
-    },
-    Uploading {
-        connection_id: u64,
-        is_completed: bool,
-        is_failed: bool,
-    },
+    Importing { name: String },
+    Uploading { connection_id: u64, is_completed: bool, is_failed: bool },
     Pending,
     Connecting,
     Validating,
     Downloading,
-    Exporting {
-        name: String,
-    },
+    Exporting { name: String },
 }
 
 #[derive(Debug, Clone)]
@@ -176,13 +167,7 @@ impl MultiProgress {
     }
 
     fn emit_snapshot(&self) {
-        self.observer.on_update(
-            self.state
-                .read()
-                .values()
-                .cloned()
-                .collect::<Vec<ProgressState>>(),
-        );
+        self.observer.on_update(self.state.read().values().cloned().collect::<Vec<ProgressState>>());
     }
 
     fn new_state(phase: Phase, position: Option<u64>) -> ProgressState {

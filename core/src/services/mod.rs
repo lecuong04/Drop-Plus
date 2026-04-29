@@ -10,22 +10,15 @@ use tracing::instrument;
 
 use crate::{
     frb_generated::StreamSink,
-    progress::ProgressState,
+    progresses::ProgressState,
     services::{others::qr, receive::ReceiveArgs, send::SendArgs},
     types::{ReceiveResult, SendResult},
 };
 
-static RUNTIME: LazyLock<Runtime> =
-    LazyLock::new(|| Runtime::new().expect("failed to initialize tokio runtime"));
+static RUNTIME: LazyLock<Runtime> = LazyLock::new(|| Runtime::new().expect("failed to initialize tokio runtime"));
 
 #[instrument(err, skip(stream, result))]
-pub fn send(
-    paths: Vec<String>,
-    magic_addr: Option<String>,
-    relay: Option<String>,
-    stream: StreamSink<Vec<ProgressState>>,
-    result: StreamSink<SendResult>,
-) -> Result<()> {
+pub fn send(paths: Vec<String>, magic_addr: Option<String>, relay: Option<String>, stream: StreamSink<Vec<ProgressState>>, result: StreamSink<SendResult>) -> Result<()> {
     let handle = RUNTIME.handle().clone();
     block_in_place(|| {
         handle
@@ -45,13 +38,7 @@ pub fn cancel_send(ticket: Vec<u8>) -> Result<()> {
 }
 
 #[instrument(err, skip(stream, result))]
-pub fn receive(
-    ticket: Vec<u8>,
-    download_dir: String,
-    relay: Option<String>,
-    stream: StreamSink<Vec<ProgressState>>,
-    result: StreamSink<ReceiveResult>,
-) -> Result<()> {
+pub fn receive(ticket: Vec<u8>, download_dir: String, relay: Option<String>, stream: StreamSink<Vec<ProgressState>>, result: StreamSink<ReceiveResult>) -> Result<()> {
     let handle = RUNTIME.handle().clone();
     block_in_place(|| {
         handle

@@ -10,7 +10,7 @@ crate-type = ["cdylib", "staticlib"]
 flutter_rust_bridge = "=2.12.0"
 anyhow = "1.0.102"
 iroh-blobs = { version = "0.100.0" }
-iroh = { version = "0.98.1", features = [
+iroh = { version = "0.98.2", features = [
     "tls-aws-lc-rs",
     "fast-apple-datapath",
     "portmapper",
@@ -24,7 +24,6 @@ uuid = { version = "1.23.1", features = ["v7"] }
 parking_lot = "0.12.5"
 tracing = "0.1.44"
 tracing-subscriber = "0.3.23"
-hashbrown = "0.17.0"
 num_cpus = "1.17.0"
 tempfile = "3.27.0"
 miniz_oxide = "0.9.1"

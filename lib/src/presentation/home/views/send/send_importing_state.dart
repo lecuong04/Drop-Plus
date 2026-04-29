@@ -3,7 +3,7 @@ import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
 import "package:material_symbols_icons/material_symbols_icons.dart";
 
-import "../../../../../rust/progress.dart";
+import "../../../../../rust/progresses.dart";
 import "../../../../cubits/send_cubit.dart";
 
 class SendImportingStateWidget extends StatelessWidget {

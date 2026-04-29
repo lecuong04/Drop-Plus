@@ -1,6 +1,7 @@
 pub mod utils;
 
 use std::{
+    collections::HashMap,
     path::PathBuf,
     str::FromStr,
     sync::{Arc, LazyLock},
@@ -9,7 +10,6 @@ use std::{
 
 use anyhow::{anyhow, bail, Result};
 use futures_util::StreamExt;
-use hashbrown::HashMap;
 use iroh::{endpoint::presets::Minimal, Endpoint, EndpointAddr, RelayMap, RelayMode, RelayUrl};
 use iroh_blobs::{
     api::remote::GetProgressItem,
@@ -31,17 +31,16 @@ use tracing::warn;
 use crate::{
     consts::{IRPC_ALPN, TRANSFER_ALPN},
     frb_generated::StreamSink,
-    progress::{MultiProgress, Phase, ProgressState},
-    services::{receive::utils::export, send::proto::SendServiceProtocol},
+    progresses::{MultiProgress, Phase, ProgressState},
+    protos::{ListFiles, SendServiceProtocol},
+    services::receive::utils::export,
     types::ReceiveResult,
     utils::{decompress_ticket, get_or_create_secret},
 };
 
-static TOKENS: LazyLock<Mutex<HashMap<String, CancellationToken>>> =
-    LazyLock::new(|| Mutex::new(HashMap::with_capacity(2)));
+static TOKENS: LazyLock<Mutex<HashMap<String, CancellationToken>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
 
-static BOARDCAST: LazyLock<broadcast::Sender<(String, bool)>> =
-    LazyLock::new(|| broadcast::Sender::new(24));
+static BOARDCAST: LazyLock<broadcast::Sender<(String, bool)>> = LazyLock::new(|| broadcast::Sender::new(24));
 
 #[derive(Debug)]
 pub(super) struct ReceiveArgs {
@@ -56,16 +55,10 @@ impl ReceiveArgs {
         let ticket = BlobTicket::from_str(&raw)?;
         let download_dir = PathBuf::from_str(&download_dir)?;
         let relay = relay
-            .map(|u| {
-                RelayUrl::from_str(&u).map(|url| RelayMode::Custom(RelayMap::from_iter(vec![url])))
-            })
+            .map(|u| RelayUrl::from_str(&u).map(|url| RelayMode::Custom(RelayMap::from_iter(vec![url]))))
             .transpose()?
             .unwrap_or(RelayMode::Disabled);
-        Ok(Self {
-            download_dir,
-            relay,
-            ticket,
-        })
+        Ok(Self { download_dir, relay, ticket })
     }
 }
 
@@ -91,16 +84,8 @@ fn connect_rpc(endpoint: &Endpoint, addr: &EndpointAddr) -> Client<SendServicePr
     irpc_iroh::client(endpoint.clone(), addr.clone(), IRPC_ALPN)
 }
 
-pub(super) async fn start(
-    args: ReceiveArgs,
-    stream: StreamSink<Vec<ProgressState>>,
-    result: &StreamSink<ReceiveResult>,
-) -> Result<()> {
-    let ReceiveArgs {
-        ticket,
-        relay,
-        download_dir,
-    } = args;
+pub(super) async fn start(args: ReceiveArgs, stream: StreamSink<Vec<ProgressState>>, result: &StreamSink<ReceiveResult>) -> Result<()> {
+    let ReceiveArgs { ticket, relay, download_dir } = args;
     let addr = ticket.addr().clone();
     let hash_and_format = ticket.hash_and_format();
     let secret_key = get_or_create_secret()?;
@@ -112,14 +97,8 @@ pub(super) async fn start(
     let mp: MultiProgress = MultiProgress::new(Arc::new(stream));
     let id = mp.add(Phase::Pending);
     let client = connect_rpc(&endpoint, &addr);
-    let files = timeout(
-        Duration::from_secs(5),
-        client.rpc(super::send::proto::ListFiles),
-    )
-    .await??;
-    result
-        .add(ReceiveResult::pending(files))
-        .map_err(|e| anyhow!("{}", e))?;
+    let files = timeout(Duration::from_secs(5), client.rpc(ListFiles)).await??;
+    result.add(ReceiveResult::pending(files)).map_err(|e| anyhow!("{}", e))?;
     while let Ok(r) = BOARDCAST.subscribe().recv().await {
         if r.0.eq(&ticket.to_string()) && r.1 {
             break;
@@ -127,10 +106,7 @@ pub(super) async fn start(
             return Ok(());
         }
     }
-    let data_dir = download_dir.join(format!(
-        ".droplus-recv-{}",
-        hash_and_format.hash.fmt_short().to_lowercase()
-    ));
+    let data_dir = download_dir.join(format!(".droplus-recv-{}", hash_and_format.hash.fmt_short().to_lowercase()));
     let db = FsStore::load(&data_dir).await?;
     let receive_result = async {
         let cancel = CancellationToken::new();
@@ -152,10 +128,9 @@ pub(super) async fn start(
                 _ = cancel.cancelled() => Err(anyhow!("cancelled"))
             }?;
             mp.change_phase(&id, Phase::Validating, None);
-            let (_, sizes) =
-                get_hash_seq_and_sizes(&connection, &hash_and_format.hash, 1024 * 1024 * 32, None)
-                    .await
-                    .map_err(show_get_error)?;
+            let (_, sizes) = get_hash_seq_and_sizes(&connection, &hash_and_format.hash, 1024 * 1024 * 32, None)
+                .await
+                .map_err(show_get_error)?;
             let total_size = sizes.iter().copied().sum::<u64>();
             let total_files = (sizes.len().saturating_sub(1)) as u64;
             let local_size = local.local_bytes();
@@ -200,20 +175,14 @@ pub(super) async fn start(
         let start = Instant::now();
         let collection = Collection::load(hash_and_format.hash, db.as_ref()).await?;
         export(&download_dir, &db, collection, &mp).await?;
-        Ok((
-            total_files,
-            payload_size,
-            stats.elapsed.as_secs() + start.elapsed().as_secs(),
-        ))
+        Ok((total_files, payload_size, stats.elapsed.as_secs() + start.elapsed().as_secs()))
     }
     .await;
     endpoint.close().await;
     db.shutdown().await?;
     match receive_result {
         Ok(x) => {
-            result
-                .add(ReceiveResult::ok(x.0, x.1, x.2))
-                .map_err(|e| anyhow!("{}", e))?;
+            result.add(ReceiveResult::ok(x.0, x.1, x.2)).map_err(|e| anyhow!("{}", e))?;
             tokio::fs::remove_dir_all(data_dir).await?;
         }
         Err(e) => {
@@ -236,16 +205,10 @@ pub(super) fn cancel(ticket: Vec<u8>) -> Result<()> {
 
 pub(super) fn reject(ticket: Vec<u8>) -> Result<()> {
     let raw = decompress_ticket(ticket)?;
-    BOARDCAST
-        .send((raw, false))
-        .map(|_| ())
-        .map_err(|e| anyhow!("{}", e))
+    BOARDCAST.send((raw, false)).map(|_| ()).map_err(|e| anyhow!("{}", e))
 }
 
 pub(super) fn accept(ticket: Vec<u8>) -> Result<()> {
     let raw = decompress_ticket(ticket)?;
-    BOARDCAST
-        .send((raw, true))
-        .map(|_| ())
-        .map_err(|e| anyhow!("{}", e))
+    BOARDCAST.send((raw, true)).map(|_| ()).map_err(|e| anyhow!("{}", e))
 }

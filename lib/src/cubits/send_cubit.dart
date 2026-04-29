@@ -1,7 +1,7 @@
 import "dart:async";
 import "dart:convert";
 
-import "../../rust/progress.dart";
+import "../../rust/progresses.dart";
 import "../../rust/types.dart";
 import "../services/transfer_service.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
@@ -70,7 +70,14 @@ class SendCubit extends Cubit<SendState> {
       if (e.any((p) => p.phase is Phase_Importing)) {
         emit(SendImporting(progresses: e));
       } else if (e.any((p) => p.phase is Phase_Uploading)) {
-        emit((state as SendReady).copyWith(progresses: e));
+        final curState = (state as SendReady);
+
+        final progresses = curState.progresses.where(
+          (p) => !e
+              .map((e) => (e.phase as Phase_Uploading).connectionId)
+              .contains((p.phase as Phase_Uploading).connectionId),
+        );
+        emit((state as SendReady).copyWith(progresses: [...progresses, ...e]));
       }
     });
     resultSub = resultSink.stream.listen((result) {

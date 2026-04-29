@@ -9,7 +9,7 @@ import "dart:ffi" as ffi;
 import "ffi.dart";
 import "frb_generated.dart";
 import "package:flutter_rust_bridge/flutter_rust_bridge_for_generated_io.dart";
-import "progress.dart";
+import "progresses.dart";
 import "types.dart";
 
 abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {

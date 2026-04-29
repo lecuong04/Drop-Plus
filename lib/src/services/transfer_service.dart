@@ -1,7 +1,8 @@
-import "../../rust/ffi.dart" as ffi;
-import "../../rust/progress.dart";
-import "../../rust/types.dart";
 import "package:flutter_rust_bridge/flutter_rust_bridge.dart";
+
+import "../../rust/ffi.dart" as ffi;
+import "../../rust/progresses.dart";
+import "../../rust/types.dart";
 
 class TransferService {
   Future<void> send({

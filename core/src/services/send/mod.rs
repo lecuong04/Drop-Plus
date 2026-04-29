@@ -1,8 +1,7 @@
-pub mod proto;
 pub mod utils;
 
 use std::{
-    collections::BTreeMap,
+    collections::HashMap,
     net::SocketAddr,
     path::PathBuf,
     str::FromStr,
@@ -13,20 +12,18 @@ use std::{
 use crate::{
     consts::{IRPC_ALPN, TRANSFER_ALPN},
     frb_generated::StreamSink,
-    progress::{MultiProgress, Phase, ProgressObserver, ProgressState},
-    services::send::{proto::SendServiceMessage, utils::import},
+    progresses::{MultiProgress, Phase, ProgressObserver, ProgressState},
+    protos::SendServiceProtocol,
+    services::send::utils::import,
     types::BlobInfo,
     utils::{decompress_ticket, get_or_create_secret},
 };
-use crate::{services::send::proto::SendServiceProtocol, types::SendResult};
+use crate::{protos::SendServiceMessage, types::SendResult};
 
 use anyhow::{anyhow, Result};
-use hashbrown::HashMap;
 use iroh::{endpoint::presets::Minimal, protocol::Router, Endpoint, RelayMap, RelayMode, RelayUrl};
 use iroh_blobs::{
-    provider::events::{
-        ConnectMode, EventMask, EventSender, ProviderMessage, RequestMode, RequestUpdate,
-    },
+    provider::events::{ConnectMode, EventMask, EventSender, ProviderMessage, RequestMode, RequestUpdate},
     store::fs::FsStore,
     ticket::BlobTicket,
     BlobFormat, BlobsProtocol,
@@ -44,8 +41,7 @@ use tokio_util::{sync::CancellationToken, task::AbortOnDropHandle};
 use tracing::error;
 use uuid::Uuid;
 
-static TOKENS: LazyLock<Mutex<HashMap<String, CancellationToken>>> =
-    LazyLock::new(|| Mutex::new(HashMap::with_capacity(2)));
+static TOKENS: LazyLock<Mutex<HashMap<String, CancellationToken>>> = LazyLock::new(|| Mutex::new(HashMap::with_capacity(2)));
 
 #[derive(Debug)]
 pub(super) struct SendArgs {
@@ -55,30 +51,17 @@ pub(super) struct SendArgs {
 }
 
 impl SendArgs {
-    pub fn new(
-        paths: Vec<String>,
-        magic_addr: Option<String>,
-        relay: Option<String>,
-    ) -> Result<Self> {
-        let paths = paths
-            .into_iter()
-            .filter_map(|p| PathBuf::from(p).canonicalize().ok())
-            .collect::<Vec<PathBuf>>();
+    pub fn new(paths: Vec<String>, magic_addr: Option<String>, relay: Option<String>) -> Result<Self> {
+        let paths = paths.into_iter().filter_map(|p| PathBuf::from(p).canonicalize().ok()).collect::<Vec<PathBuf>>();
         if paths.is_empty() {
             return Err(anyhow!("no valid paths provided"));
         }
         let magic_addr = magic_addr.map(|u| SocketAddr::from_str(&u)).transpose()?;
         let relay = relay
-            .map(|u| {
-                RelayUrl::from_str(&u).map(|url| RelayMode::Custom(RelayMap::from_iter(vec![url])))
-            })
+            .map(|u| RelayUrl::from_str(&u).map(|url| RelayMode::Custom(RelayMap::from_iter(vec![url]))))
             .transpose()?
             .unwrap_or(RelayMode::Disabled);
-        Ok(Self {
-            paths,
-            magic_addr,
-            relay,
-        })
+        Ok(Self { paths, magic_addr, relay })
     }
 }
 
@@ -90,16 +73,16 @@ impl ProgressObserver for StreamSink<Vec<ProgressState>> {
 
 struct TransferState {
     connection_id: u64,
-    size: u64,
+    index: u64,
     is_completed: bool,
     is_failed: bool,
 }
 
 impl TransferState {
-    fn new(connection_id: u64, size: u64, is_completed: bool, is_failed: bool) -> Self {
+    fn new(connection_id: u64, index: u64, is_completed: bool, is_failed: bool) -> Self {
         Self {
             connection_id,
-            size,
+            index,
             is_completed,
             is_failed,
         }
@@ -107,10 +90,7 @@ impl TransferState {
 }
 
 fn tempdir_in(dir: PathBuf) -> Result<TempDir> {
-    let dir = Builder::new()
-        .prefix(".droplus-send-")
-        .rand_bytes(6)
-        .tempdir_in(dir)?;
+    let dir = Builder::new().prefix(".droplus-send-").rand_bytes(6).tempdir_in(dir)?;
     Ok(dir)
 }
 
@@ -135,36 +115,50 @@ fn listen_rpc(files: Vec<BlobInfo>) -> IrohProtocol<SendServiceProtocol> {
 async fn request_progress(
     request_id: u64,
     connection_id: u64,
+    hashes: Arc<RwLock<HashMap<u64, HashMap<u64, u64>>>>,
     utx: UnboundedSender<TransferState>,
     mut rx: irpc::channel::mpsc::Receiver<RequestUpdate>,
-) -> Result<()> {
-    let mut size = 0;
-    while let Ok(Some(r)) = rx.recv().await {
-        if request_id != 0 {
+) {
+    if request_id != 0 {
+        let (mut index, mut size) = (0, 0);
+        while let Ok(Some(r)) = rx.recv().await {
             match r {
                 RequestUpdate::Started(r) => {
-                    size = r.size;
+                    (index, size) = (r.index, r.size);
                 }
                 RequestUpdate::Progress(r) => {
                     if r.end_offset.eq(&size) {
-                        utx.send(TransferState::new(connection_id, size, false, false))?;
+                        utx.send(TransferState::new(connection_id, index, false, false)).unwrap();
                     }
                 }
                 RequestUpdate::Completed(_) => {
-                    utx.send(TransferState::new(connection_id, 0, true, false))?;
+                    utx.send(TransferState::new(connection_id, 0, true, false)).unwrap();
                 }
                 RequestUpdate::Aborted(_) => {
-                    utx.send(TransferState::new(connection_id, 0, false, true))?;
+                    utx.send(TransferState::new(connection_id, 0, false, true)).unwrap();
                 }
             }
         }
+    } else {
+        let map = Arc::new(RwLock::new(HashMap::new()));
+        while let Ok(Some(r)) = rx.recv().await {
+            match r {
+                RequestUpdate::Started(r) => {
+                    map.write().insert(r.index, r.size);
+                }
+                RequestUpdate::Completed(_) => {
+                    hashes.write().insert(connection_id, map.read().clone());
+                }
+                _ => {}
+            }
+        }
     }
-    Ok(())
 }
 
 async fn update_progress(
     mp: Arc<MultiProgress>,
-    connections: Arc<RwLock<BTreeMap<u64, Uuid>>>,
+    hashes: Arc<RwLock<HashMap<u64, HashMap<u64, u64>>>>,
+    connections: Arc<RwLock<HashMap<u64, Uuid>>>,
     mut urx: UnboundedReceiver<TransferState>,
 ) {
     let mut map = HashMap::new();
@@ -172,8 +166,21 @@ async fn update_progress(
         let value = connections.read().get(&s.connection_id).cloned();
         match value {
             Some(id) => {
+                let total = hashes
+                    .read()
+                    .get(&s.connection_id)
+                    .unwrap()
+                    .iter()
+                    .filter_map(|(k, v)| {
+                        if k <= &s.index {
+                            return Some(v);
+                        }
+                        None
+                    })
+                    .sum::<u64>();
                 if !s.is_completed && !s.is_failed {
-                    map.insert(s.connection_id, mp.increase(&id, s.size));
+                    map.insert(s.connection_id, s.index);
+                    mp.set_position(&id, total);
                 } else {
                     mp.change_phase(
                         &id,
@@ -182,9 +189,10 @@ async fn update_progress(
                             is_completed: s.is_completed,
                             is_failed: s.is_failed,
                         },
-                        Some(*map.get(&s.connection_id).unwrap_or(&0)),
+                        Some(total),
                     );
                     mp.remove(&id);
+                    hashes.write().remove(&s.connection_id);
                 }
             }
             None => {
@@ -194,17 +202,11 @@ async fn update_progress(
     }
 }
 
-async fn provide_progress(
-    mp: Arc<MultiProgress>,
-    mut recv: Receiver<ProviderMessage>,
-) -> Result<()> {
-    let connections = Arc::new(RwLock::new(BTreeMap::new()));
+async fn provide_progress(mp: Arc<MultiProgress>, mut recv: Receiver<ProviderMessage>) -> Result<()> {
+    let connections = Arc::new(RwLock::new(HashMap::new()));
+    let hashes = Arc::new(RwLock::new(HashMap::new()));
     let (utx, urx) = mpsc::unbounded_channel();
-    let handle = AbortOnDropHandle::new(tokio::task::spawn(update_progress(
-        mp.clone(),
-        connections.clone(),
-        urx,
-    )));
+    let handle = AbortOnDropHandle::new(tokio::task::spawn(update_progress(mp.clone(), hashes.clone(), connections.clone(), urx)));
     let mut tasks = JoinSet::new();
     loop {
         match recv.recv().await {
@@ -220,12 +222,7 @@ async fn provide_progress(
                         connections.write().insert(msg.connection_id, id);
                     }
                     ProviderMessage::GetRequestReceivedNotify(msg) => {
-                        tasks.spawn(request_progress(
-                            msg.request_id,
-                            msg.connection_id,
-                            utx.clone(),
-                            msg.rx,
-                        ));
+                        tasks.spawn(request_progress(msg.request_id, msg.connection_id, hashes.clone(), utx.clone(), msg.rx));
                     }
                     _ => {}
                 };
@@ -234,22 +231,14 @@ async fn provide_progress(
         }
     }
     while let Some(task) = tasks.join_next().await {
-        task??
+        task?
     }
     handle.await?;
     Ok(())
 }
 
-pub(super) async fn start(
-    args: SendArgs,
-    stream: StreamSink<Vec<ProgressState>>,
-    result: &StreamSink<SendResult>,
-) -> Result<()> {
-    let SendArgs {
-        paths,
-        magic_addr,
-        relay,
-    } = args;
+pub(super) async fn start(args: SendArgs, stream: StreamSink<Vec<ProgressState>>, result: &StreamSink<SendResult>) -> Result<()> {
+    let SendArgs { paths, magic_addr, relay } = args;
     let secret_key = get_or_create_secret()?;
     let mut builder = Endpoint::builder(Minimal)
         .alpns(vec![TRANSFER_ALPN.to_vec()])
@@ -277,10 +266,7 @@ pub(super) async fn start(
     );
     let (temp_tag, files, size) = import(paths, blobs.store(), &mp).await?;
     let rpc = listen_rpc(files);
-    let router = Router::builder(endpoint)
-        .accept(TRANSFER_ALPN, blobs)
-        .accept(IRPC_ALPN, rpc)
-        .spawn();
+    let router = Router::builder(endpoint).accept(TRANSFER_ALPN, blobs).accept(IRPC_ALPN, rpc).spawn();
     let ep = router.endpoint();
     time::timeout(Duration::from_secs(30), async move {
         if !matches!(relay, RelayMode::Disabled) {

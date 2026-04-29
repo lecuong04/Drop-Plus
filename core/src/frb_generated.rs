@@ -59,24 +59,15 @@ fn wire__crate__ffi__accept_receive_impl(
             mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
         },
         move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let message = unsafe { flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(ptr_, rust_vec_len_, data_len_) };
+            let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_ticket = <Vec<u8>>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let output_ok = crate::ffi::accept_receive(api_ticket)?;
-                        Ok(output_ok)
-                    })(),
-                )
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>((move || {
+                    let output_ok = crate::ffi::accept_receive(api_ticket)?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
@@ -94,24 +85,15 @@ fn wire__crate__ffi__cancel_receive_impl(
             mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
         },
         move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let message = unsafe { flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(ptr_, rust_vec_len_, data_len_) };
+            let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_ticket = <Vec<u8>>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let output_ok = crate::ffi::cancel_receive(api_ticket)?;
-                        Ok(output_ok)
-                    })(),
-                )
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>((move || {
+                    let output_ok = crate::ffi::cancel_receive(api_ticket)?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
@@ -129,24 +111,15 @@ fn wire__crate__ffi__cancel_send_impl(
             mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
         },
         move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let message = unsafe { flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(ptr_, rust_vec_len_, data_len_) };
+            let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_ticket = <Vec<u8>>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let output_ok = crate::ffi::cancel_send(api_ticket)?;
-                        Ok(output_ok)
-                    })(),
-                )
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>((move || {
+                    let output_ok = crate::ffi::cancel_send(api_ticket)?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
@@ -164,15 +137,8 @@ fn wire__crate__ffi__init_app_impl(
             mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
         },
         move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let message = unsafe { flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(ptr_, rust_vec_len_, data_len_) };
+            let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, ()>((move || {
@@ -198,19 +164,9 @@ fn wire__crate__ffi__init_tracing_impl(
             mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
         },
         move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_stream = <StreamSink<
-                crate::types::LogEntry,
-                flutter_rust_bridge::for_generated::SseCodec,
-            >>::sse_decode(&mut deserializer);
+            let message = unsafe { flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(ptr_, rust_vec_len_, data_len_) };
+            let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_stream = <StreamSink<crate::types::LogEntry, flutter_rust_bridge::for_generated::SseCodec>>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| async move {
                 transform_result_sse::<_, ()>(
@@ -239,24 +195,15 @@ fn wire__crate__ffi__qr_reader_impl(
             mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
         },
         move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let message = unsafe { flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(ptr_, rust_vec_len_, data_len_) };
+            let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_image = <Vec<u8>>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let output_ok = crate::ffi::qr_reader(api_image)?;
-                        Ok(output_ok)
-                    })(),
-                )
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>((move || {
+                    let output_ok = crate::ffi::qr_reader(api_image)?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
@@ -274,40 +221,19 @@ fn wire__crate__ffi__receive_impl(
             mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
         },
         move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let message = unsafe { flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(ptr_, rust_vec_len_, data_len_) };
+            let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_ticket = <Vec<u8>>::sse_decode(&mut deserializer);
             let api_download_dir = <String>::sse_decode(&mut deserializer);
             let api_relay = <Option<String>>::sse_decode(&mut deserializer);
-            let api_stream = <StreamSink<
-                Vec<crate::progress::ProgressState>,
-                flutter_rust_bridge::for_generated::SseCodec,
-            >>::sse_decode(&mut deserializer);
-            let api_result = <StreamSink<
-                crate::types::ReceiveResult,
-                flutter_rust_bridge::for_generated::SseCodec,
-            >>::sse_decode(&mut deserializer);
+            let api_stream = <StreamSink<Vec<crate::progresses::ProgressState>, flutter_rust_bridge::for_generated::SseCodec>>::sse_decode(&mut deserializer);
+            let api_result = <StreamSink<crate::types::ReceiveResult, flutter_rust_bridge::for_generated::SseCodec>>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let output_ok = crate::ffi::receive(
-                            api_ticket,
-                            api_download_dir,
-                            api_relay,
-                            api_stream,
-                            api_result,
-                        )?;
-                        Ok(output_ok)
-                    })(),
-                )
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>((move || {
+                    let output_ok = crate::ffi::receive(api_ticket, api_download_dir, api_relay, api_stream, api_result)?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
@@ -325,24 +251,15 @@ fn wire__crate__ffi__reject_receive_impl(
             mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
         },
         move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let message = unsafe { flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(ptr_, rust_vec_len_, data_len_) };
+            let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_ticket = <Vec<u8>>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let output_ok = crate::ffi::reject_receive(api_ticket)?;
-                        Ok(output_ok)
-                    })(),
-                )
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>((move || {
+                    let output_ok = crate::ffi::reject_receive(api_ticket)?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
@@ -360,40 +277,19 @@ fn wire__crate__ffi__send_impl(
             mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
         },
         move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let message = unsafe { flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(ptr_, rust_vec_len_, data_len_) };
+            let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_paths = <Vec<String>>::sse_decode(&mut deserializer);
             let api_magic_addr = <Option<String>>::sse_decode(&mut deserializer);
             let api_relay = <Option<String>>::sse_decode(&mut deserializer);
-            let api_stream = <StreamSink<
-                Vec<crate::progress::ProgressState>,
-                flutter_rust_bridge::for_generated::SseCodec,
-            >>::sse_decode(&mut deserializer);
-            let api_result = <StreamSink<
-                crate::types::SendResult,
-                flutter_rust_bridge::for_generated::SseCodec,
-            >>::sse_decode(&mut deserializer);
+            let api_stream = <StreamSink<Vec<crate::progresses::ProgressState>, flutter_rust_bridge::for_generated::SseCodec>>::sse_decode(&mut deserializer);
+            let api_result = <StreamSink<crate::types::SendResult, flutter_rust_bridge::for_generated::SseCodec>>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
-                    (move || {
-                        let output_ok = crate::ffi::send(
-                            api_paths,
-                            api_magic_addr,
-                            api_relay,
-                            api_stream,
-                            api_result,
-                        )?;
-                        Ok(output_ok)
-                    })(),
-                )
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>((move || {
+                    let output_ok = crate::ffi::send(api_paths, api_magic_addr, api_relay, api_stream, api_result)?;
+                    Ok(output_ok)
+                })())
             }
         },
     )
@@ -417,12 +313,7 @@ impl SseDecode for std::collections::HashMap<String, String> {
     }
 }
 
-impl SseDecode
-    for StreamSink<
-        Vec<crate::progress::ProgressState>,
-        flutter_rust_bridge::for_generated::SseCodec,
-    >
-{
+impl SseDecode for StreamSink<Vec<crate::progresses::ProgressState>, flutter_rust_bridge::for_generated::SseCodec> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut inner = <String>::sse_decode(deserializer);
@@ -430,9 +321,7 @@ impl SseDecode
     }
 }
 
-impl SseDecode
-    for StreamSink<crate::types::LogEntry, flutter_rust_bridge::for_generated::SseCodec>
-{
+impl SseDecode for StreamSink<crate::types::LogEntry, flutter_rust_bridge::for_generated::SseCodec> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut inner = <String>::sse_decode(deserializer);
@@ -440,9 +329,7 @@ impl SseDecode
     }
 }
 
-impl SseDecode
-    for StreamSink<crate::types::ReceiveResult, flutter_rust_bridge::for_generated::SseCodec>
-{
+impl SseDecode for StreamSink<crate::types::ReceiveResult, flutter_rust_bridge::for_generated::SseCodec> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut inner = <String>::sse_decode(deserializer);
@@ -450,9 +337,7 @@ impl SseDecode
     }
 }
 
-impl SseDecode
-    for StreamSink<crate::types::SendResult, flutter_rust_bridge::for_generated::SseCodec>
-{
+impl SseDecode for StreamSink<crate::types::SendResult, flutter_rust_bridge::for_generated::SseCodec> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut inner = <String>::sse_decode(deserializer);
@@ -473,10 +358,7 @@ impl SseDecode for crate::types::BlobInfo {
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_name = <String>::sse_decode(deserializer);
         let mut var_size = <u64>::sse_decode(deserializer);
-        return crate::types::BlobInfo {
-            name: var_name,
-            size: var_size,
-        };
+        return crate::types::BlobInfo { name: var_name, size: var_size };
     }
 }
 
@@ -523,13 +405,13 @@ impl SseDecode for Vec<u8> {
     }
 }
 
-impl SseDecode for Vec<crate::progress::ProgressState> {
+impl SseDecode for Vec<crate::progresses::ProgressState> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut len_ = <i32>::sse_decode(deserializer);
         let mut ans_ = Vec::with_capacity(len_ as usize);
         for idx_ in 0..len_ {
-            ans_.push(<crate::progress::ProgressState>::sse_decode(deserializer));
+            ans_.push(<crate::progresses::ProgressState>::sse_decode(deserializer));
         }
         return ans_;
     }
@@ -585,40 +467,40 @@ impl SseDecode for Option<u64> {
     }
 }
 
-impl SseDecode for crate::progress::Phase {
+impl SseDecode for crate::progresses::Phase {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut tag_ = <i32>::sse_decode(deserializer);
         match tag_ {
             0 => {
                 let mut var_name = <String>::sse_decode(deserializer);
-                return crate::progress::Phase::Importing { name: var_name };
+                return crate::progresses::Phase::Importing { name: var_name };
             }
             1 => {
                 let mut var_connectionId = <u64>::sse_decode(deserializer);
                 let mut var_isCompleted = <bool>::sse_decode(deserializer);
                 let mut var_isFailed = <bool>::sse_decode(deserializer);
-                return crate::progress::Phase::Uploading {
+                return crate::progresses::Phase::Uploading {
                     connection_id: var_connectionId,
                     is_completed: var_isCompleted,
                     is_failed: var_isFailed,
                 };
             }
             2 => {
-                return crate::progress::Phase::Pending;
+                return crate::progresses::Phase::Pending;
             }
             3 => {
-                return crate::progress::Phase::Connecting;
+                return crate::progresses::Phase::Connecting;
             }
             4 => {
-                return crate::progress::Phase::Validating;
+                return crate::progresses::Phase::Validating;
             }
             5 => {
-                return crate::progress::Phase::Downloading;
+                return crate::progresses::Phase::Downloading;
             }
             6 => {
                 let mut var_name = <String>::sse_decode(deserializer);
-                return crate::progress::Phase::Exporting { name: var_name };
+                return crate::progresses::Phase::Exporting { name: var_name };
             }
             _ => {
                 unimplemented!("");
@@ -627,13 +509,13 @@ impl SseDecode for crate::progress::Phase {
     }
 }
 
-impl SseDecode for crate::progress::ProgressState {
+impl SseDecode for crate::progresses::ProgressState {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut var_phase = <crate::progress::Phase>::sse_decode(deserializer);
+        let mut var_phase = <crate::progresses::Phase>::sse_decode(deserializer);
         let mut var_position = <u64>::sse_decode(deserializer);
         let mut var_length = <Option<u64>>::sse_decode(deserializer);
-        return crate::progress::ProgressState {
+        return crate::progresses::ProgressState {
             phase: var_phase,
             position: var_position,
             length: var_length,
@@ -767,11 +649,7 @@ fn pde_ffi_dispatcher_sync_impl(
 // Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::types::BlobInfo {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
-        [
-            self.name.into_into_dart().into_dart(),
-            self.size.into_into_dart().into_dart(),
-        ]
-        .into_dart()
+        [self.name.into_into_dart().into_dart(), self.size.into_into_dart().into_dart()].into_dart()
     }
 }
 impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::types::BlobInfo {}
@@ -799,13 +677,11 @@ impl flutter_rust_bridge::IntoIntoDart<crate::types::LogEntry> for crate::types:
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for crate::progress::Phase {
+impl flutter_rust_bridge::IntoDart for crate::progresses::Phase {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         match self {
-            crate::progress::Phase::Importing { name } => {
-                [0.into_dart(), name.into_into_dart().into_dart()].into_dart()
-            }
-            crate::progress::Phase::Uploading {
+            crate::progresses::Phase::Importing { name } => [0.into_dart(), name.into_into_dart().into_dart()].into_dart(),
+            crate::progresses::Phase::Uploading {
                 connection_id,
                 is_completed,
                 is_failed,
@@ -816,27 +692,25 @@ impl flutter_rust_bridge::IntoDart for crate::progress::Phase {
                 is_failed.into_into_dart().into_dart(),
             ]
             .into_dart(),
-            crate::progress::Phase::Pending => [2.into_dart()].into_dart(),
-            crate::progress::Phase::Connecting => [3.into_dart()].into_dart(),
-            crate::progress::Phase::Validating => [4.into_dart()].into_dart(),
-            crate::progress::Phase::Downloading => [5.into_dart()].into_dart(),
-            crate::progress::Phase::Exporting { name } => {
-                [6.into_dart(), name.into_into_dart().into_dart()].into_dart()
-            }
+            crate::progresses::Phase::Pending => [2.into_dart()].into_dart(),
+            crate::progresses::Phase::Connecting => [3.into_dart()].into_dart(),
+            crate::progresses::Phase::Validating => [4.into_dart()].into_dart(),
+            crate::progresses::Phase::Downloading => [5.into_dart()].into_dart(),
+            crate::progresses::Phase::Exporting { name } => [6.into_dart(), name.into_into_dart().into_dart()].into_dart(),
             _ => {
                 unimplemented!("");
             }
         }
     }
 }
-impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::progress::Phase {}
-impl flutter_rust_bridge::IntoIntoDart<crate::progress::Phase> for crate::progress::Phase {
-    fn into_into_dart(self) -> crate::progress::Phase {
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::progresses::Phase {}
+impl flutter_rust_bridge::IntoIntoDart<crate::progresses::Phase> for crate::progresses::Phase {
+    fn into_into_dart(self) -> crate::progresses::Phase {
         self
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for crate::progress::ProgressState {
+impl flutter_rust_bridge::IntoDart for crate::progresses::ProgressState {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
             self.phase.into_into_dart().into_dart(),
@@ -846,14 +720,9 @@ impl flutter_rust_bridge::IntoDart for crate::progress::ProgressState {
         .into_dart()
     }
 }
-impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
-    for crate::progress::ProgressState
-{
-}
-impl flutter_rust_bridge::IntoIntoDart<crate::progress::ProgressState>
-    for crate::progress::ProgressState
-{
-    fn into_into_dart(self) -> crate::progress::ProgressState {
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::progresses::ProgressState {}
+impl flutter_rust_bridge::IntoIntoDart<crate::progresses::ProgressState> for crate::progresses::ProgressState {
+    fn into_into_dart(self) -> crate::progresses::ProgressState {
         self
     }
 }
@@ -861,9 +730,7 @@ impl flutter_rust_bridge::IntoIntoDart<crate::progress::ProgressState>
 impl flutter_rust_bridge::IntoDart for crate::types::ReceiveResult {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         match self {
-            crate::types::ReceiveResult::Pending { files } => {
-                [0.into_dart(), files.into_into_dart().into_dart()].into_dart()
-            }
+            crate::types::ReceiveResult::Pending { files } => [0.into_dart(), files.into_into_dart().into_dart()].into_dart(),
             crate::types::ReceiveResult::Ok {
                 total_files,
                 payload_size,
@@ -883,9 +750,7 @@ impl flutter_rust_bridge::IntoDart for crate::types::ReceiveResult {
     }
 }
 impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::types::ReceiveResult {}
-impl flutter_rust_bridge::IntoIntoDart<crate::types::ReceiveResult>
-    for crate::types::ReceiveResult
-{
+impl flutter_rust_bridge::IntoIntoDart<crate::types::ReceiveResult> for crate::types::ReceiveResult {
     fn into_into_dart(self) -> crate::types::ReceiveResult {
         self
     }
@@ -894,12 +759,7 @@ impl flutter_rust_bridge::IntoIntoDart<crate::types::ReceiveResult>
 impl flutter_rust_bridge::IntoDart for crate::types::SendResult {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         match self {
-            crate::types::SendResult::Ok { ticket, size } => [
-                0.into_dart(),
-                ticket.into_into_dart().into_dart(),
-                size.into_into_dart().into_dart(),
-            ]
-            .into_dart(),
+            crate::types::SendResult::Ok { ticket, size } => [0.into_dart(), ticket.into_into_dart().into_dart(), size.into_into_dart().into_dart()].into_dart(),
             crate::types::SendResult::Err => [1.into_dart()].into_dart(),
             _ => {
                 unimplemented!("");
@@ -928,39 +788,28 @@ impl SseEncode for std::collections::HashMap<String, String> {
     }
 }
 
-impl SseEncode
-    for StreamSink<
-        Vec<crate::progress::ProgressState>,
-        flutter_rust_bridge::for_generated::SseCodec,
-    >
-{
+impl SseEncode for StreamSink<Vec<crate::progresses::ProgressState>, flutter_rust_bridge::for_generated::SseCodec> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         unimplemented!("")
     }
 }
 
-impl SseEncode
-    for StreamSink<crate::types::LogEntry, flutter_rust_bridge::for_generated::SseCodec>
-{
+impl SseEncode for StreamSink<crate::types::LogEntry, flutter_rust_bridge::for_generated::SseCodec> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         unimplemented!("")
     }
 }
 
-impl SseEncode
-    for StreamSink<crate::types::ReceiveResult, flutter_rust_bridge::for_generated::SseCodec>
-{
+impl SseEncode for StreamSink<crate::types::ReceiveResult, flutter_rust_bridge::for_generated::SseCodec> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         unimplemented!("")
     }
 }
 
-impl SseEncode
-    for StreamSink<crate::types::SendResult, flutter_rust_bridge::for_generated::SseCodec>
-{
+impl SseEncode for StreamSink<crate::types::SendResult, flutter_rust_bridge::for_generated::SseCodec> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         unimplemented!("")
@@ -1019,12 +868,12 @@ impl SseEncode for Vec<u8> {
     }
 }
 
-impl SseEncode for Vec<crate::progress::ProgressState> {
+impl SseEncode for Vec<crate::progresses::ProgressState> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <i32>::sse_encode(self.len() as _, serializer);
         for item in self {
-            <crate::progress::ProgressState>::sse_encode(item, serializer);
+            <crate::progresses::ProgressState>::sse_encode(item, serializer);
         }
     }
 }
@@ -1069,15 +918,15 @@ impl SseEncode for Option<u64> {
     }
 }
 
-impl SseEncode for crate::progress::Phase {
+impl SseEncode for crate::progresses::Phase {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         match self {
-            crate::progress::Phase::Importing { name } => {
+            crate::progresses::Phase::Importing { name } => {
                 <i32>::sse_encode(0, serializer);
                 <String>::sse_encode(name, serializer);
             }
-            crate::progress::Phase::Uploading {
+            crate::progresses::Phase::Uploading {
                 connection_id,
                 is_completed,
                 is_failed,
@@ -1087,19 +936,19 @@ impl SseEncode for crate::progress::Phase {
                 <bool>::sse_encode(is_completed, serializer);
                 <bool>::sse_encode(is_failed, serializer);
             }
-            crate::progress::Phase::Pending => {
+            crate::progresses::Phase::Pending => {
                 <i32>::sse_encode(2, serializer);
             }
-            crate::progress::Phase::Connecting => {
+            crate::progresses::Phase::Connecting => {
                 <i32>::sse_encode(3, serializer);
             }
-            crate::progress::Phase::Validating => {
+            crate::progresses::Phase::Validating => {
                 <i32>::sse_encode(4, serializer);
             }
-            crate::progress::Phase::Downloading => {
+            crate::progresses::Phase::Downloading => {
                 <i32>::sse_encode(5, serializer);
             }
-            crate::progress::Phase::Exporting { name } => {
+            crate::progresses::Phase::Exporting { name } => {
                 <i32>::sse_encode(6, serializer);
                 <String>::sse_encode(name, serializer);
             }
@@ -1110,10 +959,10 @@ impl SseEncode for crate::progress::Phase {
     }
 }
 
-impl SseEncode for crate::progress::ProgressState {
+impl SseEncode for crate::progresses::ProgressState {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <crate::progress::Phase>::sse_encode(self.phase, serializer);
+        <crate::progresses::Phase>::sse_encode(self.phase, serializer);
         <u64>::sse_encode(self.position, serializer);
         <Option<u64>>::sse_encode(self.length, serializer);
     }
@@ -1208,9 +1057,7 @@ mod io {
     // Section: imports
 
     use super::*;
-    use flutter_rust_bridge::for_generated::byteorder::{
-        NativeEndian, ReadBytesExt, WriteBytesExt,
-    };
+    use flutter_rust_bridge::for_generated::byteorder::{NativeEndian, ReadBytesExt, WriteBytesExt};
     use flutter_rust_bridge::for_generated::{transform_result_dco, Lifetimeable, Lockable};
     use flutter_rust_bridge::{Handler, IntoIntoDart};
 

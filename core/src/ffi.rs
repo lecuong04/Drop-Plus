@@ -11,7 +11,7 @@ use tracing_subscriber::{fmt, layer::SubscriberExt, Layer, Registry};
 
 use crate::{
     frb_generated::StreamSink,
-    progress::ProgressState,
+    progresses::ProgressState,
     services::{self},
     types::{LogEntry, ReceiveResult, SendResult},
 };
@@ -50,18 +50,10 @@ impl<S> Layer<S> for CoreLayer
 where
     S: tracing::Subscriber,
 {
-    fn on_event(
-        &self,
-        event: &tracing::Event<'_>,
-        _ctx: tracing_subscriber::layer::Context<'_, S>,
-    ) {
+    fn on_event(&self, event: &tracing::Event<'_>, _ctx: tracing_subscriber::layer::Context<'_, S>) {
         let mut visitor = CoreVisitor(HashMap::new());
         event.record(&mut visitor);
-        let entry = LogEntry::new(
-            Self::level_str(event.metadata().level()).to_string(),
-            event.metadata().target().into(),
-            visitor.0,
-        );
+        let entry = LogEntry::new(Self::level_str(event.metadata().level()).to_string(), event.metadata().target().into(), visitor.0);
         let _ = self.tx.send(entry);
     }
 }
@@ -85,17 +77,8 @@ pub async fn init_tracing(stream: StreamSink<LogEntry>) {
             } else {
                 (false, false, LevelFilter::INFO)
             };
-            let fmt_layer = fmt::layer()
-                .with_file(file)
-                .with_line_number(line_number)
-                .with_writer(io::stderr)
-                .with_filter(level);
-            tracing::subscriber::set_global_default(
-                Registry::default()
-                    .with(fmt_layer)
-                    .with(CoreLayer::new(tx.clone())),
-            )
-            .unwrap();
+            let fmt_layer = fmt::layer().with_file(file).with_line_number(line_number).with_writer(io::stderr).with_filter(level);
+            tracing::subscriber::set_global_default(Registry::default().with(fmt_layer).with(CoreLayer::new(tx.clone()))).unwrap();
             LOG_TX.get_or_init(|| tx.clone()).subscribe()
         }
     };
@@ -105,13 +88,7 @@ pub async fn init_tracing(stream: StreamSink<LogEntry>) {
 }
 
 #[frb(name = "send")]
-pub fn send(
-    paths: Vec<String>,
-    magic_addr: Option<String>,
-    relay: Option<String>,
-    stream: StreamSink<Vec<ProgressState>>,
-    result: StreamSink<SendResult>,
-) -> Result<()> {
+pub fn send(paths: Vec<String>, magic_addr: Option<String>, relay: Option<String>, stream: StreamSink<Vec<ProgressState>>, result: StreamSink<SendResult>) -> Result<()> {
     services::send(paths, magic_addr, relay, stream, result)
 }
 
@@ -121,13 +98,7 @@ pub fn cancel_send(ticket: Vec<u8>) -> Result<()> {
 }
 
 #[frb(name = "receive")]
-pub fn receive(
-    ticket: Vec<u8>,
-    download_dir: String,
-    relay: Option<String>,
-    stream: StreamSink<Vec<ProgressState>>,
-    result: StreamSink<ReceiveResult>,
-) -> Result<()> {
+pub fn receive(ticket: Vec<u8>, download_dir: String, relay: Option<String>, stream: StreamSink<Vec<ProgressState>>, result: StreamSink<ReceiveResult>) -> Result<()> {
     services::receive(ticket, download_dir, relay, stream, result)
 }
 

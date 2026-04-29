@@ -9,7 +9,7 @@ import "package:material_symbols_icons/material_symbols_icons.dart";
 import "package:pretty_qr_code/pretty_qr_code.dart";
 
 import "../../../../../exts.dart";
-import "../../../../../rust/progress.dart";
+import "../../../../../rust/progresses.dart";
 import "../../../../cubits/send_cubit.dart";
 
 class SendReadyStateWidget extends StatelessWidget {

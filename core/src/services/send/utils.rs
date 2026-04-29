@@ -18,7 +18,7 @@ use tracing::instrument;
 use walkdir::WalkDir;
 
 use crate::{
-    progress::{MultiProgress, Phase},
+    progresses::{MultiProgress, Phase},
     types::BlobInfo,
     utils::PARALLELISM,
 };
@@ -28,9 +28,7 @@ fn canonicalized_path_to_string(path: impl AsRef<Path>, must_be_relative: bool) 
     for component in path.as_ref().components() {
         match component {
             Component::Normal(segment) => {
-                let segment = segment
-                    .to_str()
-                    .ok_or_else(|| anyhow!("invalid character in path"))?;
+                let segment = segment.to_str().ok_or_else(|| anyhow!("invalid character in path"))?;
                 parts.push(segment);
             }
             Component::RootDir => {
@@ -72,11 +70,7 @@ fn process_path(path: &PathBuf) -> Result<Vec<(String, PathBuf)>> {
 }
 
 #[instrument(err, skip(mp))]
-pub(super) async fn import(
-    paths: Vec<PathBuf>,
-    db: &Store,
-    mp: &MultiProgress,
-) -> Result<(TempTag, Vec<BlobInfo>, u64)> {
+pub(super) async fn import(paths: Vec<PathBuf>, db: &Store, mp: &MultiProgress) -> Result<(TempTag, Vec<BlobInfo>, u64)> {
     let error_count = AtomicUsize::new(0);
     let data_sources: Vec<(String, PathBuf)> = paths
         .iter()
@@ -90,10 +84,7 @@ pub(super) async fn import(
         .flatten()
         .collect();
     if error_count.load(Ordering::Relaxed) > 0 {
-        return Err(anyhow!(
-            "failed to process {} path(s)",
-            error_count.load(Ordering::Relaxed)
-        ));
+        return Err(anyhow!("failed to process {} path(s)", error_count.load(Ordering::Relaxed)));
     }
     if data_sources.is_empty() {
         return Err(anyhow!("no files found to share"));
@@ -109,10 +100,7 @@ pub(super) async fn import(
             let mut stream = import.stream().await;
             let mut item_size = 0;
             let temp_tag = loop {
-                let item = stream
-                    .next()
-                    .await
-                    .context("import stream ended without a tag")?;
+                let item = stream.next().await.context("import stream ended without a tag")?;
                 match item {
                     AddProgressItem::Size(size) => {
                         item_size = size;

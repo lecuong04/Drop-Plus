@@ -5,7 +5,7 @@
 
 import "frb_generated.dart";
 import "package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart";
-import "progress.dart";
+import "progresses.dart";
 import "types.dart";
 
 // These functions are ignored because they are not marked as `pub`: `level_str`, `new`

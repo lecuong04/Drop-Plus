@@ -1,6 +1,7 @@
 pub mod consts;
 pub mod ffi;
-pub mod progress;
+pub mod progresses;
+pub mod protos;
 pub mod services;
 pub mod types;
 pub mod utils;

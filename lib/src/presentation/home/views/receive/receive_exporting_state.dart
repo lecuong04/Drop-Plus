@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 
-import "../../../../../rust/progress.dart";
+import "../../../../../rust/progresses.dart";
 
 class ReceiveExportingStateWidget extends StatelessWidget {
   final List<ProgressState> progresses;
