@@ -40,10 +40,8 @@ class SendReadyStateWidget extends StatelessWidget {
             _QrCodeSection(ticket: ticket),
             const SizedBox(height: 32),
             _TransferCodeSection(ticketCode: ticket.$2),
-            if (progresses.any((p) => p.phase is Phase_Uploading)) ...[
-              const SizedBox(height: 32),
+            if (progresses.any((p) => p.phase is Phase_Uploading))
               _ActiveTransfersSection(progresses: progresses, size: size),
-            ],
             const SizedBox(height: 24),
             const _FooterSection(),
           ],
@@ -53,109 +51,154 @@ class SendReadyStateWidget extends StatelessWidget {
   }
 }
 
-class _ActiveTransfersSection extends StatelessWidget {
+class _ActiveTransfersSection extends StatefulWidget {
+  final List<ProgressState> progresses;
   final BigInt size;
-  late final Map<BigInt, ProgressState> grouped;
 
-  _ActiveTransfersSection({
-    required List<ProgressState> progresses,
-    required this.size,
-  }) {
-    grouped = progresses.fold<Map<BigInt, ProgressState>>({}, (map, progress) {
-      final phase = progress.phase;
-      if (phase is Phase_Uploading) {
-        map[phase.connectionId] = progress;
-      }
-      return map;
-    });
-  }
+  const _ActiveTransfersSection({required this.progresses, required this.size});
+
+  @override
+  State<_ActiveTransfersSection> createState() =>
+      _ActiveTransfersSectionState();
+}
+
+class _ActiveTransfersSectionState extends State<_ActiveTransfersSection> {
+  final Set<BigInt> _dismissedIds = {};
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 4,
-              height: 20,
-              decoration: BoxDecoration(
-                color: colorScheme.primary,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              "Active Transfers",
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: colorScheme.onSurface,
-                letterSpacing: 0.5,
-              ),
-            ),
-            const Spacer(),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: colorScheme.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                "${grouped.length} connected",
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        ...grouped.entries.map((entry) {
-          final connectionId = entry.key;
-          final percent = entry.value.position.toDouble() / size.toDouble();
+    final grouped = widget.progresses.fold<Map<BigInt, ProgressState>>({}, (
+      map,
+      progress,
+    ) {
+      final phase = progress.phase;
+      if (phase is Phase_Uploading &&
+          !_dismissedIds.contains(phase.connectionId)) {
+        map[phase.connectionId] = progress;
+      }
+      return map;
+    });
 
-          return Card(
-            key: ValueKey(connectionId),
-            margin: const EdgeInsets.only(bottom: 12),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: colorScheme.primaryContainer,
-                  child: Icon(Symbols.package, color: colorScheme.primary),
+    if (grouped.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 4,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: colorScheme.primary,
+                  borderRadius: BorderRadius.circular(2),
                 ),
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "#$connectionId",
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      "${(percent * 100).toStringAsFixed(1)}%",
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.primary,
-                      ),
-                    ),
-                  ],
+              ),
+              const SizedBox(width: 12),
+              Text(
+                "Active Transfers",
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface,
+                  letterSpacing: 0.5,
                 ),
-                subtitle: LinearProgressIndicator(
-                  value: percent,
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
+                child: Text(
+                  "${grouped.values.where((p) => !(p.phase as Phase_Uploading).isCompleted && !(p.phase as Phase_Uploading).isFailed).length} active",
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
-            ),
-          );
-        }),
-      ],
+            ],
+          ),
+          const SizedBox(height: 16),
+          ...grouped.entries.map((entry) {
+            final connectionId = entry.key;
+            final progress = entry.value;
+            final phase = progress.phase as Phase_Uploading;
+
+            final percent =
+                progress.position.toDouble() / widget.size.toDouble();
+
+            Color statusColor = colorScheme.primary;
+            IconData statusIcon = Symbols.package;
+            String statusText = "${(percent * 100).toStringAsFixed(1)}%";
+
+            if (phase.isCompleted) {
+              statusColor = Colors.green;
+              statusIcon = Symbols.check_circle;
+              statusText = "Completed";
+            } else if (phase.isFailed) {
+              statusColor = colorScheme.error;
+              statusIcon = Symbols.error;
+              statusText = "Failed";
+            }
+
+            return Dismissible(
+              direction: phase.isCompleted || phase.isFailed
+                  ? DismissDirection.horizontal
+                  : DismissDirection.none,
+              key: ValueKey(connectionId),
+              onDismissed: (_) =>
+                  setState(() => _dismissedIds.add(connectionId)),
+              child: Card(
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: statusColor.withValues(alpha: 0.1),
+                    child: Icon(statusIcon, color: statusColor),
+                  ),
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "#$connectionId",
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        statusText,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: statusColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: LinearProgressIndicator(
+                      value: phase.isCompleted
+                          ? 1.0
+                          : (phase.isFailed ? 0.0 : percent),
+                      color: statusColor,
+                      backgroundColor: statusColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }),
+        ],
+      ),
     );
   }
 }

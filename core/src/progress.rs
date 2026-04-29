@@ -7,18 +7,26 @@ use uuid::Uuid;
 
 const PROGRESS_DEBOUNCE: Duration = Duration::from_millis(200);
 
-#[derive(Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Phase {
-    Importing { name: String },
-    Uploading { connection_id: u64 },
+    Importing {
+        name: String,
+    },
+    Uploading {
+        connection_id: u64,
+        is_completed: bool,
+        is_failed: bool,
+    },
     Pending,
     Connecting,
     Validating,
     Downloading,
-    Exporting { name: String },
+    Exporting {
+        name: String,
+    },
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct ProgressState {
     pub phase: Phase,
     pub position: u64,
@@ -55,26 +63,25 @@ impl MultiProgress {
 
     pub fn add(&self, phase: Phase) -> Uuid {
         let id = Uuid::now_v7();
-        self.state.write().insert(id, Self::new_state(phase));
+        self.state.write().insert(id, Self::new_state(phase, None));
         self.notify_immediate();
         id
     }
 
-    pub fn change_phase(&self, id: &Uuid, new_phase: Phase) {
+    pub fn change_phase(&self, id: &Uuid, phase: Phase, position: Option<u64>) {
         if self.update_state(id, |state| {
-            *state = Self::new_state(new_phase);
+            *state = Self::new_state(phase, position);
             true
         }) {
             self.notify_immediate();
         }
     }
 
-    pub fn increase(&self, id: &Uuid, delta: u64) {
-        if delta == 0 {
-            return;
-        }
+    pub fn increase(&self, id: &Uuid, delta: u64) -> u64 {
+        let mut output = 0;
         if self.update_state(id, |state| {
             let next = state.position.saturating_add(delta);
+            output = next;
             if next == state.position {
                 return false;
             }
@@ -83,6 +90,7 @@ impl MultiProgress {
         }) {
             self.notify_debounced();
         }
+        output
     }
 
     pub fn set_length(&self, id: &Uuid, length: u64) {
@@ -168,14 +176,19 @@ impl MultiProgress {
     }
 
     fn emit_snapshot(&self) {
-        let snapshot: Vec<ProgressState> = self.state.read().values().cloned().collect();
-        self.observer.on_update(snapshot);
+        self.observer.on_update(
+            self.state
+                .read()
+                .values()
+                .cloned()
+                .collect::<Vec<ProgressState>>(),
+        );
     }
 
-    fn new_state(phase: Phase) -> ProgressState {
+    fn new_state(phase: Phase, position: Option<u64>) -> ProgressState {
         ProgressState {
             phase,
-            position: 0,
+            position: position.unwrap_or(0),
             length: None,
         }
     }

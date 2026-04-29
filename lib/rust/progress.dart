@@ -13,8 +13,11 @@ sealed class Phase with _$Phase {
   const Phase._();
 
   const factory Phase.importing({required String name}) = Phase_Importing;
-  const factory Phase.uploading({required BigInt connectionId}) =
-      Phase_Uploading;
+  const factory Phase.uploading({
+    required BigInt connectionId,
+    required bool isCompleted,
+    required bool isFailed,
+  }) = Phase_Uploading;
   const factory Phase.pending() = Phase_Pending;
   const factory Phase.connecting() = Phase_Connecting;
   const factory Phase.validating() = Phase_Validating;

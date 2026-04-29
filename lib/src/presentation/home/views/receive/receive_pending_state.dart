@@ -33,6 +33,8 @@ class _ReceivePendingStateWidgetState extends State<ReceivePendingStateWidget> {
   final ScrollController _horizontalController = ScrollController();
   final ScrollController _verticalController = ScrollController();
 
+  bool _isClick = false;
+
   @override
   void initState() {
     super.initState();
@@ -218,7 +220,12 @@ class _ReceivePendingStateWidgetState extends State<ReceivePendingStateWidget> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => context.read<ReceiveCubit>().reject(),
+                      onPressed: !_isClick
+                          ? () {
+                              setState(() => _isClick = true);
+                              context.read<ReceiveCubit>().reject();
+                            }
+                          : null,
                       style: OutlinedButton.styleFrom(
                         foregroundColor: colorScheme.error,
                         side: BorderSide(color: colorScheme.error),
@@ -233,7 +240,12 @@ class _ReceivePendingStateWidgetState extends State<ReceivePendingStateWidget> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: FilledButton(
-                      onPressed: () => context.read<ReceiveCubit>().accept(),
+                      onPressed: !_isClick
+                          ? () {
+                              setState(() => _isClick = true);
+                              context.read<ReceiveCubit>().accept();
+                            }
+                          : null,
                       style: FilledButton.styleFrom(
                         minimumSize: const Size(0, 56),
                         shape: RoundedRectangleBorder(

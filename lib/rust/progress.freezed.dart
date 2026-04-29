@@ -134,11 +134,11 @@ return exporting(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String name)?  importing,TResult Function( BigInt connectionId)?  uploading,TResult Function()?  pending,TResult Function()?  connecting,TResult Function()?  validating,TResult Function()?  downloading,TResult Function( String name)?  exporting,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String name)?  importing,TResult Function( BigInt connectionId,  bool isCompleted,  bool isFailed)?  uploading,TResult Function()?  pending,TResult Function()?  connecting,TResult Function()?  validating,TResult Function()?  downloading,TResult Function( String name)?  exporting,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case Phase_Importing() when importing != null:
 return importing(_that.name);case Phase_Uploading() when uploading != null:
-return uploading(_that.connectionId);case Phase_Pending() when pending != null:
+return uploading(_that.connectionId,_that.isCompleted,_that.isFailed);case Phase_Pending() when pending != null:
 return pending();case Phase_Connecting() when connecting != null:
 return connecting();case Phase_Validating() when validating != null:
 return validating();case Phase_Downloading() when downloading != null:
@@ -161,11 +161,11 @@ return exporting(_that.name);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String name)  importing,required TResult Function( BigInt connectionId)  uploading,required TResult Function()  pending,required TResult Function()  connecting,required TResult Function()  validating,required TResult Function()  downloading,required TResult Function( String name)  exporting,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String name)  importing,required TResult Function( BigInt connectionId,  bool isCompleted,  bool isFailed)  uploading,required TResult Function()  pending,required TResult Function()  connecting,required TResult Function()  validating,required TResult Function()  downloading,required TResult Function( String name)  exporting,}) {final _that = this;
 switch (_that) {
 case Phase_Importing():
 return importing(_that.name);case Phase_Uploading():
-return uploading(_that.connectionId);case Phase_Pending():
+return uploading(_that.connectionId,_that.isCompleted,_that.isFailed);case Phase_Pending():
 return pending();case Phase_Connecting():
 return connecting();case Phase_Validating():
 return validating();case Phase_Downloading():
@@ -184,11 +184,11 @@ return exporting(_that.name);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String name)?  importing,TResult? Function( BigInt connectionId)?  uploading,TResult? Function()?  pending,TResult? Function()?  connecting,TResult? Function()?  validating,TResult? Function()?  downloading,TResult? Function( String name)?  exporting,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String name)?  importing,TResult? Function( BigInt connectionId,  bool isCompleted,  bool isFailed)?  uploading,TResult? Function()?  pending,TResult? Function()?  connecting,TResult? Function()?  validating,TResult? Function()?  downloading,TResult? Function( String name)?  exporting,}) {final _that = this;
 switch (_that) {
 case Phase_Importing() when importing != null:
 return importing(_that.name);case Phase_Uploading() when uploading != null:
-return uploading(_that.connectionId);case Phase_Pending() when pending != null:
+return uploading(_that.connectionId,_that.isCompleted,_that.isFailed);case Phase_Pending() when pending != null:
 return pending();case Phase_Connecting() when connecting != null:
 return connecting();case Phase_Validating() when validating != null:
 return validating();case Phase_Downloading() when downloading != null:
@@ -271,10 +271,12 @@ as String,
 
 
 class Phase_Uploading extends Phase {
-  const Phase_Uploading({required this.connectionId}): super._();
+  const Phase_Uploading({required this.connectionId, required this.isCompleted, required this.isFailed}): super._();
   
 
  final  BigInt connectionId;
+ final  bool isCompleted;
+ final  bool isFailed;
 
 /// Create a copy of Phase
 /// with the given fields replaced by the non-null parameter values.
@@ -286,16 +288,16 @@ $Phase_UploadingCopyWith<Phase_Uploading> get copyWith => _$Phase_UploadingCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Phase_Uploading&&(identical(other.connectionId, connectionId) || other.connectionId == connectionId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Phase_Uploading&&(identical(other.connectionId, connectionId) || other.connectionId == connectionId)&&(identical(other.isCompleted, isCompleted) || other.isCompleted == isCompleted)&&(identical(other.isFailed, isFailed) || other.isFailed == isFailed));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,connectionId);
+int get hashCode => Object.hash(runtimeType,connectionId,isCompleted,isFailed);
 
 @override
 String toString() {
-  return 'Phase.uploading(connectionId: $connectionId)';
+  return 'Phase.uploading(connectionId: $connectionId, isCompleted: $isCompleted, isFailed: $isFailed)';
 }
 
 
@@ -306,7 +308,7 @@ abstract mixin class $Phase_UploadingCopyWith<$Res> implements $PhaseCopyWith<$R
   factory $Phase_UploadingCopyWith(Phase_Uploading value, $Res Function(Phase_Uploading) _then) = _$Phase_UploadingCopyWithImpl;
 @useResult
 $Res call({
- BigInt connectionId
+ BigInt connectionId, bool isCompleted, bool isFailed
 });
 
 
@@ -323,10 +325,12 @@ class _$Phase_UploadingCopyWithImpl<$Res>
 
 /// Create a copy of Phase
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? connectionId = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? connectionId = null,Object? isCompleted = null,Object? isFailed = null,}) {
   return _then(Phase_Uploading(
 connectionId: null == connectionId ? _self.connectionId : connectionId // ignore: cast_nullable_to_non_nullable
-as BigInt,
+as BigInt,isCompleted: null == isCompleted ? _self.isCompleted : isCompleted // ignore: cast_nullable_to_non_nullable
+as bool,isFailed: null == isFailed ? _self.isFailed : isFailed // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

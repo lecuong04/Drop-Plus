@@ -140,7 +140,7 @@ pub(super) async fn start(
         }
         let local = db.remote().local(hash_and_format).await?;
         let (stats, total_files, payload_size) = if !local.is_complete() {
-            mp.change_phase(&id, Phase::Connecting);
+            mp.change_phase(&id, Phase::Connecting, None);
             let connection = select! {
                 res = timeout(Duration::from_secs(10), endpoint.connect(addr, TRANSFER_ALPN)) => {
                     match res {
@@ -151,7 +151,7 @@ pub(super) async fn start(
                 }
                 _ = cancel.cancelled() => Err(anyhow!("cancelled"))
             }?;
-            mp.change_phase(&id, Phase::Validating);
+            mp.change_phase(&id, Phase::Validating, None);
             let (_, sizes) =
                 get_hash_seq_and_sizes(&connection, &hash_and_format.hash, 1024 * 1024 * 32, None)
                     .await
@@ -162,7 +162,7 @@ pub(super) async fn start(
             let get = db.remote().execute_get(connection, local.missing());
             let mut stats = Stats::default();
             let mut completed = false;
-            mp.change_phase(&id, Phase::Downloading);
+            mp.change_phase(&id, Phase::Downloading, None);
             mp.set_length(&id, total_size);
             let mut stream = get.stream();
             while let Some(item) = stream.next().await {

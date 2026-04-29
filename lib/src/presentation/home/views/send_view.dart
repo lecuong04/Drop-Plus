@@ -37,38 +37,21 @@ class SendView extends StatelessWidget {
                     constraints: const BoxConstraints(
                       maxWidth: SendView.maxWidth,
                     ),
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 400),
-                      switchInCurve: Curves.easeOutCubic,
-                      switchOutCurve: Curves.easeInCubic,
-                      transitionBuilder: (child, animation) {
-                        return FadeTransition(
-                          opacity: animation,
-                          child: SlideTransition(
-                            position: Tween<Offset>(
-                              begin: const Offset(0, 0.05),
-                              end: Offset.zero,
-                            ).animate(animation),
-                            child: child,
-                          ),
-                        );
-                      },
-                      child: switch (state) {
-                        SendInitial() => const SendInitialStateWidget(),
-                        SendImporting(:final progresses) =>
-                          SendImportingStateWidget(progresses: progresses),
-                        SendReady(
-                          :final ticket,
-                          :final size,
-                          :final progresses,
-                        ) =>
-                          SendReadyStateWidget(
-                            ticket: ticket,
-                            size: size,
-                            progresses: progresses,
-                          ),
-                      },
-                    ),
+                    child: switch (state) {
+                      SendInitial() => const SendInitialStateWidget(),
+                      SendImporting(:final progresses) =>
+                        SendImportingStateWidget(progresses: progresses),
+                      SendReady(
+                        :final ticket,
+                        :final size,
+                        :final progresses,
+                      ) =>
+                        SendReadyStateWidget(
+                          ticket: ticket,
+                          size: size,
+                          progresses: progresses.toList(),
+                        ),
+                    },
                   ),
                 ),
               );

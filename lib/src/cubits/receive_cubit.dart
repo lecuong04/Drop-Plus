@@ -131,7 +131,6 @@ class ReceiveCubit extends Cubit<ReceiveState> {
         {
           try {
             await _service.acceptReceive(curState.ticket);
-            emit(const ReceiveInitial());
           } catch (_) {
             emit(const ReceiveInitial(isError: true));
           }

@@ -72,9 +72,6 @@ class SendCubit extends Cubit<SendState> {
       } else if (e.any((p) => p.phase is Phase_Uploading)) {
         emit((state as SendReady).copyWith(progresses: e));
       }
-      if (state is SendReady && e.isEmpty) {
-        emit((state as SendReady).copyWith(progresses: e));
-      }
     });
     resultSub = resultSink.stream.listen((result) {
       if (result is SendResult_Ok) {

@@ -474,6 +474,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  bool dco_decode_bool(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as bool;
+  }
+
+  @protected
   BigInt dco_decode_box_autoadd_u_64(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dco_decode_u_64(raw);
@@ -548,7 +554,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       case 0:
         return Phase_Importing(name: dco_decode_String(raw[1]));
       case 1:
-        return Phase_Uploading(connectionId: dco_decode_u_64(raw[1]));
+        return Phase_Uploading(
+          connectionId: dco_decode_u_64(raw[1]),
+          isCompleted: dco_decode_bool(raw[2]),
+          isFailed: dco_decode_bool(raw[3]),
+        );
       case 2:
         return const Phase_Pending();
       case 3:
@@ -703,6 +713,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  bool sse_decode_bool(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getUint8() != 0;
+  }
+
+  @protected
   BigInt sse_decode_box_autoadd_u_64(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return (sse_decode_u_64(deserializer));
@@ -822,7 +838,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         return Phase_Importing(name: var_name);
       case 1:
         var var_connectionId = sse_decode_u_64(deserializer);
-        return Phase_Uploading(connectionId: var_connectionId);
+        var var_isCompleted = sse_decode_bool(deserializer);
+        var var_isFailed = sse_decode_bool(deserializer);
+        return Phase_Uploading(
+          connectionId: var_connectionId,
+          isCompleted: var_isCompleted,
+          isFailed: var_isFailed,
+        );
       case 2:
         return const Phase_Pending();
       case 3:
@@ -928,12 +950,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  bool sse_decode_bool(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return deserializer.buffer.getUint8() != 0;
-  }
-
-  @protected
   void sse_encode_AnyhowException(
     AnyhowException self,
     SseSerializer serializer,
@@ -1033,6 +1049,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.name, serializer);
     sse_encode_u_64(self.size, serializer);
+  }
+
+  @protected
+  void sse_encode_bool(bool self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putUint8(self ? 1 : 0);
   }
 
   @protected
@@ -1144,9 +1166,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       case Phase_Importing(name: final name):
         sse_encode_i_32(0, serializer);
         sse_encode_String(name, serializer);
-      case Phase_Uploading(connectionId: final connectionId):
+      case Phase_Uploading(
+        connectionId: final connectionId,
+        isCompleted: final isCompleted,
+        isFailed: final isFailed,
+      ):
         sse_encode_i_32(1, serializer);
         sse_encode_u_64(connectionId, serializer);
+        sse_encode_bool(isCompleted, serializer);
+        sse_encode_bool(isFailed, serializer);
       case Phase_Pending():
         sse_encode_i_32(2, serializer);
       case Phase_Connecting():
@@ -1234,11 +1262,5 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_i_32(int self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putInt32(self);
-  }
-
-  @protected
-  void sse_encode_bool(bool self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    serializer.buffer.putUint8(self ? 1 : 0);
   }
 }

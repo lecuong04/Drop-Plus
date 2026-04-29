@@ -36,11 +36,12 @@ use irpc_iroh::IrohProtocol;
 use parking_lot::{Mutex, RwLock};
 use tempfile::{Builder, TempDir};
 use tokio::{
-    sync::mpsc::{self, Receiver},
+    sync::mpsc::{self, Receiver, UnboundedReceiver, UnboundedSender},
     task::JoinSet,
     time,
 };
 use tokio_util::{sync::CancellationToken, task::AbortOnDropHandle};
+use tracing::error;
 use uuid::Uuid;
 
 static TOKENS: LazyLock<Mutex<HashMap<String, CancellationToken>>> =
@@ -87,6 +88,24 @@ impl ProgressObserver for StreamSink<Vec<ProgressState>> {
     }
 }
 
+struct TransferState {
+    connection_id: u64,
+    size: u64,
+    is_completed: bool,
+    is_failed: bool,
+}
+
+impl TransferState {
+    fn new(connection_id: u64, size: u64, is_completed: bool, is_failed: bool) -> Self {
+        Self {
+            connection_id,
+            size,
+            is_completed,
+            is_failed,
+        }
+    }
+}
+
 fn tempdir_in(dir: PathBuf) -> Result<TempDir> {
     let dir = Builder::new()
         .prefix(".droplus-send-")
@@ -114,36 +133,65 @@ fn listen_rpc(files: Vec<BlobInfo>) -> IrohProtocol<SendServiceProtocol> {
 }
 
 async fn request_progress(
-    is_all: bool,
+    request_id: u64,
     connection_id: u64,
-    connections: Arc<RwLock<BTreeMap<u64, Uuid>>>,
-    mp: Arc<MultiProgress>,
+    utx: UnboundedSender<TransferState>,
     mut rx: irpc::channel::mpsc::Receiver<RequestUpdate>,
 ) -> Result<()> {
-    let id = connections
-        .read()
-        .get(&connection_id)
-        .ok_or(anyhow!(
-            "got request for unknown connection {connection_id}"
-        ))?
-        .clone();
     let mut size = 0;
     while let Ok(Some(r)) = rx.recv().await {
-        if is_all {
+        if request_id != 0 {
             match r {
                 RequestUpdate::Started(r) => {
                     size = r.size;
                 }
                 RequestUpdate::Progress(r) => {
                     if r.end_offset.eq(&size) {
-                        mp.increase(&id, size);
+                        utx.send(TransferState::new(connection_id, size, false, false))?;
                     }
                 }
-                _ => {}
+                RequestUpdate::Completed(_) => {
+                    utx.send(TransferState::new(connection_id, 0, true, false))?;
+                }
+                RequestUpdate::Aborted(_) => {
+                    utx.send(TransferState::new(connection_id, 0, false, true))?;
+                }
             }
         }
     }
     Ok(())
+}
+
+async fn update_progress(
+    mp: Arc<MultiProgress>,
+    connections: Arc<RwLock<BTreeMap<u64, Uuid>>>,
+    mut urx: UnboundedReceiver<TransferState>,
+) {
+    let mut map = HashMap::new();
+    while let Some(s) = urx.recv().await {
+        let value = connections.read().get(&s.connection_id).cloned();
+        match value {
+            Some(id) => {
+                if !s.is_completed && !s.is_failed {
+                    map.insert(s.connection_id, mp.increase(&id, s.size));
+                } else {
+                    mp.change_phase(
+                        &id,
+                        Phase::Uploading {
+                            connection_id: s.connection_id,
+                            is_completed: s.is_completed,
+                            is_failed: s.is_failed,
+                        },
+                        Some(*map.get(&s.connection_id).unwrap_or(&0)),
+                    );
+                    mp.remove(&id);
+                }
+            }
+            None => {
+                error!("got request for unknown connection {}", s.connection_id);
+            }
+        }
+    }
 }
 
 async fn provide_progress(
@@ -151,6 +199,12 @@ async fn provide_progress(
     mut recv: Receiver<ProviderMessage>,
 ) -> Result<()> {
     let connections = Arc::new(RwLock::new(BTreeMap::new()));
+    let (utx, urx) = mpsc::unbounded_channel();
+    let handle = AbortOnDropHandle::new(tokio::task::spawn(update_progress(
+        mp.clone(),
+        connections.clone(),
+        urx,
+    )));
     let mut tasks = JoinSet::new();
     loop {
         match recv.recv().await {
@@ -158,20 +212,18 @@ async fn provide_progress(
                 match item {
                     ProviderMessage::ClientConnectedNotify(msg) => {
                         let connection_id = msg.connection_id;
-                        let id = mp.add(Phase::Uploading { connection_id });
+                        let id = mp.add(Phase::Uploading {
+                            connection_id,
+                            is_failed: false,
+                            is_completed: false,
+                        });
                         connections.write().insert(msg.connection_id, id);
-                    }
-                    ProviderMessage::ConnectionClosed(msg) => {
-                        if let Some(id) = connections.write().remove(&msg.connection_id) {
-                            mp.remove(&id);
-                        }
                     }
                     ProviderMessage::GetRequestReceivedNotify(msg) => {
                         tasks.spawn(request_progress(
-                            msg.request.ranges.is_all(),
+                            msg.request_id,
                             msg.connection_id,
-                            connections.clone(),
-                            mp.clone(),
+                            utx.clone(),
                             msg.rx,
                         ));
                     }
@@ -184,6 +236,7 @@ async fn provide_progress(
     while let Some(task) = tasks.join_next().await {
         task??
     }
+    handle.await?;
     Ok(())
 }
 
@@ -257,7 +310,7 @@ pub(super) async fn start(
     time::timeout(Duration::from_secs(2), router.shutdown()).await??;
     drop(blobs_dir);
     drop(router);
-    progress.await.ok();
+    progress.await??;
     Ok(())
 }
 

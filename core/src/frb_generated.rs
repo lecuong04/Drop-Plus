@@ -480,6 +480,13 @@ impl SseDecode for crate::types::BlobInfo {
     }
 }
 
+impl SseDecode for bool {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        deserializer.cursor.read_u8().unwrap() != 0
+    }
+}
+
 impl SseDecode for Vec<String> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -589,8 +596,12 @@ impl SseDecode for crate::progress::Phase {
             }
             1 => {
                 let mut var_connectionId = <u64>::sse_decode(deserializer);
+                let mut var_isCompleted = <bool>::sse_decode(deserializer);
+                let mut var_isFailed = <bool>::sse_decode(deserializer);
                 return crate::progress::Phase::Uploading {
                     connection_id: var_connectionId,
+                    is_completed: var_isCompleted,
+                    is_failed: var_isFailed,
                 };
             }
             2 => {
@@ -717,13 +728,6 @@ impl SseDecode for i32 {
     }
 }
 
-impl SseDecode for bool {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        deserializer.cursor.read_u8().unwrap() != 0
-    }
-}
-
 fn pde_ffi_dispatcher_primary_impl(
     func_id: i32,
     port: flutter_rust_bridge::for_generated::MessagePort,
@@ -801,9 +805,17 @@ impl flutter_rust_bridge::IntoDart for crate::progress::Phase {
             crate::progress::Phase::Importing { name } => {
                 [0.into_dart(), name.into_into_dart().into_dart()].into_dart()
             }
-            crate::progress::Phase::Uploading { connection_id } => {
-                [1.into_dart(), connection_id.into_into_dart().into_dart()].into_dart()
-            }
+            crate::progress::Phase::Uploading {
+                connection_id,
+                is_completed,
+                is_failed,
+            } => [
+                1.into_dart(),
+                connection_id.into_into_dart().into_dart(),
+                is_completed.into_into_dart().into_dart(),
+                is_failed.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
             crate::progress::Phase::Pending => [2.into_dart()].into_dart(),
             crate::progress::Phase::Connecting => [3.into_dart()].into_dart(),
             crate::progress::Phase::Validating => [4.into_dart()].into_dart(),
@@ -970,6 +982,13 @@ impl SseEncode for crate::types::BlobInfo {
     }
 }
 
+impl SseEncode for bool {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        serializer.cursor.write_u8(self as _).unwrap();
+    }
+}
+
 impl SseEncode for Vec<String> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -1058,9 +1077,15 @@ impl SseEncode for crate::progress::Phase {
                 <i32>::sse_encode(0, serializer);
                 <String>::sse_encode(name, serializer);
             }
-            crate::progress::Phase::Uploading { connection_id } => {
+            crate::progress::Phase::Uploading {
+                connection_id,
+                is_completed,
+                is_failed,
+            } => {
                 <i32>::sse_encode(1, serializer);
                 <u64>::sse_encode(connection_id, serializer);
+                <bool>::sse_encode(is_completed, serializer);
+                <bool>::sse_encode(is_failed, serializer);
             }
             crate::progress::Phase::Pending => {
                 <i32>::sse_encode(2, serializer);
@@ -1172,13 +1197,6 @@ impl SseEncode for i32 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         serializer.cursor.write_i32::<NativeEndian>(self).unwrap();
-    }
-}
-
-impl SseEncode for bool {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        serializer.cursor.write_u8(self as _).unwrap();
     }
 }
 

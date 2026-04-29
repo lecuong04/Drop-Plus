@@ -77,12 +77,9 @@ class _HomeScreenState extends State<HomeScreen> {
               boundType: .Bounce,
             ),
           ),
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            child: IndexedStack(
-              index: _selectedIndex,
-              children: const [SendView(), ReceiveView(), SettingsView()],
-            ),
+          IndexedStack(
+            index: _selectedIndex,
+            children: const [SendView(), ReceiveView(), SettingsView()],
           ),
         ],
       ),

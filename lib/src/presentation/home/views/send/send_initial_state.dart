@@ -25,14 +25,9 @@ class _SendInitialStateWidgetState extends State<SendInitialStateWidget> {
     return Card.filled(
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 400),
-        switchInCurve: Curves.easeInQuart,
-        switchOutCurve: Curves.easeOutExpo,
-        child: _selectedPath.isEmpty
-            ? _buildEmptyState(context)
-            : _buildFileListView(context),
-      ),
+      child: _selectedPath.isEmpty
+          ? _buildEmptyState(context)
+          : _buildFileListView(context),
     );
   }
 
