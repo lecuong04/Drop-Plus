@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "vn.lecuong04" "\0"
-            VALUE "FileDescription", "drop_plus" "\0"
+            VALUE "FileDescription", "Drop Plus" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "drop_plus" "\0"
+            VALUE "InternalName", "Drop Plus" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 vn.lecuong04. All rights reserved." "\0"
             VALUE "OriginalFilename", "drop_plus.exe" "\0"
-            VALUE "ProductName", "drop_plus" "\0"
+            VALUE "ProductName", "Drop Plus" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

@@ -1,0 +1,18 @@
+
+package_rename_config:
+  android:
+    app_name: "Drop Plus"
+
+  ios:
+    app_name: "Drop Plus"
+
+  linux:
+    app_name: "Drop Plus"
+    exe_name: "drop_plus"
+
+  macos:
+    app_name: "Drop Plus"
+
+  windows:
+    app_name: "Drop Plus"
+    exe_name: "drop_plus"

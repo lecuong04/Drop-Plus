@@ -5,7 +5,7 @@
 // 'flutter create' template.
 
 // The application's name. By default this is also the title of the Flutter window.
-PRODUCT_NAME = drop_plus
+PRODUCT_NAME = Drop Plus
 
 // The application's bundle identifier
 PRODUCT_BUNDLE_IDENTIFIER = vn.lecuong04.dropPlus
