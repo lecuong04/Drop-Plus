@@ -74,7 +74,7 @@ pub(super) async fn import(paths: Vec<PathBuf>, db: &Store, mp: &MultiProgress) 
     let error_count = AtomicUsize::new(0);
     let data_sources: Vec<(String, PathBuf)> = paths
         .iter()
-        .filter_map(|path| match process_path(&path) {
+        .filter_map(|path| match process_path(path) {
             Ok(sources) => Some(sources),
             Err(_) => {
                 error_count.fetch_add(1, Ordering::Relaxed);

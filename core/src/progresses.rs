@@ -1,6 +1,7 @@
-use std::{collections::HashMap, sync::Arc, time::Duration};
+use scc::HashMap;
+use std::{sync::Arc, time::Duration};
 
-use parking_lot::{Mutex, RwLock};
+use parking_lot::Mutex;
 use tokio::{runtime::Handle, time};
 use uuid::Uuid;
 
@@ -26,7 +27,7 @@ pub struct ProgressState {
 
 #[derive(Clone)]
 pub struct MultiProgress {
-    state: Arc<RwLock<HashMap<Uuid, ProgressState>>>,
+    state: Arc<HashMap<Uuid, ProgressState>>,
     observer: Arc<dyn ProgressObserver>,
     debounce: Arc<Mutex<DebounceMeta>>,
     debounce_window: Duration,
@@ -45,7 +46,7 @@ struct DebounceMeta {
 impl MultiProgress {
     pub fn new(observer: Arc<dyn ProgressObserver>) -> Self {
         Self {
-            state: Arc::new(RwLock::new(HashMap::with_capacity(4))),
+            state: Arc::new(HashMap::with_capacity(4)),
             observer,
             debounce: Arc::new(Mutex::new(DebounceMeta::default())),
             debounce_window: PROGRESS_DEBOUNCE,
@@ -54,14 +55,14 @@ impl MultiProgress {
 
     pub fn add(&self, phase: Phase) -> Uuid {
         let id = Uuid::now_v7();
-        self.state.write().insert(id, Self::new_state(phase, None));
+        let _ = self.state.insert_sync(id, Self::new_state(phase, None));
         self.notify_immediate();
         id
     }
 
     pub fn change_phase(&self, id: &Uuid, phase: Phase, position: Option<u64>) {
         if self.update_state(id, |state| {
-            *state = Self::new_state(phase, position);
+            *state = Self::new_state(phase.clone(), position);
             true
         }) {
             self.notify_immediate();
@@ -109,7 +110,7 @@ impl MultiProgress {
     }
 
     pub fn remove(&self, id: &Uuid) {
-        if self.state.write().remove(id).is_some() {
+        if self.state.remove_sync(id).is_some() {
             self.notify_immediate();
         }
     }
@@ -167,7 +168,12 @@ impl MultiProgress {
     }
 
     fn emit_snapshot(&self) {
-        self.observer.on_update(self.state.read().values().cloned().collect::<Vec<ProgressState>>());
+        let mut states = Vec::new();
+        self.state.any_sync(|_k, v| {
+            states.push(v.clone());
+            false
+        });
+        self.observer.on_update(states);
     }
 
     fn new_state(phase: Phase, position: Option<u64>) -> ProgressState {
@@ -178,7 +184,7 @@ impl MultiProgress {
         }
     }
 
-    fn update_state(&self, id: &Uuid, update: impl FnOnce(&mut ProgressState) -> bool) -> bool {
-        self.state.write().get_mut(id).is_some_and(update)
+    fn update_state(&self, id: &Uuid, mut update: impl FnMut(&mut ProgressState) -> bool) -> bool {
+        self.state.update_sync(id, |_k, v| update(v)).unwrap_or(false)
     }
 }

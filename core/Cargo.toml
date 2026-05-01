@@ -31,6 +31,7 @@ irpc = "0.14.0"
 irpc-iroh = "0.14.0"
 serde = { version = "1.0.228", features = ["derive"] }
 getifaddrs = "0.6.1"
+scc = "3.7.0"
 
 [profile.release]
 opt-level = 3

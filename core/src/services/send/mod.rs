@@ -30,7 +30,7 @@ use iroh_blobs::{
 };
 use irpc::{Client, WithChannels};
 use irpc_iroh::IrohProtocol;
-use parking_lot::{Mutex, RwLock};
+use parking_lot::RwLock;
 use tempfile::{Builder, TempDir};
 use tokio::{
     sync::mpsc::{self, Receiver, UnboundedReceiver, UnboundedSender},
@@ -38,10 +38,10 @@ use tokio::{
     time,
 };
 use tokio_util::{sync::CancellationToken, task::AbortOnDropHandle};
-use tracing::{debug, error};
+use tracing::error;
 use uuid::Uuid;
 
-static TOKENS: LazyLock<Mutex<HashMap<String, CancellationToken>>> = LazyLock::new(|| Mutex::new(HashMap::with_capacity(2)));
+static TOKENS: LazyLock<scc::HashMap<String, CancellationToken>> = LazyLock::new(scc::HashMap::new);
 
 #[derive(Debug)]
 pub(super) struct SendArgs {
@@ -118,38 +118,63 @@ async fn request_progress(
     hashes: Arc<RwLock<HashMap<u64, HashMap<u64, u64>>>>,
     utx: UnboundedSender<TransferState>,
     mut rx: irpc::channel::mpsc::Receiver<RequestUpdate>,
+    cancel: CancellationToken,
 ) {
     if request_id != 0 {
         let (mut index, mut size) = (0, 0);
-        while let Ok(Some(r)) = rx.recv().await {
-            match r {
-                RequestUpdate::Started(r) => {
-                    (index, size) = (r.index, r.size);
-                }
-                RequestUpdate::Progress(r) => {
-                    if r.end_offset.eq(&size) {
-                        utx.send(TransferState::new(connection_id, index, false, false)).unwrap();
+        loop {
+            tokio::select! {
+                res = rx.recv() => {
+                    match res {
+                        Ok(Some(r)) => {
+                            match r {
+                                RequestUpdate::Started(r) => {
+                                    (index, size) = (r.index, r.size);
+                                }
+                                RequestUpdate::Progress(r) => {
+                                    if r.end_offset.eq(&size) {
+                                        utx.send(TransferState::new(connection_id, index, false, false)).unwrap();
+                                    }
+                                }
+                                RequestUpdate::Completed(_) => {
+                                    utx.send(TransferState::new(connection_id, index, true, false)).unwrap();
+                                }
+                                RequestUpdate::Aborted(_) => {
+                                    utx.send(TransferState::new(connection_id, index, false, true)).unwrap();
+                                }
+                            }
+                        }
+                        _ => break,
                     }
                 }
-                RequestUpdate::Completed(_) => {
-                    utx.send(TransferState::new(connection_id, index, true, false)).unwrap();
-                }
-                RequestUpdate::Aborted(_) => {
-                    utx.send(TransferState::new(connection_id, index, false, true)).unwrap();
+                _ = cancel.cancelled() => {
+                    break;
                 }
             }
         }
     } else {
         let map = Arc::new(RwLock::new(HashMap::new()));
-        while let Ok(Some(r)) = rx.recv().await {
-            match r {
-                RequestUpdate::Started(r) => {
-                    map.write().insert(r.index, r.size);
+        loop {
+            tokio::select! {
+                res = rx.recv() => {
+                    match res {
+                        Ok(Some(r)) => {
+                            match r {
+                                RequestUpdate::Started(r) => {
+                                    map.write().insert(r.index, r.size);
+                                }
+                                RequestUpdate::Completed(_) => {
+                                    hashes.write().insert(connection_id, map.read().clone());
+                                }
+                                _ => {}
+                            }
+                        }
+                        _ => break,
+                    }
                 }
-                RequestUpdate::Completed(_) => {
-                    hashes.write().insert(connection_id, map.read().clone());
+                _ = cancel.cancelled() => {
+                    break;
                 }
-                _ => {}
             }
         }
     }
@@ -202,40 +227,46 @@ async fn update_progress(
     }
 }
 
-async fn provide_progress(mp: Arc<MultiProgress>, mut recv: Receiver<ProviderMessage>) -> Result<()> {
+async fn provide_progress(mp: Arc<MultiProgress>, mut recv: Receiver<ProviderMessage>, cancel: CancellationToken) -> Result<()> {
     let connections = Arc::new(RwLock::new(HashMap::new()));
     let hashes = Arc::new(RwLock::new(HashMap::new()));
     let (utx, urx) = mpsc::unbounded_channel();
     let handle = AbortOnDropHandle::new(tokio::task::spawn(update_progress(mp.clone(), hashes.clone(), connections.clone(), urx)));
     let mut tasks = JoinSet::new();
+
     loop {
-        match recv.recv().await {
-            Some(item) => {
+        tokio::select! {
+            item = recv.recv() => {
                 match item {
-                    ProviderMessage::ClientConnectedNotify(msg) => {
-                        match msg.endpoint_id {
-                            Some(endpoint) => {
-                                let endpoint = endpoint.fmt_short().to_string();
-                                let connection_id = msg.connection_id;
-                                let id = mp.add(Phase::Uploading {
-                                    endpoint: endpoint.clone(),
-                                    is_failed: false,
-                                    is_completed: false,
-                                });
-                                connections.write().insert(connection_id, (id, endpoint));
+                    Some(item) => {
+                        match item {
+                            ProviderMessage::ClientConnectedNotify(msg) => {
+                                if let Some(endpoint) = msg.endpoint_id {
+                                    let endpoint = endpoint.fmt_short().to_string();
+                                    let connection_id = msg.connection_id;
+                                    let id = mp.add(Phase::Uploading {
+                                        endpoint: endpoint.clone(),
+                                        is_failed: false,
+                                        is_completed: false,
+                                    });
+                                    connections.write().insert(connection_id, (id, endpoint));
+                                };
                             }
-                            None => {}
+                            ProviderMessage::GetRequestReceivedNotify(msg) => {
+                                tasks.spawn(request_progress(msg.request_id, msg.connection_id, hashes.clone(), utx.clone(), msg.rx, cancel.clone()));
+                            }
+                            _ => {}
                         };
                     }
-                    ProviderMessage::GetRequestReceivedNotify(msg) => {
-                        tasks.spawn(request_progress(msg.request_id, msg.connection_id, hashes.clone(), utx.clone(), msg.rx));
-                    }
-                    _ => {}
-                };
+                    None => break,
+                }
             }
-            None => break,
+            _ = cancel.cancelled() => {
+                break;
+            }
         }
     }
+
     while let Some(task) = tasks.join_next().await {
         task?
     }
@@ -258,7 +289,8 @@ pub(super) async fn start(args: SendArgs, stream: StreamSink<Vec<ProgressState>>
     let endpoint = builder.bind().await?;
     let store = FsStore::load(blobs_dir.path()).await?;
     let (tx, rx) = mpsc::channel(128);
-    let progress = AbortOnDropHandle::new(tokio::task::spawn(provide_progress(mp.clone(), rx)));
+    let cancel = CancellationToken::new();
+    let progress = AbortOnDropHandle::new(tokio::task::spawn(provide_progress(mp.clone(), rx, cancel.clone())));
     let blobs = BlobsProtocol::new(
         &store,
         Some(EventSender::new(
@@ -283,22 +315,19 @@ pub(super) async fn start(args: SendArgs, stream: StreamSink<Vec<ProgressState>>
     let hash = temp_tag.hash();
     let addr = router.endpoint().addr();
     let ticket = BlobTicket::new(addr, hash, BlobFormat::HashSeq).to_string();
-    debug!("created ticket: {}", &ticket);
-    let cancel = CancellationToken::new();
-    {
-        let mut tokens = TOKENS.lock();
-        tokens.insert(ticket.clone(), cancel.clone());
-    }
+
+    let _ = TOKENS.insert_sync(ticket.clone(), cancel.clone());
+
     match result.add(SendResult::ok(&ticket, size)) {
         Ok(_) => {}
         Err(_) => {
-            if let Some(t) = TOKENS.lock().remove(&ticket) {
+            if let Some((_, t)) = TOKENS.remove_sync(&ticket) {
                 t.cancel();
             }
         }
     }
     cancel.cancelled().await;
-    TOKENS.lock().remove(&ticket);
+    TOKENS.remove_sync(&ticket);
     drop(temp_tag);
     time::timeout(Duration::from_secs(2), router.shutdown()).await??;
     drop(blobs_dir);
@@ -308,11 +337,10 @@ pub(super) async fn start(args: SendArgs, stream: StreamSink<Vec<ProgressState>>
 }
 
 pub(super) fn cancel(ticket: String) -> Result<()> {
-    let mut tokens = TOKENS.lock();
-    if let Some(cancel) = tokens.remove(&ticket) {
+    if let Some((_, cancel)) = TOKENS.remove_sync(&ticket) {
         cancel.cancel();
+        Ok(())
     } else {
-        return Err(anyhow!("token not found"));
+        Err(anyhow!("token not found"))
     }
-    Ok(())
 }

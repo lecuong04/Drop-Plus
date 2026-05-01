@@ -1,7 +1,6 @@
 pub mod utils;
 
 use std::{
-    collections::HashMap,
     path::PathBuf,
     str::FromStr,
     sync::{Arc, LazyLock},
@@ -19,10 +18,10 @@ use iroh_blobs::{
     ticket::BlobTicket,
 };
 use irpc::Client;
-use parking_lot::Mutex;
+use scc::HashMap;
 use tokio::{
     select,
-    sync::broadcast,
+    sync::oneshot,
     time::{timeout, Instant},
 };
 use tokio_util::sync::CancellationToken;
@@ -38,9 +37,9 @@ use crate::{
     utils::get_or_create_secret,
 };
 
-static TOKENS: LazyLock<Mutex<HashMap<String, CancellationToken>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
+static TOKENS: LazyLock<HashMap<String, CancellationToken>> = LazyLock::new(HashMap::new);
 
-static BOARDCAST: LazyLock<broadcast::Sender<(String, bool)>> = LazyLock::new(|| broadcast::Sender::new(24));
+static PENDING_RECEIVES: LazyLock<HashMap<String, oneshot::Sender<bool>>> = LazyLock::new(HashMap::new);
 
 #[derive(Debug)]
 pub(super) struct ReceiveArgs {
@@ -98,21 +97,20 @@ pub(super) async fn start(args: ReceiveArgs, stream: StreamSink<Vec<ProgressStat
     let client = connect_rpc(&endpoint, &addr);
     let files = timeout(Duration::from_secs(5), client.rpc(ListFiles)).await??;
     result.add(ReceiveResult::pending(files)).map_err(|e| anyhow!("{}", e))?;
-    while let Ok(r) = BOARDCAST.subscribe().recv().await {
-        if r.0.eq(&ticket.to_string()) && r.1 {
-            break;
-        } else {
-            return Ok(());
-        }
+
+    let (tx, rx) = oneshot::channel();
+    let _ = PENDING_RECEIVES.insert_sync(ticket.to_string(), tx);
+    let accepted = rx.await.unwrap_or(false);
+    PENDING_RECEIVES.remove_sync(&ticket.to_string());
+    if !accepted {
+        return Ok(());
     }
+
     let data_dir = download_dir.join(format!(".droplus-recv-{}", hash_and_format.hash.fmt_short().to_lowercase()));
     let db = FsStore::load(&data_dir).await?;
     let receive_result = async {
         let cancel = CancellationToken::new();
-        {
-            let mut tokens = TOKENS.lock();
-            tokens.insert(ticket.to_string(), cancel.clone());
-        }
+        let _ = TOKENS.insert_sync(ticket.to_string(), cancel.clone());
         let local = db.remote().local(hash_and_format).await?;
         let (stats, total_files, payload_size) = if !local.is_complete() {
             mp.change_phase(&id, Phase::Connecting, None);
@@ -160,7 +158,7 @@ pub(super) async fn start(args: ReceiveArgs, stream: StreamSink<Vec<ProgressStat
             }
             mp.remove(&id);
             if !completed {
-                TOKENS.lock().remove(&ticket.to_string());
+                TOKENS.remove_sync(&ticket.to_string());
                 bail!("download stream ended before completion");
             }
             (stats, total_files, total_size)
@@ -192,19 +190,24 @@ pub(super) async fn start(args: ReceiveArgs, stream: StreamSink<Vec<ProgressStat
 }
 
 pub(super) fn cancel(ticket: String) -> Result<()> {
-    let mut tokens = TOKENS.lock();
-    if let Some(cancel) = tokens.remove(&ticket) {
+    if let Some((_, cancel)) = TOKENS.remove_sync(&ticket) {
         cancel.cancel();
+        Ok(())
     } else {
-        return Err(anyhow!("token not found"));
+        Err(anyhow!("token not found"))
+    }
+}
+
+pub(super) fn reject(ticket: String) -> Result<()> {
+    if let Some((_, tx)) = PENDING_RECEIVES.remove_sync(&ticket) {
+        let _ = tx.send(false);
     }
     Ok(())
 }
 
-pub(super) fn reject(ticket: String) -> Result<()> {
-    BOARDCAST.send((ticket, false)).map(|_| ()).map_err(|e| anyhow!("{}", e))
-}
-
 pub(super) fn accept(ticket: String) -> Result<()> {
-    BOARDCAST.send((ticket, true)).map(|_| ()).map_err(|e| anyhow!("{}", e))
+    if let Some((_, tx)) = PENDING_RECEIVES.remove_sync(&ticket) {
+        let _ = tx.send(true);
+    }
+    Ok(())
 }

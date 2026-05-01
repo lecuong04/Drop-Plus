@@ -11,8 +11,8 @@ pub enum SendResult {
 }
 
 impl SendResult {
-    pub fn ok(ticket: &String, size: u64) -> Self {
-        Self::Ok { ticket: ticket.clone(), size }
+    pub fn ok(ticket: &str, size: u64) -> Self {
+        Self::Ok { ticket: ticket.to_owned(), size }
     }
 
     pub fn err() -> Self {
