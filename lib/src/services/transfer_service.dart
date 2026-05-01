@@ -7,10 +7,11 @@ import "../../rust/types.dart";
 class TransferService {
   Future<void> send({
     required List<String> paths,
+    required String? addr,
     required RustStreamSink<List<ProgressState>> stream,
     required RustStreamSink<SendResult> result,
   }) async {
-    await ffi.send(paths: paths, stream: stream, result: result);
+    await ffi.send(paths: paths, addr: addr, stream: stream, result: result);
   }
 
   Future<void> cancelSend(List<int> ticket) async {

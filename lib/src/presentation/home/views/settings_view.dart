@@ -21,6 +21,103 @@ class SettingsView extends StatelessWidget {
     }
   }
 
+  Future<void> _showAddressSelection(BuildContext context) async {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      useSafeArea: true,
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.6,
+          minChildSize: 0.4,
+          maxChildSize: 0.9,
+          expand: false,
+          builder: (context, scrollController) {
+            return BlocBuilder<SettingsCubit, SettingsState>(
+              builder: (context, state) {
+                final theme = Theme.of(context);
+                final colorScheme = theme.colorScheme;
+
+                return Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 0, 12, 8),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              "Network Addresses",
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () =>
+                                context.read<SettingsCubit>().refresh(),
+                            icon: const Icon(Symbols.refresh),
+                            tooltip: "Refresh",
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: ListView(
+                        controller: scrollController,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        children: [
+                          _AddressOption(
+                            title: "Auto selection",
+                            subtitle: "Recommended (use all interfaces)",
+                            icon: Symbols.magic_button,
+                            isSelected:
+                                state.addr == null || state.addr!.isEmpty,
+                            onTap: () {
+                              context.read<SettingsCubit>().clearAddr();
+                              Navigator.pop(context);
+                            },
+                          ),
+                          if (state.availableAddrs.isNotEmpty) ...[
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+                              child: Text(
+                                "Manual Selection",
+                                style: theme.textTheme.labelLarge?.copyWith(
+                                  color: colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            ...state.availableAddrs.entries.map((entry) {
+                              return _AddressOption(
+                                title: entry.value,
+                                subtitle: entry.key,
+                                icon: Symbols.lan,
+                                isSelected: state.addr == entry.key,
+                                onTap: () {
+                                  context.read<SettingsCubit>().setAddress(
+                                    entry.key,
+                                  );
+                                  Navigator.pop(context);
+                                },
+                              );
+                            }),
+                          ],
+                          const SizedBox(height: 24),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -115,6 +212,31 @@ class SettingsView extends StatelessWidget {
             onTap: () => _pickDownloadDirectory(context),
           ),
           const Divider(height: 1, indent: 72),
+          ListTile(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 8,
+            ),
+            leading: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: colorScheme.primaryContainer.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(Symbols.lan, color: colorScheme.primary),
+            ),
+            title: const Text("Network Addresses"),
+            subtitle: Text(
+              state.addr == null || state.addr!.isEmpty
+                  ? "Auto selection"
+                  : state.addr!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            trailing: const Icon(Symbols.chevron_right, size: 20),
+            onTap: () => _showAddressSelection(context),
+          ),
+          const Divider(height: 1, indent: 72),
           SwitchListTile(
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 20,
@@ -131,9 +253,7 @@ class SettingsView extends StatelessWidget {
             title: const Text("Notifications"),
             subtitle: const Text("Show transfer progress in system tray"),
             value: true,
-            onChanged: (val) {
-              // TODO: Add notification setting to SettingsCubit
-            },
+            onChanged: (val) {},
           ),
         ],
       ),
@@ -232,6 +352,66 @@ class SettingsView extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _AddressOption extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _AddressOption({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      leading: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? colorScheme.primaryContainer
+              : colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(
+          icon,
+          color: isSelected
+              ? colorScheme.primary
+              : colorScheme.onSurfaceVariant,
+          size: 20,
+        ),
+      ),
+      title: Text(
+        title,
+        style: theme.textTheme.bodyLarge?.copyWith(
+          fontWeight: isSelected ? FontWeight.bold : null,
+          color: isSelected ? colorScheme.primary : null,
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: isSelected ? colorScheme.primary.withValues(alpha: 0.7) : null,
+        ),
+      ),
+      trailing: isSelected
+          ? Icon(Symbols.check_circle, color: colorScheme.primary, size: 24)
+          : null,
+      onTap: onTap,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     );
   }
 }

@@ -7,6 +7,7 @@ import "package:flutter_bloc/flutter_bloc.dart";
 import "package:material_symbols_icons/material_symbols_icons.dart";
 
 import "../../../../cubits/send_cubit.dart";
+import "../../../../cubits/settings_cubit.dart";
 
 class SendInitialStateWidget extends StatefulWidget {
   const SendInitialStateWidget({super.key});
@@ -253,6 +254,7 @@ class _SendInitialStateWidgetState extends State<SendInitialStateWidget> {
                 onPressed: () {
                   context.read<SendCubit>().startSend(
                     _selectedPath.keys.toList(),
+                    addr: context.read<SettingsCubit>().state.addr,
                   );
                 },
                 style: FilledButton.styleFrom(

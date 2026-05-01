@@ -23,9 +23,7 @@ class ReceiveSuccessStateWidget extends StatelessWidget {
 
     return Card.filled(
       clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(28),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
         child: Column(

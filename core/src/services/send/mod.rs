@@ -2,7 +2,7 @@ pub mod utils;
 
 use std::{
     collections::HashMap,
-    net::SocketAddr,
+    net::IpAddr,
     path::PathBuf,
     str::FromStr,
     sync::{Arc, LazyLock},
@@ -38,7 +38,7 @@ use tokio::{
     time,
 };
 use tokio_util::{sync::CancellationToken, task::AbortOnDropHandle};
-use tracing::error;
+use tracing::{debug, error};
 use uuid::Uuid;
 
 static TOKENS: LazyLock<Mutex<HashMap<String, CancellationToken>>> = LazyLock::new(|| Mutex::new(HashMap::with_capacity(2)));
@@ -46,22 +46,22 @@ static TOKENS: LazyLock<Mutex<HashMap<String, CancellationToken>>> = LazyLock::n
 #[derive(Debug)]
 pub(super) struct SendArgs {
     paths: Vec<PathBuf>,
-    magic_addr: Option<SocketAddr>,
+    addr: Option<IpAddr>,
     relay: RelayMode,
 }
 
 impl SendArgs {
-    pub fn new(paths: Vec<String>, magic_addr: Option<String>, relay: Option<String>) -> Result<Self> {
+    pub fn new(paths: Vec<String>, addr: Option<String>, relay: Option<String>) -> Result<Self> {
         let paths = paths.into_iter().filter_map(|p| PathBuf::from(p).canonicalize().ok()).collect::<Vec<PathBuf>>();
         if paths.is_empty() {
             return Err(anyhow!("no valid paths provided"));
         }
-        let magic_addr = magic_addr.map(|u| SocketAddr::from_str(&u)).transpose()?;
+        let addr = addr.map(|a| IpAddr::from_str(&a)).transpose()?;
         let relay = relay
             .map(|u| RelayUrl::from_str(&u).map(|url| RelayMode::Custom(RelayMap::from_iter(vec![url]))))
             .transpose()?
             .unwrap_or(RelayMode::Disabled);
-        Ok(Self { paths, magic_addr, relay })
+        Ok(Self { paths, addr, relay })
     }
 }
 
@@ -132,10 +132,10 @@ async fn request_progress(
                     }
                 }
                 RequestUpdate::Completed(_) => {
-                    utx.send(TransferState::new(connection_id, 0, true, false)).unwrap();
+                    utx.send(TransferState::new(connection_id, index, true, false)).unwrap();
                 }
                 RequestUpdate::Aborted(_) => {
-                    utx.send(TransferState::new(connection_id, 0, false, true)).unwrap();
+                    utx.send(TransferState::new(connection_id, index, false, true)).unwrap();
                 }
             }
         }
@@ -158,14 +158,14 @@ async fn request_progress(
 async fn update_progress(
     mp: Arc<MultiProgress>,
     hashes: Arc<RwLock<HashMap<u64, HashMap<u64, u64>>>>,
-    connections: Arc<RwLock<HashMap<u64, Uuid>>>,
+    connections: Arc<RwLock<HashMap<u64, (Uuid, String)>>>,
     mut urx: UnboundedReceiver<TransferState>,
 ) {
     let mut map = HashMap::new();
     while let Some(s) = urx.recv().await {
         let value = connections.read().get(&s.connection_id).cloned();
         match value {
-            Some(id) => {
+            Some((id, endpoint)) => {
                 let total = hashes
                     .read()
                     .get(&s.connection_id)
@@ -185,7 +185,7 @@ async fn update_progress(
                     mp.change_phase(
                         &id,
                         Phase::Uploading {
-                            connection_id: s.connection_id,
+                            endpoint,
                             is_completed: s.is_completed,
                             is_failed: s.is_failed,
                         },
@@ -213,13 +213,19 @@ async fn provide_progress(mp: Arc<MultiProgress>, mut recv: Receiver<ProviderMes
             Some(item) => {
                 match item {
                     ProviderMessage::ClientConnectedNotify(msg) => {
-                        let connection_id = msg.connection_id;
-                        let id = mp.add(Phase::Uploading {
-                            connection_id,
-                            is_failed: false,
-                            is_completed: false,
-                        });
-                        connections.write().insert(msg.connection_id, id);
+                        match msg.endpoint_id {
+                            Some(endpoint) => {
+                                let endpoint = endpoint.fmt_short().to_string();
+                                let connection_id = msg.connection_id;
+                                let id = mp.add(Phase::Uploading {
+                                    endpoint: endpoint.clone(),
+                                    is_failed: false,
+                                    is_completed: false,
+                                });
+                                connections.write().insert(connection_id, (id, endpoint));
+                            }
+                            None => {}
+                        };
                     }
                     ProviderMessage::GetRequestReceivedNotify(msg) => {
                         tasks.spawn(request_progress(msg.request_id, msg.connection_id, hashes.clone(), utx.clone(), msg.rx));
@@ -238,14 +244,14 @@ async fn provide_progress(mp: Arc<MultiProgress>, mut recv: Receiver<ProviderMes
 }
 
 pub(super) async fn start(args: SendArgs, stream: StreamSink<Vec<ProgressState>>, result: &StreamSink<SendResult>) -> Result<()> {
-    let SendArgs { paths, magic_addr, relay } = args;
+    let SendArgs { paths, addr, relay } = args;
     let secret_key = get_or_create_secret()?;
     let mut builder = Endpoint::builder(Minimal)
         .alpns(vec![TRANSFER_ALPN.to_vec()])
         .secret_key(secret_key)
         .relay_mode(relay.clone());
-    if let Some(addr) = magic_addr {
-        builder = builder.bind_addr(addr)?;
+    if let Some(addr) = addr {
+        builder = builder.clear_ip_transports().bind_addr((addr, 0))?
     }
     let blobs_dir = tempdir_in(std::env::temp_dir())?;
     let mp = Arc::new(MultiProgress::new(Arc::new(stream)));
@@ -277,6 +283,7 @@ pub(super) async fn start(args: SendArgs, stream: StreamSink<Vec<ProgressState>>
     let hash = temp_tag.hash();
     let addr = router.endpoint().addr();
     let ticket = BlobTicket::new(addr, hash, BlobFormat::HashSeq).to_string();
+    debug!("created ticket: {}", &ticket);
     let cancel = CancellationToken::new();
     {
         let mut tokens = TOKENS.lock();

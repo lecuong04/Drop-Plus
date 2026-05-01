@@ -16,13 +16,13 @@ Stream<LogEntry> initTracing() => RustLib.instance.api.crateFfiInitTracing();
 
 Future<void> send({
   required List<String> paths,
-  String? magicAddr,
+  String? addr,
   String? relay,
   required RustStreamSink<List<ProgressState>> stream,
   required RustStreamSink<SendResult> result,
 }) => RustLib.instance.api.crateFfiSend(
   paths: paths,
-  magicAddr: magicAddr,
+  addr: addr,
   relay: relay,
   stream: stream,
   result: result,
@@ -56,3 +56,6 @@ Future<void> cancelReceive({required List<int> ticket}) =>
 
 Future<Uint8List> qrReader({required List<int> image}) =>
     RustLib.instance.api.crateFfiQrReader(image: image);
+
+Future<Map<String, String>> getAddrs() =>
+    RustLib.instance.api.crateFfiGetAddrs();

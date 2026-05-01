@@ -88,8 +88,8 @@ pub async fn init_tracing(stream: StreamSink<LogEntry>) {
 }
 
 #[frb(name = "send")]
-pub fn send(paths: Vec<String>, magic_addr: Option<String>, relay: Option<String>, stream: StreamSink<Vec<ProgressState>>, result: StreamSink<SendResult>) -> Result<()> {
-    services::send(paths, magic_addr, relay, stream, result)
+pub fn send(paths: Vec<String>, addr: Option<String>, relay: Option<String>, stream: StreamSink<Vec<ProgressState>>, result: StreamSink<SendResult>) -> Result<()> {
+    services::send(paths, addr, relay, stream, result)
 }
 
 #[frb(name = "cancelSend")]
@@ -120,4 +120,9 @@ pub fn cancel_receive(ticket: Vec<u8>) -> Result<()> {
 #[frb(name = "qrReader")]
 pub fn qr_reader(image: Vec<u8>) -> Result<Vec<u8>> {
     services::qr_reader(image)
+}
+
+#[frb(name = "getAddrs")]
+pub fn get_addrs() -> Result<HashMap<String, String>> {
+    services::get_addrs()
 }

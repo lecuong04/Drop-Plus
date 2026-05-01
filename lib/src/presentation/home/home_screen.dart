@@ -15,19 +15,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late final List<Particle> _particles;
+  late final List<Particle> _particles = _createParticles();
 
   int _selectedIndex = 0;
-
-  @override
-  void initState() {
-    _particles = _createParticles();
-    super.initState();
-  }
-
-  void _onDestinationSelected(int index) {
-    setState(() => _selectedIndex = index);
-  }
 
   List<Particle> _createParticles() {
     double randomSign() {
@@ -35,12 +25,21 @@ class _HomeScreenState extends State<HomeScreen> {
       return rng.nextBool() ? 1 : -1;
     }
 
+    Color randomColor(Random rng) {
+      return Color.from(
+        red: rng.nextDouble(),
+        green: rng.nextDouble(),
+        blue: rng.nextDouble(),
+        alpha: 0.5,
+      );
+    }
+
     var rng = Random();
     List<Particle> particles = [];
     for (int i = 0; i < 32; i++) {
       particles.add(
         CircularParticle(
-          color: _randomColor(rng),
+          color: randomColor(rng),
           radius: rng.nextDouble() * 20,
           velocity: Offset(
             rng.nextDouble() * 200 * randomSign(),
@@ -50,15 +49,6 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
     return particles;
-  }
-
-  Color _randomColor(Random rng) {
-    return Color.from(
-      red: rng.nextDouble(),
-      green: rng.nextDouble(),
-      blue: rng.nextDouble(),
-      alpha: 0.5,
-    );
   }
 
   @override
@@ -85,7 +75,8 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
-        onDestinationSelected: _onDestinationSelected,
+        onDestinationSelected: (index) =>
+            setState(() => _selectedIndex = index),
         destinations: const [
           NavigationDestination(
             icon: Icon(Symbols.upload),

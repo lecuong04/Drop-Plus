@@ -14,7 +14,7 @@ sealed class Phase with _$Phase {
 
   const factory Phase.importing({required String name}) = Phase_Importing;
   const factory Phase.uploading({
-    required BigInt connectionId,
+    required String endpoint,
     required bool isCompleted,
     required bool isFailed,
   }) = Phase_Uploading;

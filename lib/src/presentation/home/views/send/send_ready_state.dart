@@ -63,21 +63,20 @@ class _ActiveTransfersSection extends StatefulWidget {
 }
 
 class _ActiveTransfersSectionState extends State<_ActiveTransfersSection> {
-  final Set<BigInt> _dismissedIds = {};
+  final Set<String> _dismissedIds = {};
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    final grouped = widget.progresses.fold<Map<BigInt, ProgressState>>({}, (
+    final grouped = widget.progresses.fold<Map<String, ProgressState>>({}, (
       map,
       progress,
     ) {
       final phase = progress.phase;
-      if (phase is Phase_Uploading &&
-          !_dismissedIds.contains(phase.connectionId)) {
-        map[phase.connectionId] = progress;
+      if (phase is Phase_Uploading && !_dismissedIds.contains(phase.endpoint)) {
+        map[phase.endpoint] = progress;
       }
       return map;
     });
@@ -136,19 +135,17 @@ class _ActiveTransfersSectionState extends State<_ActiveTransfersSection> {
 
             final percent =
                 progress.position.toDouble() / widget.size.toDouble();
+            final statusText = "${(percent * 100).toStringAsFixed(1)}%";
 
-            Color statusColor = colorScheme.primary;
-            IconData statusIcon = Symbols.package;
-            String statusText = "${(percent * 100).toStringAsFixed(1)}%";
+            var statusColor = colorScheme.primary;
+            var statusIcon = Symbols.package;
 
             if (phase.isCompleted) {
               statusColor = Colors.green;
               statusIcon = Symbols.check_circle;
-              statusText = "Completed";
             } else if (phase.isFailed) {
               statusColor = colorScheme.error;
               statusIcon = Symbols.error;
-              statusText = "Failed";
             }
 
             return Dismissible(
@@ -185,9 +182,7 @@ class _ActiveTransfersSectionState extends State<_ActiveTransfersSection> {
                   subtitle: Padding(
                     padding: const EdgeInsets.only(top: 8),
                     child: LinearProgressIndicator(
-                      value: phase.isCompleted
-                          ? 1.0
-                          : (phase.isFailed ? 0.0 : percent),
+                      value: phase.isCompleted ? 1.0 : percent,
                       color: statusColor,
                       backgroundColor: statusColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),

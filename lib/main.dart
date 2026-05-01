@@ -1,3 +1,4 @@
+import "exts.dart";
 import "rust/frb_generated.dart";
 import "src/app_theme.dart";
 import "src/cubits/settings_cubit.dart";
@@ -8,6 +9,8 @@ import "src/services/tracing_service.dart";
 import "src/services/transfer_service.dart";
 import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
+
+final navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,13 +36,22 @@ class MainApp extends StatelessWidget {
             create: (context) => TracingCubit(context.read()),
           ),
           BlocProvider(
-            create: (context) => SettingsCubit(),
+            create: (context) => SettingsCubit(
+              context.read(),
+              onConnectivityLost: (addr) {
+                navigatorKey.currentContext?.showWarningSnackBar(
+                  "Lost connection to $addr",
+                );
+              },
+            ),
           ),
         ],
         child: BlocBuilder<SettingsCubit, SettingsState>(
-          buildWhen: (previous, current) => previous.themeMode != current.themeMode,
+          buildWhen: (previous, current) =>
+              previous.themeMode != current.themeMode,
           builder: (context, state) {
             return MaterialApp(
+              navigatorKey: navigatorKey,
               title: "Drop Plus",
               debugShowCheckedModeBanner: false,
               theme: AppTheme.light,

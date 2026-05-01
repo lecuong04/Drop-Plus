@@ -38,7 +38,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.12.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 1123577874;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 553960083;
 
 // Section: executor
 
@@ -118,6 +118,31 @@ fn wire__crate__ffi__cancel_send_impl(
             move |context| {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>((move || {
                     let output_ok = crate::ffi::cancel_send(api_ticket)?;
+                    Ok(output_ok)
+                })())
+            }
+        },
+    )
+}
+fn wire__crate__ffi__get_addrs_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "get_addrs(dart_style=getAddrs)",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe { flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(ptr_, rust_vec_len_, data_len_) };
+            let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>((move || {
+                    let output_ok = crate::ffi::get_addrs()?;
                     Ok(output_ok)
                 })())
             }
@@ -280,14 +305,14 @@ fn wire__crate__ffi__send_impl(
             let message = unsafe { flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(ptr_, rust_vec_len_, data_len_) };
             let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_paths = <Vec<String>>::sse_decode(&mut deserializer);
-            let api_magic_addr = <Option<String>>::sse_decode(&mut deserializer);
+            let api_addr = <Option<String>>::sse_decode(&mut deserializer);
             let api_relay = <Option<String>>::sse_decode(&mut deserializer);
             let api_stream = <StreamSink<Vec<crate::progresses::ProgressState>, flutter_rust_bridge::for_generated::SseCodec>>::sse_decode(&mut deserializer);
             let api_result = <StreamSink<crate::types::SendResult, flutter_rust_bridge::for_generated::SseCodec>>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>((move || {
-                    let output_ok = crate::ffi::send(api_paths, api_magic_addr, api_relay, api_stream, api_result)?;
+                    let output_ok = crate::ffi::send(api_paths, api_addr, api_relay, api_stream, api_result)?;
                     Ok(output_ok)
                 })())
             }
@@ -477,11 +502,11 @@ impl SseDecode for crate::progresses::Phase {
                 return crate::progresses::Phase::Importing { name: var_name };
             }
             1 => {
-                let mut var_connectionId = <u64>::sse_decode(deserializer);
+                let mut var_endpoint = <String>::sse_decode(deserializer);
                 let mut var_isCompleted = <bool>::sse_decode(deserializer);
                 let mut var_isFailed = <bool>::sse_decode(deserializer);
                 return crate::progresses::Phase::Uploading {
-                    connection_id: var_connectionId,
+                    endpoint: var_endpoint,
                     is_completed: var_isCompleted,
                     is_failed: var_isFailed,
                 };
@@ -622,12 +647,13 @@ fn pde_ffi_dispatcher_primary_impl(
         1 => wire__crate__ffi__accept_receive_impl(port, ptr, rust_vec_len, data_len),
         2 => wire__crate__ffi__cancel_receive_impl(port, ptr, rust_vec_len, data_len),
         3 => wire__crate__ffi__cancel_send_impl(port, ptr, rust_vec_len, data_len),
-        4 => wire__crate__ffi__init_app_impl(port, ptr, rust_vec_len, data_len),
-        5 => wire__crate__ffi__init_tracing_impl(port, ptr, rust_vec_len, data_len),
-        6 => wire__crate__ffi__qr_reader_impl(port, ptr, rust_vec_len, data_len),
-        7 => wire__crate__ffi__receive_impl(port, ptr, rust_vec_len, data_len),
-        8 => wire__crate__ffi__reject_receive_impl(port, ptr, rust_vec_len, data_len),
-        9 => wire__crate__ffi__send_impl(port, ptr, rust_vec_len, data_len),
+        4 => wire__crate__ffi__get_addrs_impl(port, ptr, rust_vec_len, data_len),
+        5 => wire__crate__ffi__init_app_impl(port, ptr, rust_vec_len, data_len),
+        6 => wire__crate__ffi__init_tracing_impl(port, ptr, rust_vec_len, data_len),
+        7 => wire__crate__ffi__qr_reader_impl(port, ptr, rust_vec_len, data_len),
+        8 => wire__crate__ffi__receive_impl(port, ptr, rust_vec_len, data_len),
+        9 => wire__crate__ffi__reject_receive_impl(port, ptr, rust_vec_len, data_len),
+        10 => wire__crate__ffi__send_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -682,12 +708,12 @@ impl flutter_rust_bridge::IntoDart for crate::progresses::Phase {
         match self {
             crate::progresses::Phase::Importing { name } => [0.into_dart(), name.into_into_dart().into_dart()].into_dart(),
             crate::progresses::Phase::Uploading {
-                connection_id,
+                endpoint,
                 is_completed,
                 is_failed,
             } => [
                 1.into_dart(),
-                connection_id.into_into_dart().into_dart(),
+                endpoint.into_into_dart().into_dart(),
                 is_completed.into_into_dart().into_dart(),
                 is_failed.into_into_dart().into_dart(),
             ]
@@ -927,12 +953,12 @@ impl SseEncode for crate::progresses::Phase {
                 <String>::sse_encode(name, serializer);
             }
             crate::progresses::Phase::Uploading {
-                connection_id,
+                endpoint,
                 is_completed,
                 is_failed,
             } => {
                 <i32>::sse_encode(1, serializer);
-                <u64>::sse_encode(connection_id, serializer);
+                <String>::sse_encode(endpoint, serializer);
                 <bool>::sse_encode(is_completed, serializer);
                 <bool>::sse_encode(is_failed, serializer);
             }

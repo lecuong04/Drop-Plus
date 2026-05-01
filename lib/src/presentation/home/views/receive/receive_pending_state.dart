@@ -186,27 +186,22 @@ class _ReceivePendingStateWidgetState extends State<ReceivePendingStateWidget> {
             const SizedBox(height: 12),
             ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 300),
-              child: ScrollConfiguration(
-                behavior: ScrollConfiguration.of(
-                  context,
-                ).copyWith(scrollbars: false),
+              child: Scrollbar(
+                thumbVisibility: true,
+                controller: _horizontalController,
                 child: Scrollbar(
                   thumbVisibility: true,
-                  controller: _horizontalController,
-                  child: Scrollbar(
-                    thumbVisibility: true,
-                    controller: _verticalController,
-                    child: TreeView(
-                      verticalDetails: ScrollableDetails.vertical(
-                        controller: _verticalController,
-                      ),
-                      horizontalDetails: ScrollableDetails.horizontal(
-                        controller: _horizontalController,
-                      ),
-                      tree: _tree,
-                      controller: _controller,
-                      treeNodeBuilder: _treeNodeBuilder,
+                  controller: _verticalController,
+                  child: TreeView(
+                    verticalDetails: ScrollableDetails.vertical(
+                      controller: _verticalController,
                     ),
+                    horizontalDetails: ScrollableDetails.horizontal(
+                      controller: _horizontalController,
+                    ),
+                    tree: _tree,
+                    controller: _controller,
+                    treeNodeBuilder: _treeNodeBuilder,
                   ),
                 ),
               ),

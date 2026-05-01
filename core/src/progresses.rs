@@ -9,7 +9,7 @@ const PROGRESS_DEBOUNCE: Duration = Duration::from_millis(200);
 #[derive(Debug, Clone, PartialEq)]
 pub enum Phase {
     Importing { name: String },
-    Uploading { connection_id: u64, is_completed: bool, is_failed: bool },
+    Uploading { endpoint: String, is_completed: bool, is_failed: bool },
     Pending,
     Connecting,
     Validating,

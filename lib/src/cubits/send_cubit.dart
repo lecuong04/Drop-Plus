@@ -53,7 +53,7 @@ class SendCubit extends Cubit<SendState> {
 
   SendCubit(this._service) : super(const SendInitial());
 
-  void startSend(List<String> paths) {
+  void startSend(List<String> paths, {String? addr}) {
     final progressSink = RustStreamSink<List<ProgressState>>();
     final resultSink = RustStreamSink<SendResult>();
 
@@ -61,7 +61,12 @@ class SendCubit extends Cubit<SendState> {
     StreamSubscription? resultSub;
 
     _service
-        .send(paths: paths, stream: progressSink, result: resultSink)
+        .send(
+          paths: paths,
+          addr: addr,
+          stream: progressSink,
+          result: resultSink,
+        )
         .whenComplete(() async {
           await progressSub?.cancel();
           await resultSub?.cancel();
@@ -74,8 +79,8 @@ class SendCubit extends Cubit<SendState> {
 
         final progresses = curState.progresses.where(
           (p) => !e
-              .map((e) => (e.phase as Phase_Uploading).connectionId)
-              .contains((p.phase as Phase_Uploading).connectionId),
+              .map((e) => (e.phase as Phase_Uploading).endpoint)
+              .contains((p.phase as Phase_Uploading).endpoint),
         );
         emit((state as SendReady).copyWith(progresses: [...progresses, ...e]));
       }
