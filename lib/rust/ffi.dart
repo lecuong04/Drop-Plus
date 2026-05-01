@@ -16,13 +16,15 @@ Stream<LogEntry> initTracing() => RustLib.instance.api.crateFfiInitTracing();
 
 Future<void> send({
   required List<String> paths,
-  String? addr,
-  String? relay,
+  String? ipv4Addr,
+  String? ipv6Addr,
+  required RelayModeOption relay,
   required RustStreamSink<List<ProgressState>> stream,
   required RustStreamSink<SendResult> result,
 }) => RustLib.instance.api.crateFfiSend(
   paths: paths,
-  addr: addr,
+  ipv4Addr: ipv4Addr,
+  ipv6Addr: ipv6Addr,
   relay: relay,
   stream: stream,
   result: result,

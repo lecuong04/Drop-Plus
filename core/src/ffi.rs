@@ -13,7 +13,7 @@ use crate::{
     frb_generated::StreamSink,
     progresses::ProgressState,
     services::{self},
-    types::{LogEntry, ReceiveResult, SendResult},
+    types::{LogEntry, ReceiveResult, RelayModeOption, SendResult},
 };
 
 use anyhow::Result;
@@ -88,8 +88,15 @@ pub async fn init_tracing(stream: StreamSink<LogEntry>) {
 }
 
 #[frb(name = "send")]
-pub fn send(paths: Vec<String>, addr: Option<String>, relay: Option<String>, stream: StreamSink<Vec<ProgressState>>, result: StreamSink<SendResult>) -> Result<()> {
-    services::send(paths, addr, relay, stream, result)
+pub fn send(
+    paths: Vec<String>,
+    ipv4_addr: Option<String>,
+    ipv6_addr: Option<String>,
+    relay: RelayModeOption,
+    stream: StreamSink<Vec<ProgressState>>,
+    result: StreamSink<SendResult>,
+) -> Result<()> {
+    services::send(paths, ipv4_addr, ipv6_addr, relay, stream, result)
 }
 
 #[frb(name = "cancelSend")]

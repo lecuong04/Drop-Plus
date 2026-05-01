@@ -16,18 +16,25 @@ use crate::{
         receive::ReceiveArgs,
         send::SendArgs,
     },
-    types::{ReceiveResult, SendResult},
+    types::{ReceiveResult, RelayModeOption, SendResult},
 };
 
 static RUNTIME: LazyLock<Runtime> = LazyLock::new(|| Runtime::new().expect("failed to initialize tokio runtime"));
 
 #[instrument(err, skip(stream, result))]
-pub fn send(paths: Vec<String>, addr: Option<String>, relay: Option<String>, stream: StreamSink<Vec<ProgressState>>, result: StreamSink<SendResult>) -> Result<()> {
+pub fn send(
+    paths: Vec<String>,
+    ipv4_addr: Option<String>,
+    ipv6_addr: Option<String>,
+    relay: RelayModeOption,
+    stream: StreamSink<Vec<ProgressState>>,
+    result: StreamSink<SendResult>,
+) -> Result<()> {
     let handle = RUNTIME.handle().clone();
     block_in_place(|| {
         handle
             .block_on(async {
-                let args = SendArgs::new(paths, addr, relay)?;
+                let args = SendArgs::new(paths, ipv4_addr, ipv6_addr, relay)?;
                 self::send::start(args, stream, &result).await
             })
             .inspect_err(|_| {

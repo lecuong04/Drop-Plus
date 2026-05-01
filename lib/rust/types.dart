@@ -69,6 +69,16 @@ sealed class ReceiveResult with _$ReceiveResult {
 }
 
 @freezed
+sealed class RelayModeOption with _$RelayModeOption {
+  const RelayModeOption._();
+
+  const factory RelayModeOption.disabled() = RelayModeOption_Disabled;
+  const factory RelayModeOption.n0() = RelayModeOption_N0;
+  const factory RelayModeOption.custom({required String url}) =
+      RelayModeOption_Custom;
+}
+
+@freezed
 sealed class SendResult with _$SendResult {
   const SendResult._();
 

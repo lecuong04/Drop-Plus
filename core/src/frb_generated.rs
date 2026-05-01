@@ -305,14 +305,15 @@ fn wire__crate__ffi__send_impl(
             let message = unsafe { flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(ptr_, rust_vec_len_, data_len_) };
             let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_paths = <Vec<String>>::sse_decode(&mut deserializer);
-            let api_addr = <Option<String>>::sse_decode(&mut deserializer);
-            let api_relay = <Option<String>>::sse_decode(&mut deserializer);
+            let api_ipv4_addr = <Option<String>>::sse_decode(&mut deserializer);
+            let api_ipv6_addr = <Option<String>>::sse_decode(&mut deserializer);
+            let api_relay = <crate::types::RelayModeOption>::sse_decode(&mut deserializer);
             let api_stream = <StreamSink<Vec<crate::progresses::ProgressState>, flutter_rust_bridge::for_generated::SseCodec>>::sse_decode(&mut deserializer);
             let api_result = <StreamSink<crate::types::SendResult, flutter_rust_bridge::for_generated::SseCodec>>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>((move || {
-                    let output_ok = crate::ffi::send(api_paths, api_addr, api_relay, api_stream, api_result)?;
+                    let output_ok = crate::ffi::send(api_paths, api_ipv4_addr, api_ipv6_addr, api_relay, api_stream, api_result)?;
                     Ok(output_ok)
                 })())
             }
@@ -586,6 +587,28 @@ impl SseDecode for (String, String) {
     }
 }
 
+impl SseDecode for crate::types::RelayModeOption {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut tag_ = <i32>::sse_decode(deserializer);
+        match tag_ {
+            0 => {
+                return crate::types::RelayModeOption::Disabled;
+            }
+            1 => {
+                return crate::types::RelayModeOption::N0;
+            }
+            2 => {
+                let mut var_url = <String>::sse_decode(deserializer);
+                return crate::types::RelayModeOption::Custom { url: var_url };
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+
 impl SseDecode for crate::types::SendResult {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -778,6 +801,25 @@ impl flutter_rust_bridge::IntoDart for crate::types::ReceiveResult {
 impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::types::ReceiveResult {}
 impl flutter_rust_bridge::IntoIntoDart<crate::types::ReceiveResult> for crate::types::ReceiveResult {
     fn into_into_dart(self) -> crate::types::ReceiveResult {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::types::RelayModeOption {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            crate::types::RelayModeOption::Disabled => [0.into_dart()].into_dart(),
+            crate::types::RelayModeOption::N0 => [1.into_dart()].into_dart(),
+            crate::types::RelayModeOption::Custom { url } => [2.into_dart(), url.into_into_dart().into_dart()].into_dart(),
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::types::RelayModeOption {}
+impl flutter_rust_bridge::IntoIntoDart<crate::types::RelayModeOption> for crate::types::RelayModeOption {
+    fn into_into_dart(self) -> crate::types::RelayModeOption {
         self
     }
 }
@@ -1027,6 +1069,27 @@ impl SseEncode for (String, String) {
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <String>::sse_encode(self.0, serializer);
         <String>::sse_encode(self.1, serializer);
+    }
+}
+
+impl SseEncode for crate::types::RelayModeOption {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        match self {
+            crate::types::RelayModeOption::Disabled => {
+                <i32>::sse_encode(0, serializer);
+            }
+            crate::types::RelayModeOption::N0 => {
+                <i32>::sse_encode(1, serializer);
+            }
+            crate::types::RelayModeOption::Custom { url } => {
+                <i32>::sse_encode(2, serializer);
+                <String>::sse_encode(url, serializer);
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
     }
 }
 

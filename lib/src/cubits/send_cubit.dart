@@ -50,7 +50,13 @@ class SendCubit extends Cubit<SendState> {
 
   SendCubit(this._service) : super(const SendInitial());
 
-  void startSend(List<String> paths, {String? addr}) {
+  void startSend(
+    List<String> paths, {
+    String? ipv4Addr,
+    String? ipv6Addr,
+    int port = 0,
+    RelayModeOption relay = const RelayModeOption.disabled(),
+  }) {
     final progressSink = RustStreamSink<List<ProgressState>>();
     final resultSink = RustStreamSink<SendResult>();
 
@@ -60,7 +66,9 @@ class SendCubit extends Cubit<SendState> {
     _service
         .send(
           paths: paths,
-          addr: addr,
+          ipv4Addr: ipv4Addr != null ? "$ipv4Addr:$port" : null,
+          ipv6Addr: ipv6Addr != null ? "[$ipv6Addr]:$port" : null,
+          relay: relay,
           stream: progressSink,
           result: resultSink,
         )

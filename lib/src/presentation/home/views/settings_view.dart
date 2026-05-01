@@ -1,16 +1,32 @@
 import "package:file_picker/file_picker.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
 import "package:material_symbols_icons/material_symbols_icons.dart";
+import "../../../../rust/types.dart";
 import "../../../cubits/settings_cubit.dart";
 import "../../logs_screen.dart";
 
-class SettingsView extends StatelessWidget {
-  static const double maxWidth = 600;
-
+class SettingsView extends StatefulWidget {
   const SettingsView({super.key});
 
-  Future<void> _pickDownloadDirectory(BuildContext context) async {
+  @override
+  State<SettingsView> createState() => _SettingsViewState();
+}
+
+class _SettingsViewState extends State<SettingsView> {
+  final bool _isSupportNetwork = {
+    TargetPlatform.windows,
+    TargetPlatform.linux,
+    TargetPlatform.macOS,
+  }.contains(defaultTargetPlatform);
+
+  static const double maxWidth = 600;
+
+  bool _isPick = false;
+
+  Future<void> _pickDownloadDirectory() async {
+    setState(() => _isPick = true);
     final cubit = context.read<SettingsCubit>();
     final String? result = await FilePicker.getDirectoryPath(
       dialogTitle: "Select download folder",
@@ -19,9 +35,168 @@ class SettingsView extends StatelessWidget {
     if (result != null) {
       cubit.setDownloadFolder(result);
     }
+    setState(() => _isPick = false);
   }
 
-  Future<void> _showAddressSelection(BuildContext context) async {
+  Future<void> _showPortSelection() async {
+    final cubit = context.read<SettingsCubit>();
+    final controller = TextEditingController(text: cubit.state.port.toString());
+    final res = await showDialog<int>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          content: TextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: "Port number",
+              hintText: "0 for random port",
+              helperText: "Range: 0 - 65535",
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                final port = int.tryParse(controller.text);
+                if (port != null && port >= 0 && port <= 65535) {
+                  Navigator.pop(context, port);
+                }
+              },
+              child: const Text("Save"),
+            ),
+          ],
+        );
+      },
+    );
+    if (res != null) {
+      cubit.setPort(res);
+    }
+  }
+
+  Future<void> _showRelaySelection() async {
+    final cubit = context.read<SettingsCubit>();
+
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      builder: (context) {
+        return BlocBuilder<SettingsCubit, SettingsState>(
+          builder: (context, state) {
+            final theme = Theme.of(context);
+            final colorScheme = theme.colorScheme;
+
+            return ListView(
+              shrinkWrap: true,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              children: [
+                Card(
+                  elevation: 0,
+                  child: ListTile(
+                    leading: const Icon(Symbols.block),
+                    title: const Text("Disabled"),
+                    subtitle: const Text("Direct connection only"),
+                    trailing: state.relay.maybeMap(
+                      disabled: (_) => Icon(
+                        Symbols.check_circle,
+                        color: colorScheme.primary,
+                      ),
+                      orElse: () => null,
+                    ),
+                    onTap: () {
+                      cubit.setRelay(const RelayModeOption.disabled());
+                      Navigator.pop(context);
+                    },
+                  ),
+                ),
+                Card(
+                  elevation: 0,
+                  child: ListTile(
+                    leading: const Icon(Symbols.public),
+                    title: const Text("Default"),
+                    subtitle: const Text("Use iroh.network (N0)"),
+                    trailing: state.relay.maybeMap(
+                      n0: (_) => Icon(
+                        Symbols.check_circle,
+                        color: colorScheme.primary,
+                      ),
+                      orElse: () => null,
+                    ),
+                    onTap: () {
+                      cubit.setRelay(const RelayModeOption.n0());
+                      Navigator.pop(context);
+                    },
+                  ),
+                ),
+                Card(
+                  elevation: 0,
+                  child: ListTile(
+                    leading: const Icon(Symbols.dns),
+                    title: const Text("Custom"),
+                    subtitle: Text(
+                      state.relay.maybeMap(
+                        custom: (c) => c.url,
+                        orElse: () => "Enter custom relay URL",
+                      ),
+                    ),
+                    trailing: state.relay.maybeMap(
+                      custom: (_) => Icon(
+                        Symbols.check_circle,
+                        color: colorScheme.primary,
+                      ),
+                      orElse: () => null,
+                    ),
+                    onTap: () async {
+                      final controller = TextEditingController(
+                        text: state.relay.maybeMap(
+                          custom: (c) => c.url,
+                          orElse: () => "",
+                        ),
+                      );
+                      final url = await showDialog<String>(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            content: TextField(
+                              controller: controller,
+                              decoration: const InputDecoration(
+                                labelText: "Relay URL",
+                              ),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text("Cancel"),
+                              ),
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.pop(context, controller.text),
+                                child: const Text("Save"),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                      if (url != null && url.isNotEmpty) {
+                        cubit.setRelay(RelayModeOption.custom(url: url));
+                        if (context.mounted) Navigator.pop(context);
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(height: 24),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _showAddressSelection() async {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -39,75 +214,95 @@ class SettingsView extends StatelessWidget {
                 final theme = Theme.of(context);
                 final colorScheme = theme.colorScheme;
 
-                return Column(
+                return ListView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 0, 12, 8),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              "Network Addresses",
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                    Card(
+                      elevation: 0,
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+                        leading: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primaryContainer.withValues(
+                              alpha: 0.5,
                             ),
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          IconButton(
-                            onPressed: () =>
-                                context.read<SettingsCubit>().refresh(),
-                            icon: const Icon(Symbols.refresh),
-                            tooltip: "Refresh",
+                          child: Icon(
+                            Symbols.door_open,
+                            color: colorScheme.primary,
                           ),
-                        ],
+                        ),
+                        title: const Text("Port"),
+                        subtitle: Text(
+                          state.port == 0
+                              ? "Random port"
+                              : state.port.toString(),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: const Icon(Symbols.chevron_right, size: 20),
+                        onTap: _showPortSelection,
                       ),
                     ),
-                    Expanded(
-                      child: ListView(
-                        controller: scrollController,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        children: [
-                          _AddressOption(
-                            title: "Auto selection",
-                            subtitle: "Recommended (use all interfaces)",
-                            icon: Symbols.magic_button,
-                            isSelected:
-                                state.addr == null || state.addr!.isEmpty,
-                            onTap: () {
-                              context.read<SettingsCubit>().clearAddr();
-                              Navigator.pop(context);
-                            },
-                          ),
-                          if (state.availableAddrs.isNotEmpty) ...[
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-                              child: Text(
-                                "Manual Selection",
-                                style: theme.textTheme.labelLarge?.copyWith(
-                                  color: colorScheme.primary,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            ...state.availableAddrs.entries.map((entry) {
-                              return _AddressOption(
-                                title: entry.value,
-                                subtitle: entry.key,
-                                icon: Symbols.lan,
-                                isSelected: state.addr == entry.key,
-                                onTap: () {
-                                  context.read<SettingsCubit>().setAddress(
-                                    entry.key,
-                                  );
-                                  Navigator.pop(context);
-                                },
-                              );
-                            }),
-                          ],
-                          const SizedBox(height: 24),
-                        ],
-                      ),
+                    const Divider(height: 1, indent: 72),
+                    _AddressOption(
+                      title: "Auto selection",
+                      subtitle: "Recommended (use all interfaces)",
+                      icon: Symbols.magic_button,
+                      isSelected:
+                          state.ipv4Addr == null && state.ipv6Addr == null,
+                      onTap: () {
+                        context.read<SettingsCubit>().clearAddrs();
+                      },
                     ),
+                    if (state.availableAddrs.isNotEmpty) ...[
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+                        child: Text(
+                          "Manual Selection",
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      ...state.availableAddrs.entries.map((entry) {
+                        final isIpv6 = entry.key.contains(":");
+                        final isSelected = isIpv6
+                            ? state.ipv6Addr == entry.key
+                            : state.ipv4Addr == entry.key;
+
+                        return _AddressOption(
+                          title: entry.value,
+                          subtitle: entry.key,
+                          icon: Symbols.lan,
+                          isSelected: isSelected,
+                          onTap: () {
+                            final cubit = context.read<SettingsCubit>();
+                            if (isIpv6) {
+                              if (state.ipv6Addr == entry.key) {
+                                cubit.removeAddrV6();
+                              } else {
+                                cubit.setAddrV6(entry.key);
+                              }
+                            } else {
+                              if (state.ipv4Addr == entry.key) {
+                                cubit.removeAddrV4();
+                              } else {
+                                cubit.setAddrV4(entry.key);
+                              }
+                            }
+                          },
+                        );
+                      }),
+                    ],
+                    const SizedBox(height: 24),
                   ],
                 );
               },
@@ -132,7 +327,7 @@ class SettingsView extends StatelessWidget {
                 constraints: BoxConstraints(minHeight: constraints.maxHeight),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(
-                    maxWidth: SettingsView.maxWidth,
+                    maxWidth: _SettingsViewState.maxWidth,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -209,33 +404,76 @@ class SettingsView extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
             trailing: const Icon(Symbols.chevron_right, size: 20),
-            onTap: () => _pickDownloadDirectory(context),
+            onTap: !_isPick ? _pickDownloadDirectory : null,
           ),
-          const Divider(height: 1, indent: 72),
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 20,
-              vertical: 8,
-            ),
-            leading: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: colorScheme.primaryContainer.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(12),
+          if (_isSupportNetwork) ...[
+            const Divider(height: 1, indent: 72),
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 8,
               ),
-              child: Icon(Symbols.lan, color: colorScheme.primary),
+              leading: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(Symbols.lan, color: colorScheme.primary),
+              ),
+              title: const Text("Network Configurations"),
+              subtitle: Text(
+                () {
+                  final String portSuffix = state.port == 0
+                      ? " (Random port)"
+                      : ":${state.port}";
+                  if (state.ipv4Addr == null && state.ipv6Addr == null) {
+                    return "Auto selection$portSuffix";
+                  }
+                  final List<String> addrs = [];
+                  if (state.ipv4Addr != null) {
+                    addrs.add("${state.ipv4Addr}$portSuffix");
+                  }
+                  if (state.ipv6Addr != null) {
+                    addrs.add("[${state.ipv6Addr}]$portSuffix");
+                  }
+                  return addrs.join("\n");
+                }(),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              trailing: const Icon(Symbols.chevron_right, size: 20),
+              onTap: _showAddressSelection,
             ),
-            title: const Text("Network Addresses"),
-            subtitle: Text(
-              state.addr == null || state.addr!.isEmpty
-                  ? "Auto selection"
-                  : state.addr!,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            const Divider(height: 1, indent: 72),
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 8,
+              ),
+              leading: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(Symbols.share_windows, color: colorScheme.primary),
+              ),
+              title: const Text("Relay Mode"),
+              subtitle: Text(
+                state.relay.maybeMap(
+                  disabled: (_) => "Disabled",
+                  n0: (_) => "Default (N0)",
+                  custom: (c) => "Custom: ${c.url}",
+                  orElse: () => "Unknown",
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              trailing: const Icon(Symbols.chevron_right, size: 20),
+              onTap: _showRelaySelection,
             ),
-            trailing: const Icon(Symbols.chevron_right, size: 20),
-            onTap: () => _showAddressSelection(context),
-          ),
+          ],
           const Divider(height: 1, indent: 72),
           SwitchListTile(
             contentPadding: const EdgeInsets.symmetric(
@@ -376,42 +614,46 @@ class _AddressOption extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      leading: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? colorScheme.primaryContainer
-              : colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-          borderRadius: BorderRadius.circular(12),
+    return Card(
+      elevation: 0,
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        leading: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? colorScheme.primaryContainer
+                : colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            icon,
+            color: isSelected
+                ? colorScheme.primary
+                : colorScheme.onSurfaceVariant,
+            size: 20,
+          ),
         ),
-        child: Icon(
-          icon,
-          color: isSelected
-              ? colorScheme.primary
-              : colorScheme.onSurfaceVariant,
-          size: 20,
+        title: Text(
+          title,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            fontWeight: isSelected ? FontWeight.bold : null,
+            color: isSelected ? colorScheme.primary : null,
+          ),
         ),
+        subtitle: Text(
+          subtitle,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: isSelected
+                ? colorScheme.primary.withValues(alpha: 0.7)
+                : null,
+          ),
+        ),
+        trailing: isSelected
+            ? Icon(Symbols.check_circle, color: colorScheme.primary, size: 24)
+            : null,
+        onTap: onTap,
       ),
-      title: Text(
-        title,
-        style: theme.textTheme.bodyLarge?.copyWith(
-          fontWeight: isSelected ? FontWeight.bold : null,
-          color: isSelected ? colorScheme.primary : null,
-        ),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: isSelected ? colorScheme.primary.withValues(alpha: 0.7) : null,
-        ),
-      ),
-      trailing: isSelected
-          ? Icon(Symbols.check_circle, color: colorScheme.primary, size: 24)
-          : null,
-      onTap: onTap,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     );
   }
 }

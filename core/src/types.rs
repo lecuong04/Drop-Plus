@@ -1,8 +1,11 @@
 use std::{
     collections::HashMap,
+    str::FromStr,
     time::{SystemTime, UNIX_EPOCH},
 };
 
+use anyhow::Result;
+use iroh::{RelayMode, RelayUrl};
 use serde::{Deserialize, Serialize};
 
 pub enum SendResult {
@@ -72,5 +75,25 @@ pub struct BlobInfo {
 impl BlobInfo {
     pub fn new(name: String, size: u64) -> Self {
         Self { name, size }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub enum RelayModeOption {
+    Disabled,
+    N0,
+    Custom { url: String },
+}
+
+impl From<RelayModeOption> for Result<RelayMode> {
+    fn from(value: RelayModeOption) -> Self {
+        match value {
+            RelayModeOption::Disabled => Ok(RelayMode::Disabled),
+            RelayModeOption::N0 => Ok(if cfg!(debug_assertions) { RelayMode::Staging } else { RelayMode::Default }),
+            RelayModeOption::Custom { url } => {
+                let url = RelayUrl::from_str(&url)?;
+                Ok(RelayMode::Custom(url.into()))
+            }
+        }
     }
 }

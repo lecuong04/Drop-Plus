@@ -352,6 +352,302 @@ String toString() {
 
 
 /// @nodoc
+mixin _$RelayModeOption {
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RelayModeOption);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'RelayModeOption()';
+}
+
+
+}
+
+/// @nodoc
+class $RelayModeOptionCopyWith<$Res>  {
+$RelayModeOptionCopyWith(RelayModeOption _, $Res Function(RelayModeOption) __);
+}
+
+
+/// Adds pattern-matching-related methods to [RelayModeOption].
+extension RelayModeOptionPatterns on RelayModeOption {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( RelayModeOption_Disabled value)?  disabled,TResult Function( RelayModeOption_N0 value)?  n0,TResult Function( RelayModeOption_Custom value)?  custom,required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case RelayModeOption_Disabled() when disabled != null:
+return disabled(_that);case RelayModeOption_N0() when n0 != null:
+return n0(_that);case RelayModeOption_Custom() when custom != null:
+return custom(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( RelayModeOption_Disabled value)  disabled,required TResult Function( RelayModeOption_N0 value)  n0,required TResult Function( RelayModeOption_Custom value)  custom,}){
+final _that = this;
+switch (_that) {
+case RelayModeOption_Disabled():
+return disabled(_that);case RelayModeOption_N0():
+return n0(_that);case RelayModeOption_Custom():
+return custom(_that);}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( RelayModeOption_Disabled value)?  disabled,TResult? Function( RelayModeOption_N0 value)?  n0,TResult? Function( RelayModeOption_Custom value)?  custom,}){
+final _that = this;
+switch (_that) {
+case RelayModeOption_Disabled() when disabled != null:
+return disabled(_that);case RelayModeOption_N0() when n0 != null:
+return n0(_that);case RelayModeOption_Custom() when custom != null:
+return custom(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  disabled,TResult Function()?  n0,TResult Function( String url)?  custom,required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case RelayModeOption_Disabled() when disabled != null:
+return disabled();case RelayModeOption_N0() when n0 != null:
+return n0();case RelayModeOption_Custom() when custom != null:
+return custom(_that.url);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  disabled,required TResult Function()  n0,required TResult Function( String url)  custom,}) {final _that = this;
+switch (_that) {
+case RelayModeOption_Disabled():
+return disabled();case RelayModeOption_N0():
+return n0();case RelayModeOption_Custom():
+return custom(_that.url);}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  disabled,TResult? Function()?  n0,TResult? Function( String url)?  custom,}) {final _that = this;
+switch (_that) {
+case RelayModeOption_Disabled() when disabled != null:
+return disabled();case RelayModeOption_N0() when n0 != null:
+return n0();case RelayModeOption_Custom() when custom != null:
+return custom(_that.url);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class RelayModeOption_Disabled extends RelayModeOption {
+  const RelayModeOption_Disabled(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RelayModeOption_Disabled);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'RelayModeOption.disabled()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class RelayModeOption_N0 extends RelayModeOption {
+  const RelayModeOption_N0(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RelayModeOption_N0);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'RelayModeOption.n0()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class RelayModeOption_Custom extends RelayModeOption {
+  const RelayModeOption_Custom({required this.url}): super._();
+  
+
+ final  String url;
+
+/// Create a copy of RelayModeOption
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RelayModeOption_CustomCopyWith<RelayModeOption_Custom> get copyWith => _$RelayModeOption_CustomCopyWithImpl<RelayModeOption_Custom>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RelayModeOption_Custom&&(identical(other.url, url) || other.url == url));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,url);
+
+@override
+String toString() {
+  return 'RelayModeOption.custom(url: $url)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RelayModeOption_CustomCopyWith<$Res> implements $RelayModeOptionCopyWith<$Res> {
+  factory $RelayModeOption_CustomCopyWith(RelayModeOption_Custom value, $Res Function(RelayModeOption_Custom) _then) = _$RelayModeOption_CustomCopyWithImpl;
+@useResult
+$Res call({
+ String url
+});
+
+
+
+
+}
+/// @nodoc
+class _$RelayModeOption_CustomCopyWithImpl<$Res>
+    implements $RelayModeOption_CustomCopyWith<$Res> {
+  _$RelayModeOption_CustomCopyWithImpl(this._self, this._then);
+
+  final RelayModeOption_Custom _self;
+  final $Res Function(RelayModeOption_Custom) _then;
+
+/// Create a copy of RelayModeOption
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? url = null,}) {
+  return _then(RelayModeOption_Custom(
+url: null == url ? _self.url : url // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
 mixin _$SendResult {
 
 

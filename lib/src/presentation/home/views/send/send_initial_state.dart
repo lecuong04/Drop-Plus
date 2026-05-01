@@ -252,9 +252,12 @@ class _SendInitialStateWidgetState extends State<SendInitialStateWidget> {
               const Spacer(),
               FilledButton.icon(
                 onPressed: () {
+                  final state = context.read<SettingsCubit>().state;
                   context.read<SendCubit>().startSend(
                     _selectedPath.keys.toList(),
-                    addr: context.read<SettingsCubit>().state.addr,
+                    ipv4Addr: state.ipv4Addr,
+                    ipv6Addr: state.ipv6Addr,
+                    relay: state.relay,
                   );
                 },
                 style: FilledButton.styleFrom(

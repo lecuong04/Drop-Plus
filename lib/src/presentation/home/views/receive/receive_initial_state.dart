@@ -21,7 +21,7 @@ class ReceiveInitialStateWidget extends StatefulWidget {
 }
 
 class _ReceiveInitialStateWidgetState extends State<ReceiveInitialStateWidget> {
-  final bool _isSupportScanner = <TargetPlatform>{
+  final bool _isSupportScanner = {
     TargetPlatform.android,
     TargetPlatform.iOS,
   }.contains(defaultTargetPlatform);

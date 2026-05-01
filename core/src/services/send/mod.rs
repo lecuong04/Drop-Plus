@@ -2,7 +2,7 @@ pub mod utils;
 
 use std::{
     collections::HashMap,
-    net::IpAddr,
+    net::{SocketAddrV4, SocketAddrV6},
     path::PathBuf,
     str::FromStr,
     sync::{Arc, LazyLock},
@@ -15,13 +15,13 @@ use crate::{
     progresses::{MultiProgress, Phase, ProgressObserver, ProgressState},
     protos::SendServiceProtocol,
     services::send::utils::import,
-    types::BlobInfo,
+    types::{BlobInfo, RelayModeOption},
     utils::get_or_create_secret,
 };
 use crate::{protos::SendServiceMessage, types::SendResult};
 
 use anyhow::{anyhow, Result};
-use iroh::{endpoint::presets::Minimal, protocol::Router, Endpoint, RelayMap, RelayMode, RelayUrl};
+use iroh::{endpoint::presets::Minimal, protocol::Router, Endpoint, RelayMode};
 use iroh_blobs::{
     provider::events::{ConnectMode, EventMask, EventSender, ProviderMessage, RequestMode, RequestUpdate},
     store::fs::FsStore,
@@ -46,22 +46,29 @@ static TOKENS: LazyLock<scc::HashMap<String, CancellationToken>> = LazyLock::new
 #[derive(Debug)]
 pub(super) struct SendArgs {
     paths: Vec<PathBuf>,
-    addr: Option<IpAddr>,
+    ipv4_addr: Option<SocketAddrV4>,
+    ipv6_addr: Option<SocketAddrV6>,
     relay: RelayMode,
 }
 
 impl SendArgs {
-    pub fn new(paths: Vec<String>, addr: Option<String>, relay: Option<String>) -> Result<Self> {
-        let paths = paths.into_iter().filter_map(|p| PathBuf::from(p).canonicalize().ok()).collect::<Vec<PathBuf>>();
+    pub fn new(paths: Vec<String>, ipv4_addr: Option<String>, ipv6_addr: Option<String>, relay: RelayModeOption) -> Result<Self> {
+        let paths = paths
+            .into_iter()
+            .map(|p| PathBuf::from(p).canonicalize().map_err(|e| anyhow!("{}", e)))
+            .collect::<Result<Vec<PathBuf>>>()?;
         if paths.is_empty() {
             return Err(anyhow!("no valid paths provided"));
         }
-        let addr = addr.map(|a| IpAddr::from_str(&a)).transpose()?;
-        let relay = relay
-            .map(|u| RelayUrl::from_str(&u).map(|url| RelayMode::Custom(RelayMap::from_iter(vec![url]))))
-            .transpose()?
-            .unwrap_or(RelayMode::Disabled);
-        Ok(Self { paths, addr, relay })
+        let ipv4_addr = ipv4_addr.map(|a| SocketAddrV4::from_str(&a)).transpose()?;
+        let ipv6_addr = ipv6_addr.map(|a| SocketAddrV6::from_str(&a)).transpose()?;
+        let relay = <Result<RelayMode>>::from(relay)?;
+        Ok(Self {
+            paths,
+            ipv4_addr,
+            ipv6_addr,
+            relay,
+        })
     }
 }
 
@@ -275,14 +282,27 @@ async fn provide_progress(mp: Arc<MultiProgress>, mut recv: Receiver<ProviderMes
 }
 
 pub(super) async fn start(args: SendArgs, stream: StreamSink<Vec<ProgressState>>, result: &StreamSink<SendResult>) -> Result<()> {
-    let SendArgs { paths, addr, relay } = args;
+    let SendArgs {
+        paths,
+        ipv4_addr,
+        ipv6_addr,
+        relay,
+    } = args;
     let secret_key = get_or_create_secret()?;
     let mut builder = Endpoint::builder(Minimal)
         .alpns(vec![TRANSFER_ALPN.to_vec()])
         .secret_key(secret_key)
         .relay_mode(relay.clone());
-    if let Some(addr) = addr {
-        builder = builder.clear_ip_transports().bind_addr((addr, 0))?
+    if let (Some(ipv4_addr), Some(ipv6_addr)) = (ipv4_addr, ipv6_addr) {
+        builder = builder.clear_ip_transports();
+        builder = builder.bind_addr(ipv4_addr)?;
+        builder = builder.bind_addr(ipv6_addr)?;
+    } else if let Some(ipv4_addr) = ipv4_addr {
+        builder = builder.clear_ip_transports();
+        builder = builder.bind_addr(ipv4_addr)?;
+    } else if let Some(ipv6_addr) = ipv6_addr {
+        builder = builder.clear_ip_transports();
+        builder = builder.bind_addr(ipv6_addr)?;
     }
     let blobs_dir = tempdir_in(std::env::temp_dir())?;
     let mp = Arc::new(MultiProgress::new(Arc::new(stream)));

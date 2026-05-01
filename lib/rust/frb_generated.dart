@@ -106,8 +106,9 @@ abstract class RustLibApi extends BaseApi {
 
   Future<void> crateFfiSend({
     required List<String> paths,
-    String? addr,
-    String? relay,
+    String? ipv4Addr,
+    String? ipv6Addr,
+    required RelayModeOption relay,
     required RustStreamSink<List<ProgressState>> stream,
     required RustStreamSink<SendResult> result,
   });
@@ -404,8 +405,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @override
   Future<void> crateFfiSend({
     required List<String> paths,
-    String? addr,
-    String? relay,
+    String? ipv4Addr,
+    String? ipv6Addr,
+    required RelayModeOption relay,
     required RustStreamSink<List<ProgressState>> stream,
     required RustStreamSink<SendResult> result,
   }) {
@@ -414,8 +416,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_String(paths, serializer);
-          sse_encode_opt_String(addr, serializer);
-          sse_encode_opt_String(relay, serializer);
+          sse_encode_opt_String(ipv4Addr, serializer);
+          sse_encode_opt_String(ipv6Addr, serializer);
+          sse_encode_box_autoadd_relay_mode_option(relay, serializer);
           sse_encode_StreamSink_list_progress_state_Sse(stream, serializer);
           sse_encode_StreamSink_send_result_Sse(result, serializer);
           pdeCallFfi(
@@ -430,7 +433,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeErrorData: sse_decode_AnyhowException,
         ),
         constMeta: kCrateFfiSendConstMeta,
-        argValues: [paths, addr, relay, stream, result],
+        argValues: [paths, ipv4Addr, ipv6Addr, relay, stream, result],
         apiImpl: this,
       ),
     );
@@ -438,7 +441,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   TaskConstMeta get kCrateFfiSendConstMeta => const TaskConstMeta(
     debugName: "send(dart_style=send)",
-    argNames: ["paths", "addr", "relay", "stream", "result"],
+    argNames: ["paths", "ipv4Addr", "ipv6Addr", "relay", "stream", "result"],
   );
 
   @protected
@@ -508,6 +511,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   bool dco_decode_bool(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as bool;
+  }
+
+  @protected
+  RelayModeOption dco_decode_box_autoadd_relay_mode_option(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_relay_mode_option(raw);
   }
 
   @protected
@@ -648,6 +657,21 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  RelayModeOption dco_decode_relay_mode_option(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    switch (raw[0]) {
+      case 0:
+        return const RelayModeOption_Disabled();
+      case 1:
+        return const RelayModeOption_N0();
+      case 2:
+        return RelayModeOption_Custom(url: dco_decode_String(raw[1]));
+      default:
+        throw Exception("unreachable");
+    }
+  }
+
+  @protected
   SendResult dco_decode_send_result(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     switch (raw[0]) {
@@ -747,6 +771,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   bool sse_decode_bool(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getUint8() != 0;
+  }
+
+  @protected
+  RelayModeOption sse_decode_box_autoadd_relay_mode_option(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_relay_mode_option(deserializer));
   }
 
   @protected
@@ -941,6 +973,24 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  RelayModeOption sse_decode_relay_mode_option(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    var tag_ = sse_decode_i_32(deserializer);
+    switch (tag_) {
+      case 0:
+        return const RelayModeOption_Disabled();
+      case 1:
+        return const RelayModeOption_N0();
+      case 2:
+        var var_url = sse_decode_String(deserializer);
+        return RelayModeOption_Custom(url: var_url);
+      default:
+        throw UnimplementedError("");
+    }
+  }
+
+  @protected
   SendResult sse_decode_send_result(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
@@ -1086,6 +1136,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_bool(bool self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putUint8(self ? 1 : 0);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_relay_mode_option(
+    RelayModeOption self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_relay_mode_option(self, serializer);
   }
 
   @protected
@@ -1257,6 +1316,23 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.$1, serializer);
     sse_encode_String(self.$2, serializer);
+  }
+
+  @protected
+  void sse_encode_relay_mode_option(
+    RelayModeOption self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    switch (self) {
+      case RelayModeOption_Disabled():
+        sse_encode_i_32(0, serializer);
+      case RelayModeOption_N0():
+        sse_encode_i_32(1, serializer);
+      case RelayModeOption_Custom(url: final url):
+        sse_encode_i_32(2, serializer);
+        sse_encode_String(url, serializer);
+    }
   }
 
   @protected
