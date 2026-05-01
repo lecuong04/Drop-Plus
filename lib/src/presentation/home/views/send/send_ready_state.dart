@@ -14,7 +14,7 @@ import "../../../../cubits/send_cubit.dart";
 
 class SendReadyStateWidget extends StatelessWidget {
   final List<ProgressState> progresses;
-  final (List<int>, String) ticket;
+  final String ticket;
   final BigInt size;
 
   const SendReadyStateWidget({
@@ -39,7 +39,7 @@ class SendReadyStateWidget extends StatelessWidget {
             const SizedBox(height: 32),
             _QrCodeSection(ticket: ticket),
             const SizedBox(height: 32),
-            _TransferCodeSection(ticketCode: ticket.$2),
+            _TransferCodeSection(ticketCode: ticket),
             if (progresses.any((p) => p.phase is Phase_Uploading))
               _ActiveTransfersSection(progresses: progresses, size: size),
             const SizedBox(height: 24),
@@ -260,7 +260,7 @@ class _HeaderSection extends StatelessWidget {
 }
 
 class _QrCodeSection extends StatelessWidget {
-  final (List<int>, String) ticket;
+  final String ticket;
 
   const _QrCodeSection({required this.ticket});
 
@@ -367,7 +367,7 @@ class _QrCodeSection extends StatelessWidget {
   Widget _qrView(ThemeData theme, {Key? key}) {
     return PrettyQrView.data(
       key: key,
-      data: ticket.$2,
+      data: ticket,
       decoration: const PrettyQrDecoration(
         background: Colors.white,
         shape: PrettyQrSmoothSymbol(roundFactor: 0.8),
@@ -377,10 +377,7 @@ class _QrCodeSection extends StatelessWidget {
 
   Future<ui.Image> _toImage() async {
     final qrImage = QrImage(
-      QrCode.fromUint8List(
-        data: Uint8List.fromList(ticket.$1),
-        errorCorrectLevel: QrErrorCorrectLevel.M,
-      ),
+      QrCode.fromData(data: ticket, errorCorrectLevel: QrErrorCorrectLevel.M),
     );
     return await qrImage.toImage(
       size: 512,

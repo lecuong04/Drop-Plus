@@ -14,13 +14,13 @@ class TransferService {
     await ffi.send(paths: paths, addr: addr, stream: stream, result: result);
   }
 
-  Future<void> cancelSend(List<int> ticket) async {
+  Future<void> cancelSend(String ticket) async {
     await ffi.cancelSend(ticket: ticket);
   }
 
   Future<void> receive({
     String? relay,
-    required List<int> ticket,
+    required String ticket,
     required String downloadDir,
     required RustStreamSink<List<ProgressState>> stream,
     required RustStreamSink<ReceiveResult> result,
@@ -34,15 +34,15 @@ class TransferService {
     );
   }
 
-  Future<void> acceptReceive(List<int> ticket) async {
+  Future<void> acceptReceive(String ticket) async {
     await ffi.acceptReceive(ticket: ticket);
   }
 
-  Future<void> rejectReceive(List<int> ticket) async {
+  Future<void> rejectReceive(String ticket) async {
     await ffi.rejectReceive(ticket: ticket);
   }
 
-  Future<void> cancelReceive(List<int> ticket) async {
+  Future<void> cancelReceive(String ticket) async {
     await ffi.cancelReceive(ticket: ticket);
   }
 }

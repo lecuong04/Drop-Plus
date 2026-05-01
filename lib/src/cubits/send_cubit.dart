@@ -1,5 +1,4 @@
 import "dart:async";
-import "dart:convert";
 
 import "../../rust/progresses.dart";
 import "../../rust/types.dart";
@@ -23,25 +22,23 @@ final class SendImporting extends SendState {
 }
 
 final class SendReady extends SendState {
-  late final (List<int>, String) ticket;
+  final String ticket;
   final List<ProgressState> progresses;
   final BigInt size;
 
   SendReady({
-    required List<int> ticket,
+    required this.ticket,
     required this.size,
     this.progresses = const [],
-  }) {
-    this.ticket = (ticket, base64Encode(ticket));
-  }
+  });
 
   SendReady copyWith({
     BigInt? size,
-    List<int>? ticket,
+    String? ticket,
     List<ProgressState>? progresses,
   }) {
     return SendReady(
-      ticket: ticket ?? this.ticket.$1,
+      ticket: ticket ?? this.ticket,
       size: size ?? this.size,
       progresses: progresses ?? this.progresses,
     );
@@ -98,7 +95,7 @@ class SendCubit extends Cubit<SendState> {
     final curState = state;
     if (curState is SendReady) {
       try {
-        await _service.cancelSend(curState.ticket.$1);
+        await _service.cancelSend(curState.ticket);
         emit(const SendInitial());
       } catch (_) {
         emit(const SendInitial(isError: true));

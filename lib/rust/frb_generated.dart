@@ -80,11 +80,11 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 }
 
 abstract class RustLibApi extends BaseApi {
-  Future<void> crateFfiAcceptReceive({required List<int> ticket});
+  Future<void> crateFfiAcceptReceive({required String ticket});
 
-  Future<void> crateFfiCancelReceive({required List<int> ticket});
+  Future<void> crateFfiCancelReceive({required String ticket});
 
-  Future<void> crateFfiCancelSend({required List<int> ticket});
+  Future<void> crateFfiCancelSend({required String ticket});
 
   Future<Map<String, String>> crateFfiGetAddrs();
 
@@ -95,14 +95,14 @@ abstract class RustLibApi extends BaseApi {
   Future<Uint8List> crateFfiQrReader({required List<int> image});
 
   Future<void> crateFfiReceive({
-    required List<int> ticket,
+    required String ticket,
     required String downloadDir,
     String? relay,
     required RustStreamSink<List<ProgressState>> stream,
     required RustStreamSink<ReceiveResult> result,
   });
 
-  Future<void> crateFfiRejectReceive({required List<int> ticket});
+  Future<void> crateFfiRejectReceive({required String ticket});
 
   Future<void> crateFfiSend({
     required List<String> paths,
@@ -122,12 +122,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   });
 
   @override
-  Future<void> crateFfiAcceptReceive({required List<int> ticket}) {
+  Future<void> crateFfiAcceptReceive({required String ticket}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_list_prim_u_8_loose(ticket, serializer);
+          sse_encode_String(ticket, serializer);
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
@@ -152,12 +152,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   );
 
   @override
-  Future<void> crateFfiCancelReceive({required List<int> ticket}) {
+  Future<void> crateFfiCancelReceive({required String ticket}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_list_prim_u_8_loose(ticket, serializer);
+          sse_encode_String(ticket, serializer);
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
@@ -182,12 +182,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   );
 
   @override
-  Future<void> crateFfiCancelSend({required List<int> ticket}) {
+  Future<void> crateFfiCancelSend({required String ticket}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_list_prim_u_8_loose(ticket, serializer);
+          sse_encode_String(ticket, serializer);
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
@@ -333,7 +333,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @override
   Future<void> crateFfiReceive({
-    required List<int> ticket,
+    required String ticket,
     required String downloadDir,
     String? relay,
     required RustStreamSink<List<ProgressState>> stream,
@@ -343,7 +343,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_list_prim_u_8_loose(ticket, serializer);
+          sse_encode_String(ticket, serializer);
           sse_encode_String(downloadDir, serializer);
           sse_encode_opt_String(relay, serializer);
           sse_encode_StreamSink_list_progress_state_Sse(stream, serializer);
@@ -372,12 +372,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   );
 
   @override
-  Future<void> crateFfiRejectReceive({required List<int> ticket}) {
+  Future<void> crateFfiRejectReceive({required String ticket}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_list_prim_u_8_loose(ticket, serializer);
+          sse_encode_String(ticket, serializer);
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
@@ -653,7 +653,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     switch (raw[0]) {
       case 0:
         return SendResult_Ok(
-          ticket: dco_decode_list_prim_u_8_strict(raw[1]),
+          ticket: dco_decode_String(raw[1]),
           size: dco_decode_u_64(raw[2]),
         );
       case 1:
@@ -947,7 +947,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var tag_ = sse_decode_i_32(deserializer);
     switch (tag_) {
       case 0:
-        var var_ticket = sse_decode_list_prim_u_8_strict(deserializer);
+        var var_ticket = sse_decode_String(deserializer);
         var var_size = sse_decode_u_64(deserializer);
         return SendResult_Ok(ticket: var_ticket, size: var_size);
       case 1:
@@ -1265,7 +1265,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     switch (self) {
       case SendResult_Ok(ticket: final ticket, size: final size):
         sse_encode_i_32(0, serializer);
-        sse_encode_list_prim_u_8_strict(ticket, serializer);
+        sse_encode_String(ticket, serializer);
         sse_encode_u_64(size, serializer);
       case SendResult_Err():
         sse_encode_i_32(1, serializer);

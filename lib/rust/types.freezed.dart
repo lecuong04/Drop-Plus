@@ -459,7 +459,7 @@ return err(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( Uint8List ticket,  BigInt size)?  ok,TResult Function()?  err,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String ticket,  BigInt size)?  ok,TResult Function()?  err,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case SendResult_Ok() when ok != null:
 return ok(_that.ticket,_that.size);case SendResult_Err() when err != null:
@@ -481,7 +481,7 @@ return err();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( Uint8List ticket,  BigInt size)  ok,required TResult Function()  err,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String ticket,  BigInt size)  ok,required TResult Function()  err,}) {final _that = this;
 switch (_that) {
 case SendResult_Ok():
 return ok(_that.ticket,_that.size);case SendResult_Err():
@@ -499,7 +499,7 @@ return err();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( Uint8List ticket,  BigInt size)?  ok,TResult? Function()?  err,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String ticket,  BigInt size)?  ok,TResult? Function()?  err,}) {final _that = this;
 switch (_that) {
 case SendResult_Ok() when ok != null:
 return ok(_that.ticket,_that.size);case SendResult_Err() when err != null:
@@ -518,7 +518,7 @@ class SendResult_Ok extends SendResult {
   const SendResult_Ok({required this.ticket, required this.size}): super._();
   
 
- final  Uint8List ticket;
+ final  String ticket;
  final  BigInt size;
 
 /// Create a copy of SendResult
@@ -531,12 +531,12 @@ $SendResult_OkCopyWith<SendResult_Ok> get copyWith => _$SendResult_OkCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SendResult_Ok&&const DeepCollectionEquality().equals(other.ticket, ticket)&&(identical(other.size, size) || other.size == size));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SendResult_Ok&&(identical(other.ticket, ticket) || other.ticket == ticket)&&(identical(other.size, size) || other.size == size));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(ticket),size);
+int get hashCode => Object.hash(runtimeType,ticket,size);
 
 @override
 String toString() {
@@ -551,7 +551,7 @@ abstract mixin class $SendResult_OkCopyWith<$Res> implements $SendResultCopyWith
   factory $SendResult_OkCopyWith(SendResult_Ok value, $Res Function(SendResult_Ok) _then) = _$SendResult_OkCopyWithImpl;
 @useResult
 $Res call({
- Uint8List ticket, BigInt size
+ String ticket, BigInt size
 });
 
 
@@ -571,7 +571,7 @@ class _$SendResult_OkCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') $Res call({Object? ticket = null,Object? size = null,}) {
   return _then(SendResult_Ok(
 ticket: null == ticket ? _self.ticket : ticket // ignore: cast_nullable_to_non_nullable
-as Uint8List,size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
+as String,size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
 as BigInt,
   ));
 }

@@ -72,9 +72,7 @@ sealed class ReceiveResult with _$ReceiveResult {
 sealed class SendResult with _$SendResult {
   const SendResult._();
 
-  const factory SendResult.ok({
-    required Uint8List ticket,
-    required BigInt size,
-  }) = SendResult_Ok;
+  const factory SendResult.ok({required String ticket, required BigInt size}) =
+      SendResult_Ok;
   const factory SendResult.err() = SendResult_Err;
 }

@@ -3,20 +3,16 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
-use miniz_oxide::deflate::compress_to_vec;
 use serde::{Deserialize, Serialize};
 
 pub enum SendResult {
-    Ok { ticket: Vec<u8>, size: u64 },
+    Ok { ticket: String, size: u64 },
     Err,
 }
 
 impl SendResult {
     pub fn ok(ticket: &String, size: u64) -> Self {
-        Self::Ok {
-            ticket: compress_to_vec(ticket.as_bytes(), 10),
-            size,
-        }
+        Self::Ok { ticket: ticket.clone(), size }
     }
 
     pub fn err() -> Self {

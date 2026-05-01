@@ -93,27 +93,27 @@ pub fn send(paths: Vec<String>, addr: Option<String>, relay: Option<String>, str
 }
 
 #[frb(name = "cancelSend")]
-pub fn cancel_send(ticket: Vec<u8>) -> Result<()> {
+pub fn cancel_send(ticket: String) -> Result<()> {
     services::cancel_send(ticket)
 }
 
 #[frb(name = "receive")]
-pub fn receive(ticket: Vec<u8>, download_dir: String, relay: Option<String>, stream: StreamSink<Vec<ProgressState>>, result: StreamSink<ReceiveResult>) -> Result<()> {
+pub fn receive(ticket: String, download_dir: String, relay: Option<String>, stream: StreamSink<Vec<ProgressState>>, result: StreamSink<ReceiveResult>) -> Result<()> {
     services::receive(ticket, download_dir, relay, stream, result)
 }
 
 #[frb(name = "acceptReceive")]
-pub fn accept_receive(ticket: Vec<u8>) -> Result<()> {
+pub fn accept_receive(ticket: String) -> Result<()> {
     services::accept_receive(ticket)
 }
 
 #[frb(name = "rejectReceive")]
-pub fn reject_receive(ticket: Vec<u8>) -> Result<()> {
+pub fn reject_receive(ticket: String) -> Result<()> {
     services::reject_receive(ticket)
 }
 
 #[frb(name = "cancelReceive")]
-pub fn cancel_receive(ticket: Vec<u8>) -> Result<()> {
+pub fn cancel_receive(ticket: String) -> Result<()> {
     services::cancel_receive(ticket)
 }
 

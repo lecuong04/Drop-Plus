@@ -16,7 +16,7 @@ use crate::{
     protos::SendServiceProtocol,
     services::send::utils::import,
     types::BlobInfo,
-    utils::{decompress_ticket, get_or_create_secret},
+    utils::get_or_create_secret,
 };
 use crate::{protos::SendServiceMessage, types::SendResult};
 
@@ -307,9 +307,9 @@ pub(super) async fn start(args: SendArgs, stream: StreamSink<Vec<ProgressState>>
     Ok(())
 }
 
-pub(super) fn cancel(ticket: Vec<u8>) -> Result<()> {
+pub(super) fn cancel(ticket: String) -> Result<()> {
     let mut tokens = TOKENS.lock();
-    if let Some(cancel) = tokens.remove(&decompress_ticket(ticket)?) {
+    if let Some(cancel) = tokens.remove(&ticket) {
         cancel.cancel();
     } else {
         return Err(anyhow!("token not found"));

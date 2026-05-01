@@ -1,5 +1,4 @@
 import "dart:async";
-import "dart:convert";
 
 import "package:flutter_bloc/flutter_bloc.dart";
 import "package:flutter_rust_bridge/flutter_rust_bridge.dart";
@@ -18,14 +17,14 @@ final class ReceiveInitial extends ReceiveState {
 }
 
 final class ReceiveConnecting extends ReceiveState {
-  final List<int> ticket;
+  final String ticket;
 
   const ReceiveConnecting(this.ticket);
 }
 
 final class ReceivePending extends ReceiveState {
   final bool isWaiting;
-  final List<int> ticket;
+  final String ticket;
   final List<BlobInfo> files;
 
   const ReceivePending({
@@ -40,7 +39,7 @@ final class ReceiveValidating extends ReceiveState {
 }
 
 final class ReceiveTransferring extends ReceiveState {
-  final List<int> ticket;
+  final String ticket;
   final List<ProgressState> progresses;
 
   const ReceiveTransferring({required this.progresses, required this.ticket});
@@ -64,7 +63,6 @@ class ReceiveCubit extends Cubit<ReceiveState> {
   ReceiveCubit(this._service) : super(const ReceiveInitial());
 
   Future<void> startReceive(String downloadDir, String ticket) async {
-    final data = base64Decode(ticket);
     final progressSink = RustStreamSink<List<ProgressState>>();
     final resultSink = RustStreamSink<ReceiveResult>();
 
@@ -73,7 +71,7 @@ class ReceiveCubit extends Cubit<ReceiveState> {
 
     _service
         .receive(
-          ticket: data,
+          ticket: ticket,
           downloadDir: downloadDir,
           stream: progressSink,
           result: resultSink,
@@ -84,13 +82,13 @@ class ReceiveCubit extends Cubit<ReceiveState> {
         });
     progressSub = progressSink.stream.listen((progresses) {
       if (progresses.any((e) => e.phase is Phase_Pending)) {
-        emit(ReceivePending(ticket: data, isWaiting: true));
+        emit(ReceivePending(ticket: ticket, isWaiting: true));
       } else if (progresses.any((e) => e.phase is Phase_Connecting)) {
-        emit(ReceiveConnecting(data));
+        emit(ReceiveConnecting(ticket));
       } else if (progresses.any((e) => e.phase is Phase_Validating)) {
         emit(const ReceiveValidating());
       } else if (progresses.any((e) => e.phase is Phase_Downloading)) {
-        emit(ReceiveTransferring(progresses: progresses, ticket: data));
+        emit(ReceiveTransferring(progresses: progresses, ticket: ticket));
       } else if (progresses.any((e) => e.phase is Phase_Exporting)) {
         emit(ReceiveExporting(progresses));
       }
@@ -99,7 +97,7 @@ class ReceiveCubit extends Cubit<ReceiveState> {
       if (result is ReceiveResult_Ok) {
         emit(ReceiveSuccess(result));
       } else if (result is ReceiveResult_Pending) {
-        emit(ReceivePending(files: result.files, ticket: data));
+        emit(ReceivePending(files: result.files, ticket: ticket));
       } else {
         emit(const ReceiveInitial(isError: true));
       }

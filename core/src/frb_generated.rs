@@ -61,7 +61,7 @@ fn wire__crate__ffi__accept_receive_impl(
         move || {
             let message = unsafe { flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(ptr_, rust_vec_len_, data_len_) };
             let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_ticket = <Vec<u8>>::sse_decode(&mut deserializer);
+            let api_ticket = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>((move || {
@@ -87,7 +87,7 @@ fn wire__crate__ffi__cancel_receive_impl(
         move || {
             let message = unsafe { flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(ptr_, rust_vec_len_, data_len_) };
             let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_ticket = <Vec<u8>>::sse_decode(&mut deserializer);
+            let api_ticket = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>((move || {
@@ -113,7 +113,7 @@ fn wire__crate__ffi__cancel_send_impl(
         move || {
             let message = unsafe { flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(ptr_, rust_vec_len_, data_len_) };
             let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_ticket = <Vec<u8>>::sse_decode(&mut deserializer);
+            let api_ticket = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>((move || {
@@ -248,7 +248,7 @@ fn wire__crate__ffi__receive_impl(
         move || {
             let message = unsafe { flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(ptr_, rust_vec_len_, data_len_) };
             let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_ticket = <Vec<u8>>::sse_decode(&mut deserializer);
+            let api_ticket = <String>::sse_decode(&mut deserializer);
             let api_download_dir = <String>::sse_decode(&mut deserializer);
             let api_relay = <Option<String>>::sse_decode(&mut deserializer);
             let api_stream = <StreamSink<Vec<crate::progresses::ProgressState>, flutter_rust_bridge::for_generated::SseCodec>>::sse_decode(&mut deserializer);
@@ -278,7 +278,7 @@ fn wire__crate__ffi__reject_receive_impl(
         move || {
             let message = unsafe { flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(ptr_, rust_vec_len_, data_len_) };
             let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_ticket = <Vec<u8>>::sse_decode(&mut deserializer);
+            let api_ticket = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>((move || {
@@ -592,7 +592,7 @@ impl SseDecode for crate::types::SendResult {
         let mut tag_ = <i32>::sse_decode(deserializer);
         match tag_ {
             0 => {
-                let mut var_ticket = <Vec<u8>>::sse_decode(deserializer);
+                let mut var_ticket = <String>::sse_decode(deserializer);
                 let mut var_size = <u64>::sse_decode(deserializer);
                 return crate::types::SendResult::Ok {
                     ticket: var_ticket,
@@ -1036,7 +1036,7 @@ impl SseEncode for crate::types::SendResult {
         match self {
             crate::types::SendResult::Ok { ticket, size } => {
                 <i32>::sse_encode(0, serializer);
-                <Vec<u8>>::sse_encode(ticket, serializer);
+                <String>::sse_encode(ticket, serializer);
                 <u64>::sse_encode(size, serializer);
             }
             crate::types::SendResult::Err => {

@@ -37,12 +37,12 @@ pub fn send(paths: Vec<String>, addr: Option<String>, relay: Option<String>, str
 }
 
 #[instrument(err)]
-pub fn cancel_send(ticket: Vec<u8>) -> Result<()> {
+pub fn cancel_send(ticket: String) -> Result<()> {
     self::send::cancel(ticket)
 }
 
 #[instrument(err, skip(stream, result))]
-pub fn receive(ticket: Vec<u8>, download_dir: String, relay: Option<String>, stream: StreamSink<Vec<ProgressState>>, result: StreamSink<ReceiveResult>) -> Result<()> {
+pub fn receive(ticket: String, download_dir: String, relay: Option<String>, stream: StreamSink<Vec<ProgressState>>, result: StreamSink<ReceiveResult>) -> Result<()> {
     let handle = RUNTIME.handle().clone();
     block_in_place(|| {
         handle
@@ -57,17 +57,17 @@ pub fn receive(ticket: Vec<u8>, download_dir: String, relay: Option<String>, str
 }
 
 #[instrument(err)]
-pub fn accept_receive(ticket: Vec<u8>) -> Result<()> {
+pub fn accept_receive(ticket: String) -> Result<()> {
     self::receive::accept(ticket)
 }
 
 #[instrument(err)]
-pub fn reject_receive(ticket: Vec<u8>) -> Result<()> {
+pub fn reject_receive(ticket: String) -> Result<()> {
     self::receive::reject(ticket)
 }
 
 #[instrument(err)]
-pub fn cancel_receive(ticket: Vec<u8>) -> Result<()> {
+pub fn cancel_receive(ticket: String) -> Result<()> {
     self::receive::cancel(ticket)
 }
 

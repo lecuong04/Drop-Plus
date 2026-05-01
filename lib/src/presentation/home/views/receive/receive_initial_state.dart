@@ -104,7 +104,7 @@ class _ReceiveInitialStateWidgetState extends State<ReceiveInitialStateWidget> {
             final qr = (await context.read<OtherService>().qrReader(
               await res.xFiles.first.readAsBytes(),
             ));
-            setState(() => _ticketController.text = base64Encode(qr));
+            setState(() => _ticketController.text = utf8.decode(qr));
           } catch (e) {
             if (mounted) {
               context.showInfoSnackBar("No QR code found in the image");

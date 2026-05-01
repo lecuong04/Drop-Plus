@@ -28,11 +28,11 @@ Future<void> send({
   result: result,
 );
 
-Future<void> cancelSend({required List<int> ticket}) =>
+Future<void> cancelSend({required String ticket}) =>
     RustLib.instance.api.crateFfiCancelSend(ticket: ticket);
 
 Future<void> receive({
-  required List<int> ticket,
+  required String ticket,
   required String downloadDir,
   String? relay,
   required RustStreamSink<List<ProgressState>> stream,
@@ -45,13 +45,13 @@ Future<void> receive({
   result: result,
 );
 
-Future<void> acceptReceive({required List<int> ticket}) =>
+Future<void> acceptReceive({required String ticket}) =>
     RustLib.instance.api.crateFfiAcceptReceive(ticket: ticket);
 
-Future<void> rejectReceive({required List<int> ticket}) =>
+Future<void> rejectReceive({required String ticket}) =>
     RustLib.instance.api.crateFfiRejectReceive(ticket: ticket);
 
-Future<void> cancelReceive({required List<int> ticket}) =>
+Future<void> cancelReceive({required String ticket}) =>
     RustLib.instance.api.crateFfiCancelReceive(ticket: ticket);
 
 Future<Uint8List> qrReader({required List<int> image}) =>

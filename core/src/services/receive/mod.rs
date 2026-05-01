@@ -35,7 +35,7 @@ use crate::{
     protos::{ListFiles, SendServiceProtocol},
     services::receive::utils::export,
     types::ReceiveResult,
-    utils::{decompress_ticket, get_or_create_secret},
+    utils::get_or_create_secret,
 };
 
 static TOKENS: LazyLock<Mutex<HashMap<String, CancellationToken>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
@@ -50,9 +50,8 @@ pub(super) struct ReceiveArgs {
 }
 
 impl ReceiveArgs {
-    pub fn new(ticket: Vec<u8>, download_dir: String, relay: Option<String>) -> Result<Self> {
-        let raw = decompress_ticket(ticket)?;
-        let ticket = BlobTicket::from_str(&raw)?;
+    pub fn new(ticket: String, download_dir: String, relay: Option<String>) -> Result<Self> {
+        let ticket = BlobTicket::from_str(&ticket)?;
         let download_dir = PathBuf::from_str(&download_dir)?;
         let relay = relay
             .map(|u| RelayUrl::from_str(&u).map(|url| RelayMode::Custom(RelayMap::from_iter(vec![url]))))
@@ -192,10 +191,9 @@ pub(super) async fn start(args: ReceiveArgs, stream: StreamSink<Vec<ProgressStat
     Ok(())
 }
 
-pub(super) fn cancel(ticket: Vec<u8>) -> Result<()> {
+pub(super) fn cancel(ticket: String) -> Result<()> {
     let mut tokens = TOKENS.lock();
-    let raw = decompress_ticket(ticket)?;
-    if let Some(cancel) = tokens.remove(&raw) {
+    if let Some(cancel) = tokens.remove(&ticket) {
         cancel.cancel();
     } else {
         return Err(anyhow!("token not found"));
@@ -203,12 +201,10 @@ pub(super) fn cancel(ticket: Vec<u8>) -> Result<()> {
     Ok(())
 }
 
-pub(super) fn reject(ticket: Vec<u8>) -> Result<()> {
-    let raw = decompress_ticket(ticket)?;
-    BOARDCAST.send((raw, false)).map(|_| ()).map_err(|e| anyhow!("{}", e))
+pub(super) fn reject(ticket: String) -> Result<()> {
+    BOARDCAST.send((ticket, false)).map(|_| ()).map_err(|e| anyhow!("{}", e))
 }
 
-pub(super) fn accept(ticket: Vec<u8>) -> Result<()> {
-    let raw = decompress_ticket(ticket)?;
-    BOARDCAST.send((raw, true)).map(|_| ()).map_err(|e| anyhow!("{}", e))
+pub(super) fn accept(ticket: String) -> Result<()> {
+    BOARDCAST.send((ticket, true)).map(|_| ()).map_err(|e| anyhow!("{}", e))
 }
