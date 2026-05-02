@@ -5,9 +5,8 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Drop Plus (Flutter Windows)",
+            "name": "Drop Plus (Flutter)",
             "program": "lib/main.dart",
-            "deviceId": "windows",
             "request": "launch",
             "type": "dart",
             "args": [

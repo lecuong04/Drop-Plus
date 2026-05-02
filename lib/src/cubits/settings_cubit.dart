@@ -119,28 +119,9 @@ class SettingsCubit extends Cubit<SettingsState> {
         ),
       );
     });
-    _subscription = Connectivity().onConnectivityChanged.listen((e) async {
-      final availableAddrs = await _service.getAddrs();
-      var curState = state;
-      if (state.ipv4Addr != null &&
-          !availableAddrs.keys.any((e) => e == state.ipv4Addr)) {
-        onConnectivityLost?.call(state.ipv4Addr!);
-        curState = curState.removeAddrV4();
-      }
-      if (state.ipv6Addr != null &&
-          !availableAddrs.keys.any((e) => e == state.ipv6Addr)) {
-        onConnectivityLost?.call(state.ipv6Addr!);
-        curState = curState.removeAddrV6();
-      }
-      emit(
-        curState.copyWith(
-          availableAddrs: Map.fromEntries(
-            availableAddrs.entries.toList()
-              ..sort((a, b) => a.value.compareTo(b.value)),
-          ),
-        ),
-      );
-    });
+    _subscription = Connectivity().onConnectivityChanged.listen(
+      (e) => refreshAddrs(),
+    );
   }
 
   @override
@@ -183,5 +164,28 @@ class SettingsCubit extends Cubit<SettingsState> {
 
   void clearAddrs() {
     emit(state.clearAddrs());
+  }
+
+  void refreshAddrs() async {
+    final availableAddrs = await _service.getAddrs();
+    var curState = state;
+    if (state.ipv4Addr != null &&
+        !availableAddrs.keys.any((e) => e == state.ipv4Addr)) {
+      onConnectivityLost?.call(state.ipv4Addr!);
+      curState = curState.removeAddrV4();
+    }
+    if (state.ipv6Addr != null &&
+        !availableAddrs.keys.any((e) => e == state.ipv6Addr)) {
+      onConnectivityLost?.call(state.ipv6Addr!);
+      curState = curState.removeAddrV6();
+    }
+    emit(
+      curState.copyWith(
+        availableAddrs: Map.fromEntries(
+          availableAddrs.entries.toList()
+            ..sort((a, b) => a.value.compareTo(b.value)),
+        ),
+      ),
+    );
   }
 }

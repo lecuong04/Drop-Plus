@@ -5,6 +5,7 @@ pub mod send;
 use std::{collections::HashMap, sync::LazyLock};
 
 use anyhow::Result;
+use iroh::SecretKey;
 use tokio::{runtime::Runtime, task::block_in_place};
 use tracing::instrument;
 
@@ -17,9 +18,11 @@ use crate::{
         send::SendArgs,
     },
     types::{ReceiveResult, RelayModeOption, SendResult},
+    utils::get_or_create_secret,
 };
 
 static RUNTIME: LazyLock<Runtime> = LazyLock::new(|| Runtime::new().expect("failed to initialize tokio runtime"));
+static SECRET_KEY: LazyLock<SecretKey> = LazyLock::new(|| get_or_create_secret().expect("failed to initialize secret key"));
 
 #[instrument(err, skip(stream, result))]
 pub fn send(
@@ -35,7 +38,7 @@ pub fn send(
         handle
             .block_on(async {
                 let args = SendArgs::new(paths, ipv4_addr, ipv6_addr, relay)?;
-                self::send::start(args, stream, &result).await
+                self::send::start(args, SECRET_KEY.clone(), stream, &result).await
             })
             .inspect_err(|_| {
                 let _ = result.add(SendResult::err());
@@ -55,7 +58,7 @@ pub fn receive(ticket: String, download_dir: String, relay: Option<String>, stre
         handle
             .block_on(async {
                 let args = ReceiveArgs::new(ticket, download_dir, relay)?;
-                self::receive::start(args, stream, &result).await
+                self::receive::start(args, SECRET_KEY.clone(), stream, &result).await
             })
             .inspect_err(|_| {
                 let _ = result.add(ReceiveResult::err());

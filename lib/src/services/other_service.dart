@@ -1,4 +1,4 @@
-import "dart:typed_data";
+import "package:flutter/foundation.dart";
 
 import "../../rust/ffi.dart" as ffi;
 
@@ -8,6 +8,14 @@ class OtherService {
   }
 
   Future<Map<String, String>> getAddrs() async {
-    return await ffi.getAddrs();
+    final bool isSupportNetwork = {
+      TargetPlatform.windows,
+      TargetPlatform.linux,
+      TargetPlatform.macOS,
+    }.contains(defaultTargetPlatform);
+    if (isSupportNetwork) {
+      return await ffi.getAddrs();
+    }
+    return {};
   }
 }

@@ -16,12 +16,11 @@ use crate::{
     protos::SendServiceProtocol,
     services::send::utils::import,
     types::{BlobInfo, RelayModeOption},
-    utils::get_or_create_secret,
 };
 use crate::{protos::SendServiceMessage, types::SendResult};
 
 use anyhow::{anyhow, Result};
-use iroh::{endpoint::presets::Minimal, protocol::Router, Endpoint, RelayMode, TransportAddr};
+use iroh::{endpoint::presets::Minimal, protocol::Router, Endpoint, RelayMode, SecretKey, TransportAddr};
 use iroh_blobs::{
     provider::events::{ConnectMode, EventMask, EventSender, ProviderMessage, RequestMode, RequestUpdate},
     store::fs::FsStore,
@@ -101,7 +100,7 @@ fn tempdir_in(dir: PathBuf) -> Result<TempDir> {
     Ok(dir)
 }
 
-async fn actor(mut rx: tokio::sync::mpsc::Receiver<SendServiceMessage>, files: Vec<BlobInfo>) {
+async fn actor(mut rx: Receiver<SendServiceMessage>, files: Vec<BlobInfo>) {
     while let Some(msg) = rx.recv().await {
         match msg {
             SendServiceMessage::ListFiles(msg) => {
@@ -280,14 +279,13 @@ async fn provide_progress(mp: Arc<MultiProgress>, mut recv: Receiver<ProviderMes
     Ok(())
 }
 
-pub(super) async fn start(args: SendArgs, stream: StreamSink<Vec<ProgressState>>, result: &StreamSink<SendResult>) -> Result<()> {
+pub(super) async fn start(args: SendArgs, secret_key: SecretKey, stream: StreamSink<Vec<ProgressState>>, result: &StreamSink<SendResult>) -> Result<()> {
     let SendArgs {
         paths,
         ipv4_addr,
         ipv6_addr,
         relay,
     } = args;
-    let secret_key = get_or_create_secret()?;
     let mut builder = Endpoint::builder(Minimal)
         .alpns(vec![TRANSFER_ALPN.to_vec()])
         .secret_key(secret_key)

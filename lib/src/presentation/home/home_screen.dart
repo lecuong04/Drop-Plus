@@ -1,8 +1,10 @@
 import "dart:math";
 
 import "package:flutter/material.dart";
+import "package:flutter_bloc/flutter_bloc.dart";
 import "package:particles_flutter/engine.dart";
 
+import "../../cubits/settings_cubit.dart";
 import "views/settings_view.dart";
 import "views/receive_view.dart";
 import "views/send_view.dart";
@@ -14,10 +16,31 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   late final List<Particle> _particles = _createParticles();
 
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused) {
+    } else if (state == AppLifecycleState.resumed) {
+      context.read<SettingsCubit>().refreshAddrs();
+    }
+  }
 
   List<Particle> _createParticles() {
     double randomSign() {

@@ -9,7 +9,7 @@ use std::{
 
 use anyhow::{anyhow, bail, Result};
 use futures_util::StreamExt;
-use iroh::{endpoint::presets::Minimal, Endpoint, EndpointAddr, RelayMap, RelayMode, RelayUrl};
+use iroh::{endpoint::presets::Minimal, Endpoint, EndpointAddr, RelayMap, RelayMode, RelayUrl, SecretKey};
 use iroh_blobs::{
     api::remote::GetProgressItem,
     format::collection::Collection,
@@ -34,7 +34,6 @@ use crate::{
     protos::{ListFiles, SendServiceProtocol},
     services::receive::utils::export,
     types::ReceiveResult,
-    utils::get_or_create_secret,
 };
 
 static TOKENS: LazyLock<HashMap<String, CancellationToken>> = LazyLock::new(HashMap::new);
@@ -82,11 +81,10 @@ fn connect_rpc(endpoint: &Endpoint, addr: &EndpointAddr) -> Client<SendServicePr
     irpc_iroh::client(endpoint.clone(), addr.clone(), IRPC_ALPN)
 }
 
-pub(super) async fn start(args: ReceiveArgs, stream: StreamSink<Vec<ProgressState>>, result: &StreamSink<ReceiveResult>) -> Result<()> {
+pub(super) async fn start(args: ReceiveArgs, secret_key: SecretKey, stream: StreamSink<Vec<ProgressState>>, result: &StreamSink<ReceiveResult>) -> Result<()> {
     let ReceiveArgs { ticket, relay, download_dir } = args;
     let addr = ticket.addr().clone();
     let hash_and_format = ticket.hash_and_format();
-    let secret_key = get_or_create_secret()?;
     let builder = Endpoint::builder(Minimal)
         .alpns(vec![TRANSFER_ALPN.to_vec()])
         .secret_key(secret_key)
