@@ -21,7 +21,7 @@ use crate::{
 use crate::{protos::SendServiceMessage, types::SendResult};
 
 use anyhow::{anyhow, Result};
-use iroh::{endpoint::presets::Minimal, protocol::Router, Endpoint, RelayMode};
+use iroh::{endpoint::presets::Minimal, protocol::Router, Endpoint, RelayMode, TransportAddr};
 use iroh_blobs::{
     provider::events::{ConnectMode, EventMask, EventSender, ProviderMessage, RequestMode, RequestUpdate},
     store::fs::FsStore,
@@ -112,11 +112,12 @@ async fn actor(mut rx: tokio::sync::mpsc::Receiver<SendServiceMessage>, files: V
     }
 }
 
-fn listen_rpc(files: Vec<BlobInfo>) -> IrohProtocol<SendServiceProtocol> {
+fn listen_rpc(files: Vec<BlobInfo>) -> (IrohProtocol<SendServiceProtocol>, AbortOnDropHandle<()>) {
     let (tx, rx) = mpsc::channel(16);
-    tokio::task::spawn(actor(rx, files));
+    let handle = AbortOnDropHandle::new(tokio::task::spawn(actor(rx, files)));
     let client = Client::<SendServiceProtocol>::local(tx);
-    IrohProtocol::with_sender(client.as_local().unwrap())
+    let rpc = IrohProtocol::with_sender(client.as_local().unwrap());
+    (rpc, handle)
 }
 
 async fn request_progress(
@@ -160,7 +161,7 @@ async fn request_progress(
             }
         }
     } else {
-        let map = Arc::new(RwLock::new(HashMap::new()));
+        let mut map = HashMap::new();
         loop {
             tokio::select! {
                 res = rx.recv() => {
@@ -168,10 +169,10 @@ async fn request_progress(
                         Ok(Some(r)) => {
                             match r {
                                 RequestUpdate::Started(r) => {
-                                    map.write().insert(r.index, r.size);
+                                    map.insert(r.index, r.size);
                                 }
                                 RequestUpdate::Completed(_) => {
-                                    hashes.write().insert(connection_id, map.read().clone());
+                                    hashes.write().insert(connection_id, map.clone());
                                 }
                                 _ => {}
                             }
@@ -240,7 +241,6 @@ async fn provide_progress(mp: Arc<MultiProgress>, mut recv: Receiver<ProviderMes
     let (utx, urx) = mpsc::unbounded_channel();
     let handle = AbortOnDropHandle::new(tokio::task::spawn(update_progress(mp.clone(), hashes.clone(), connections.clone(), urx)));
     let mut tasks = JoinSet::new();
-
     loop {
         tokio::select! {
             item = recv.recv() => {
@@ -273,7 +273,6 @@ async fn provide_progress(mp: Arc<MultiProgress>, mut recv: Receiver<ProviderMes
             }
         }
     }
-
     while let Some(task) = tasks.join_next().await {
         task?
     }
@@ -323,22 +322,32 @@ pub(super) async fn start(args: SendArgs, stream: StreamSink<Vec<ProgressState>>
         )),
     );
     let (temp_tag, files, size) = import(paths, blobs.store(), &mp).await?;
-    let rpc = listen_rpc(files);
+    let (rpc, handle) = listen_rpc(files);
     let router = Router::builder(endpoint).accept(TRANSFER_ALPN, blobs).accept(IRPC_ALPN, rpc).spawn();
     let ep = router.endpoint();
     time::timeout(Duration::from_secs(30), async move {
         if !matches!(relay, RelayMode::Disabled) {
+            let id = mp.add(Phase::Connecting);
             ep.online().await;
+            mp.remove(&id);
         }
     })
     .await?;
     let hash = temp_tag.hash();
     let addr = router.endpoint().addr();
-    let ticket = BlobTicket::new(addr, hash, BlobFormat::HashSeq).to_string();
-
+    let ticket = BlobTicket::new(addr.clone(), hash, BlobFormat::HashSeq).to_string();
+    let addrs = addr
+        .addrs
+        .iter()
+        .map(|a| match a {
+            TransportAddr::Relay(relay_url) => relay_url.to_string(),
+            TransportAddr::Ip(socket_addr) => socket_addr.to_string(),
+            TransportAddr::Custom(custom_addr) => custom_addr.to_string(),
+            _ => "".to_string(),
+        })
+        .collect::<Vec<String>>();
     let _ = TOKENS.insert_sync(ticket.clone(), cancel.clone());
-
-    match result.add(SendResult::ok(&ticket, size)) {
+    match result.add(SendResult::ok(&ticket, size, addrs)) {
         Ok(_) => {}
         Err(_) => {
             if let Some((_, t)) = TOKENS.remove_sync(&ticket) {
@@ -353,6 +362,7 @@ pub(super) async fn start(args: SendArgs, stream: StreamSink<Vec<ProgressState>>
     drop(blobs_dir);
     drop(router);
     progress.await??;
+    handle.await?;
     Ok(())
 }
 

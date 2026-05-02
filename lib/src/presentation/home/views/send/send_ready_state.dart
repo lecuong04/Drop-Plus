@@ -14,6 +14,7 @@ import "../../../../cubits/send_cubit.dart";
 
 class SendReadyStateWidget extends StatelessWidget {
   final List<ProgressState> progresses;
+  final List<String> addrs;
   final String ticket;
   final BigInt size;
 
@@ -22,6 +23,7 @@ class SendReadyStateWidget extends StatelessWidget {
     required this.ticket,
     required this.size,
     required this.progresses,
+    required this.addrs,
   });
 
   @override
@@ -40,12 +42,89 @@ class SendReadyStateWidget extends StatelessWidget {
             _QrCodeSection(ticket: ticket),
             const SizedBox(height: 32),
             _TransferCodeSection(ticketCode: ticket),
+            _ConnectionAddressesSection(addrs: addrs),
             if (progresses.any((p) => p.phase is Phase_Uploading))
               _ActiveTransfersSection(progresses: progresses, size: size),
             const SizedBox(height: 24),
             const _FooterSection(),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ConnectionAddressesSection extends StatelessWidget {
+  final List<String> addrs;
+
+  const _ConnectionAddressesSection({required this.addrs});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 4,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: colorScheme.secondary,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                "Connection Options",
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: addrs.map((addr) {
+              return Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: colorScheme.outlineVariant,
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Symbols.link, size: 14, color: colorScheme.secondary),
+                    const SizedBox(width: 8),
+                    Text(
+                      addr,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        ],
       ),
     );
   }

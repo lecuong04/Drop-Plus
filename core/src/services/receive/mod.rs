@@ -97,7 +97,6 @@ pub(super) async fn start(args: ReceiveArgs, stream: StreamSink<Vec<ProgressStat
     let client = connect_rpc(&endpoint, &addr);
     let files = timeout(Duration::from_secs(5), client.rpc(ListFiles)).await??;
     result.add(ReceiveResult::pending(files)).map_err(|e| anyhow!("{}", e))?;
-
     let (tx, rx) = oneshot::channel();
     let _ = PENDING_RECEIVES.insert_sync(ticket.to_string(), tx);
     let accepted = rx.await.unwrap_or(false);
@@ -105,7 +104,6 @@ pub(super) async fn start(args: ReceiveArgs, stream: StreamSink<Vec<ProgressStat
     if !accepted {
         return Ok(());
     }
-
     let data_dir = download_dir.join(format!(".droplus-recv-{}", hash_and_format.hash.fmt_short().to_lowercase()));
     let db = FsStore::load(&data_dir).await?;
     let receive_result = async {

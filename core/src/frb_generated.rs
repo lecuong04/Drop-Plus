@@ -617,9 +617,11 @@ impl SseDecode for crate::types::SendResult {
             0 => {
                 let mut var_ticket = <String>::sse_decode(deserializer);
                 let mut var_size = <u64>::sse_decode(deserializer);
+                let mut var_addrs = <Vec<String>>::sse_decode(deserializer);
                 return crate::types::SendResult::Ok {
                     ticket: var_ticket,
                     size: var_size,
+                    addrs: var_addrs,
                 };
             }
             1 => {
@@ -827,7 +829,13 @@ impl flutter_rust_bridge::IntoIntoDart<crate::types::RelayModeOption> for crate:
 impl flutter_rust_bridge::IntoDart for crate::types::SendResult {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         match self {
-            crate::types::SendResult::Ok { ticket, size } => [0.into_dart(), ticket.into_into_dart().into_dart(), size.into_into_dart().into_dart()].into_dart(),
+            crate::types::SendResult::Ok { ticket, size, addrs } => [
+                0.into_dart(),
+                ticket.into_into_dart().into_dart(),
+                size.into_into_dart().into_dart(),
+                addrs.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
             crate::types::SendResult::Err => [1.into_dart()].into_dart(),
             _ => {
                 unimplemented!("");
@@ -1097,10 +1105,11 @@ impl SseEncode for crate::types::SendResult {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         match self {
-            crate::types::SendResult::Ok { ticket, size } => {
+            crate::types::SendResult::Ok { ticket, size, addrs } => {
                 <i32>::sse_encode(0, serializer);
                 <String>::sse_encode(ticket, serializer);
                 <u64>::sse_encode(size, serializer);
+                <Vec<String>>::sse_encode(addrs, serializer);
             }
             crate::types::SendResult::Err => {
                 <i32>::sse_encode(1, serializer);

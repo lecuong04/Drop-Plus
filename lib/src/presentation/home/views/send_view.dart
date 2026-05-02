@@ -3,6 +3,7 @@ import "package:flutter_bloc/flutter_bloc.dart";
 
 import "../../../../exts.dart";
 import "../../../cubits/send_cubit.dart";
+import "send/send_connecting_state.dart";
 import "send/send_importing_state.dart";
 import "send/send_initial_state.dart";
 import "send/send_ready_state.dart";
@@ -41,15 +42,18 @@ class SendView extends StatelessWidget {
                       SendInitial() => const SendInitialStateWidget(),
                       SendImporting(:final progresses) =>
                         SendImportingStateWidget(progresses: progresses),
+                      SendConnecting() => const SendConnectingStateWidget(),
                       SendReady(
                         :final ticket,
                         :final size,
+                        :final addrs,
                         :final progresses,
                       ) =>
                         SendReadyStateWidget(
                           ticket: ticket,
                           size: size,
                           progresses: progresses.toList(),
+                          addrs: addrs,
                         ),
                     },
                   ),

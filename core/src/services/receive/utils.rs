@@ -1,6 +1,9 @@
-use std::path::{Path, PathBuf};
+use std::{
+    path::{Path, PathBuf},
+    time::{SystemTime, UNIX_EPOCH},
+};
 
-use anyhow::{bail, Result};
+use anyhow::{anyhow, bail, ensure, Result};
 use futures_buffered::BufferedStreamExt;
 use futures_util::StreamExt;
 use iroh_blobs::{
@@ -12,17 +15,21 @@ use iroh_blobs::{
 };
 
 use crate::{
+    consts::PATH_SEPARATOR,
     progresses::{MultiProgress, Phase},
     utils::PARALLELISM,
 };
 
 fn validate_path_component(component: &str) -> Result<()> {
-    anyhow::ensure!(!component.contains('/'), "path components must not contain the only correct path separator, /");
+    ensure!(
+        !component.contains(PATH_SEPARATOR),
+        format!("path components must not contain the only correct path separator, {}", PATH_SEPARATOR)
+    );
     Ok(())
 }
 
 fn get_export_path(root: &Path, name: &str) -> Result<PathBuf> {
-    let parts = name.split('/');
+    let parts = name.split(PATH_SEPARATOR);
     let mut path = root.to_path_buf();
     for part in parts {
         validate_path_component(part)?;
@@ -42,12 +49,9 @@ pub async fn export(root: &Path, db: &Store, collection: Collection, mp: &MultiP
             async move {
                 let target = get_export_path(&root, &name)?;
                 if target.exists() {
-                    let now = std::time::SystemTime::now()
-                        .duration_since(std::time::UNIX_EPOCH)
-                        .map_err(|e| anyhow::anyhow!("Time went backwards: {}", e))?
-                        .as_secs();
+                    let now = SystemTime::now().duration_since(UNIX_EPOCH).map_err(|e| anyhow!("Time went backwards: {}", e))?.as_secs();
                     let mut new_target = target.clone();
-                    let file_name = target.file_name().ok_or_else(|| anyhow::anyhow!("invalid target file name"))?.to_string_lossy();
+                    let file_name = target.file_name().ok_or_else(|| anyhow!("invalid target file name"))?.to_string_lossy();
                     new_target.set_file_name(format!("{}.{}", file_name, now));
                     if let Err(e) = tokio::fs::rename(&target, &new_target).await {
                         bail!("failed to rename existing file {} to {}: {}", target.display(), new_target.display(), e);

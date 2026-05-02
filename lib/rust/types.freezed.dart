@@ -755,10 +755,10 @@ return err(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String ticket,  BigInt size)?  ok,TResult Function()?  err,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String ticket,  BigInt size,  List<String> addrs)?  ok,TResult Function()?  err,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case SendResult_Ok() when ok != null:
-return ok(_that.ticket,_that.size);case SendResult_Err() when err != null:
+return ok(_that.ticket,_that.size,_that.addrs);case SendResult_Err() when err != null:
 return err();case _:
   return orElse();
 
@@ -777,10 +777,10 @@ return err();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String ticket,  BigInt size)  ok,required TResult Function()  err,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String ticket,  BigInt size,  List<String> addrs)  ok,required TResult Function()  err,}) {final _that = this;
 switch (_that) {
 case SendResult_Ok():
-return ok(_that.ticket,_that.size);case SendResult_Err():
+return ok(_that.ticket,_that.size,_that.addrs);case SendResult_Err():
 return err();}
 }
 /// A variant of `when` that fallback to returning `null`
@@ -795,10 +795,10 @@ return err();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String ticket,  BigInt size)?  ok,TResult? Function()?  err,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String ticket,  BigInt size,  List<String> addrs)?  ok,TResult? Function()?  err,}) {final _that = this;
 switch (_that) {
 case SendResult_Ok() when ok != null:
-return ok(_that.ticket,_that.size);case SendResult_Err() when err != null:
+return ok(_that.ticket,_that.size,_that.addrs);case SendResult_Err() when err != null:
 return err();case _:
   return null;
 
@@ -811,11 +811,18 @@ return err();case _:
 
 
 class SendResult_Ok extends SendResult {
-  const SendResult_Ok({required this.ticket, required this.size}): super._();
+  const SendResult_Ok({required this.ticket, required this.size, required final  List<String> addrs}): _addrs = addrs,super._();
   
 
  final  String ticket;
  final  BigInt size;
+ final  List<String> _addrs;
+ List<String> get addrs {
+  if (_addrs is EqualUnmodifiableListView) return _addrs;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_addrs);
+}
+
 
 /// Create a copy of SendResult
 /// with the given fields replaced by the non-null parameter values.
@@ -827,16 +834,16 @@ $SendResult_OkCopyWith<SendResult_Ok> get copyWith => _$SendResult_OkCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SendResult_Ok&&(identical(other.ticket, ticket) || other.ticket == ticket)&&(identical(other.size, size) || other.size == size));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SendResult_Ok&&(identical(other.ticket, ticket) || other.ticket == ticket)&&(identical(other.size, size) || other.size == size)&&const DeepCollectionEquality().equals(other._addrs, _addrs));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,ticket,size);
+int get hashCode => Object.hash(runtimeType,ticket,size,const DeepCollectionEquality().hash(_addrs));
 
 @override
 String toString() {
-  return 'SendResult.ok(ticket: $ticket, size: $size)';
+  return 'SendResult.ok(ticket: $ticket, size: $size, addrs: $addrs)';
 }
 
 
@@ -847,7 +854,7 @@ abstract mixin class $SendResult_OkCopyWith<$Res> implements $SendResultCopyWith
   factory $SendResult_OkCopyWith(SendResult_Ok value, $Res Function(SendResult_Ok) _then) = _$SendResult_OkCopyWithImpl;
 @useResult
 $Res call({
- String ticket, BigInt size
+ String ticket, BigInt size, List<String> addrs
 });
 
 
@@ -864,11 +871,12 @@ class _$SendResult_OkCopyWithImpl<$Res>
 
 /// Create a copy of SendResult
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? ticket = null,Object? size = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? ticket = null,Object? size = null,Object? addrs = null,}) {
   return _then(SendResult_Ok(
 ticket: null == ticket ? _self.ticket : ticket // ignore: cast_nullable_to_non_nullable
 as String,size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
-as BigInt,
+as BigInt,addrs: null == addrs ? _self._addrs : addrs // ignore: cast_nullable_to_non_nullable
+as List<String>,
   ));
 }
 

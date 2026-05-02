@@ -428,7 +428,7 @@ class _SettingsViewState extends State<SettingsView> {
                       ? " (Random port)"
                       : ":${state.port}";
                   if (state.ipv4Addr == null && state.ipv6Addr == null) {
-                    return "Auto selection$portSuffix";
+                    return "Auto selection";
                   }
                   final List<String> addrs = [];
                   if (state.ipv4Addr != null) {

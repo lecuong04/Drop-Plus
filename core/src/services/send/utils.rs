@@ -14,10 +14,11 @@ use iroh_blobs::{
     format::collection::Collection,
     BlobFormat,
 };
-use tracing::instrument;
+use tracing::{instrument, warn};
 use walkdir::WalkDir;
 
 use crate::{
+    consts::PATH_SEPARATOR,
     progresses::{MultiProgress, Phase},
     types::BlobInfo,
     utils::PARALLELISM,
@@ -40,9 +41,9 @@ fn canonicalized_path_to_string(path: impl AsRef<Path>, must_be_relative: bool) 
             _ => return Err(anyhow!("invalid path component {:?}", component)),
         }
     }
-    let res = parts.join("/");
+    let res = parts.join(PATH_SEPARATOR);
     if !must_be_relative && res.is_empty() {
-        Ok("/".to_string())
+        Ok(PATH_SEPARATOR.to_string())
     } else {
         Ok(res)
     }
@@ -72,17 +73,18 @@ fn process_path(path: &PathBuf) -> Result<Vec<(String, PathBuf)>> {
 #[instrument(err, skip(mp))]
 pub(super) async fn import(paths: Vec<PathBuf>, db: &Store, mp: &MultiProgress) -> Result<(TempTag, Vec<BlobInfo>, u64)> {
     let error_count = AtomicUsize::new(0);
-    let data_sources: Vec<(String, PathBuf)> = paths
+    let data_sources = paths
         .iter()
         .filter_map(|path| match process_path(path) {
             Ok(sources) => Some(sources),
-            Err(_) => {
+            Err(e) => {
+                warn!(error = %e, path = %path.display(), "failed to process path");
                 error_count.fetch_add(1, Ordering::Relaxed);
                 None
             }
         })
         .flatten()
-        .collect();
+        .collect::<Vec<(String, PathBuf)>>();
     if error_count.load(Ordering::Relaxed) > 0 {
         return Err(anyhow!("failed to process {} path(s)", error_count.load(Ordering::Relaxed)));
     }

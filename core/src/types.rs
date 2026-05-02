@@ -9,13 +9,17 @@ use iroh::{RelayMode, RelayUrl};
 use serde::{Deserialize, Serialize};
 
 pub enum SendResult {
-    Ok { ticket: String, size: u64 },
+    Ok { ticket: String, size: u64, addrs: Vec<String> },
     Err,
 }
 
 impl SendResult {
-    pub fn ok(ticket: &str, size: u64) -> Self {
-        Self::Ok { ticket: ticket.to_owned(), size }
+    pub fn ok(ticket: &str, size: u64, addrs: Vec<String>) -> Self {
+        Self::Ok {
+            ticket: ticket.to_owned(),
+            size,
+            addrs,
+        }
     }
 
     pub fn err() -> Self {

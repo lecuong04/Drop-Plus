@@ -679,6 +679,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         return SendResult_Ok(
           ticket: dco_decode_String(raw[1]),
           size: dco_decode_u_64(raw[2]),
+          addrs: dco_decode_list_String(raw[3]),
         );
       case 1:
         return const SendResult_Err();
@@ -999,7 +1000,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       case 0:
         var var_ticket = sse_decode_String(deserializer);
         var var_size = sse_decode_u_64(deserializer);
-        return SendResult_Ok(ticket: var_ticket, size: var_size);
+        var var_addrs = sse_decode_list_String(deserializer);
+        return SendResult_Ok(
+          ticket: var_ticket,
+          size: var_size,
+          addrs: var_addrs,
+        );
       case 1:
         return const SendResult_Err();
       default:
@@ -1339,10 +1345,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_send_result(SendResult self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     switch (self) {
-      case SendResult_Ok(ticket: final ticket, size: final size):
+      case SendResult_Ok(
+        ticket: final ticket,
+        size: final size,
+        addrs: final addrs,
+      ):
         sse_encode_i_32(0, serializer);
         sse_encode_String(ticket, serializer);
         sse_encode_u_64(size, serializer);
+        sse_encode_list_String(addrs, serializer);
       case SendResult_Err():
         sse_encode_i_32(1, serializer);
     }

@@ -82,7 +82,10 @@ sealed class RelayModeOption with _$RelayModeOption {
 sealed class SendResult with _$SendResult {
   const SendResult._();
 
-  const factory SendResult.ok({required String ticket, required BigInt size}) =
-      SendResult_Ok;
+  const factory SendResult.ok({
+    required String ticket,
+    required BigInt size,
+    required List<String> addrs,
+  }) = SendResult_Ok;
   const factory SendResult.err() = SendResult_Err;
 }

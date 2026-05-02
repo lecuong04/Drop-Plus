@@ -21,25 +21,33 @@ final class SendImporting extends SendState {
   const SendImporting({this.progresses = const []});
 }
 
+final class SendConnecting extends SendState {
+  const SendConnecting();
+}
+
 final class SendReady extends SendState {
   final String ticket;
   final List<ProgressState> progresses;
+  final List<String> addrs;
   final BigInt size;
 
   SendReady({
     required this.ticket,
     required this.size,
+    this.addrs = const [],
     this.progresses = const [],
   });
 
   SendReady copyWith({
     BigInt? size,
     String? ticket,
+    List<String>? addrs,
     List<ProgressState>? progresses,
   }) {
     return SendReady(
       ticket: ticket ?? this.ticket,
       size: size ?? this.size,
+      addrs: addrs ?? this.addrs,
       progresses: progresses ?? this.progresses,
     );
   }
@@ -88,11 +96,19 @@ class SendCubit extends Cubit<SendState> {
               .contains((p.phase as Phase_Uploading).endpoint),
         );
         emit((state as SendReady).copyWith(progresses: [...progresses, ...e]));
+      } else if (e.any((p) => p.phase is Phase_Connecting)) {
+        emit(const SendConnecting());
       }
     });
     resultSub = resultSink.stream.listen((result) {
       if (result is SendResult_Ok) {
-        emit(SendReady(ticket: result.ticket, size: result.size));
+        emit(
+          SendReady(
+            ticket: result.ticket,
+            size: result.size,
+            addrs: result.addrs,
+          ),
+        );
       } else {
         emit(const SendInitial(isError: true));
       }
