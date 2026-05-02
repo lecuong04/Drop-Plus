@@ -1,7 +1,6 @@
 import "package:file_sizes/file_sizes.dart";
 import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
-import "package:material_symbols_icons/material_symbols_icons.dart";
 
 import "../../../../../rust/types.dart";
 import "../../../../cubits/receive_cubit.dart";
@@ -37,7 +36,7 @@ class ReceiveSuccessStateWidget extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                Symbols.check_circle,
+                Icons.check_circle,
                 size: 48,
                 color: Colors.green.shade600,
               ),
@@ -60,7 +59,7 @@ class ReceiveSuccessStateWidget extends StatelessWidget {
                 children: [
                   _buildSummaryRow(
                     context,
-                    Symbols.file_copy,
+                    Icons.file_copy,
                     "Files Received",
                     result.totalFiles.toString(),
                   ),
@@ -70,7 +69,7 @@ class ReceiveSuccessStateWidget extends StatelessWidget {
                   ),
                   _buildSummaryRow(
                     context,
-                    Symbols.data_usage,
+                    Icons.data_usage,
                     "Total Size",
                     FileSize.getSize(result.payloadSize),
                   ),
@@ -80,7 +79,7 @@ class ReceiveSuccessStateWidget extends StatelessWidget {
                   ),
                   _buildSummaryRow(
                     context,
-                    Symbols.timer,
+                    Icons.timer,
                     "Time Elapsed",
                     timeStr,
                   ),
@@ -90,7 +89,7 @@ class ReceiveSuccessStateWidget extends StatelessWidget {
             const SizedBox(height: 40),
             FilledButton.icon(
               onPressed: () => context.read<ReceiveCubit>().back(),
-              icon: const Icon(Symbols.arrow_back),
+              icon: const Icon(Icons.arrow_back),
               label: const Text("Done"),
               style: FilledButton.styleFrom(
                 minimumSize: const Size(double.infinity, 56),

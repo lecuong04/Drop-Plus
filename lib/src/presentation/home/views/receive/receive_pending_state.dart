@@ -1,7 +1,6 @@
 import "package:file_sizes/file_sizes.dart";
 import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
-import "package:material_symbols_icons/material_symbols_icons.dart";
 import "package:two_dimensional_scrollables/two_dimensional_scrollables.dart";
 
 import "../../../../../rust/types.dart";
@@ -102,13 +101,13 @@ class _ReceivePendingStateWidgetState extends State<ReceivePendingStateWidget> {
               ),
               child: isFolder
                   ? Icon(
-                      node.isExpanded ? Symbols.folder_open : Symbols.folder,
+                      node.isExpanded ? Icons.folder_open : Icons.folder,
                       size: 18,
                       color: isFolder
                           ? colorScheme.primary
                           : colorScheme.onSurfaceVariant,
                     )
-                  : const Icon(Symbols.description, size: 18),
+                  : const Icon(Icons.description, size: 18),
             ),
             Text(
               node.content.name,
@@ -157,7 +156,7 @@ class _ReceivePendingStateWidgetState extends State<ReceivePendingStateWidget> {
                     ),
                   )
                 : Icon(
-                    Symbols.file_download,
+                    Icons.file_download,
                     size: 32,
                     color: colorScheme.primary,
                   ),

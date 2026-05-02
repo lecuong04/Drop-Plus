@@ -184,16 +184,4 @@ class SettingsCubit extends Cubit<SettingsState> {
   void clearAddrs() {
     emit(state.clearAddrs());
   }
-
-  Future<void> refresh() async {
-    final availableAddrs = await _service.getAddrs();
-    emit(
-      state.copyWith(
-        availableAddrs: Map.fromEntries(
-          availableAddrs.entries.toList()
-            ..sort((a, b) => a.value.compareTo(b.value)),
-        ),
-      ),
-    );
-  }
 }

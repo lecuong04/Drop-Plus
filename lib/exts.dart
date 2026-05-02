@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-import "package:material_symbols_icons/symbols.dart";
 
 extension SnackBarExt on BuildContext {
   void _showCustomSnackBar({
@@ -46,7 +45,7 @@ extension SnackBarExt on BuildContext {
     final colorScheme = Theme.of(this).colorScheme;
     _showCustomSnackBar(
       message: message,
-      icon: Symbols.check_circle,
+      icon: Icons.check_circle,
       backgroundColor: colorScheme.tertiaryContainer,
       foregroundColor: colorScheme.onTertiaryContainer,
       borderColor: colorScheme.tertiary.withValues(alpha: 0.5),
@@ -57,7 +56,7 @@ extension SnackBarExt on BuildContext {
     final colorScheme = Theme.of(this).colorScheme;
     _showCustomSnackBar(
       message: message,
-      icon: Symbols.error,
+      icon: Icons.error,
       backgroundColor: colorScheme.errorContainer,
       foregroundColor: colorScheme.onErrorContainer,
       borderColor: colorScheme.error.withValues(alpha: 0.5),
@@ -69,7 +68,7 @@ extension SnackBarExt on BuildContext {
     final colorScheme = Theme.of(this).colorScheme;
     _showCustomSnackBar(
       message: message,
-      icon: Symbols.info,
+      icon: Icons.info,
       backgroundColor: colorScheme.primaryContainer,
       foregroundColor: colorScheme.onPrimaryContainer,
       borderColor: colorScheme.primary.withValues(alpha: 0.5),
@@ -80,7 +79,7 @@ extension SnackBarExt on BuildContext {
     final colorScheme = Theme.of(this).colorScheme;
     _showCustomSnackBar(
       message: message,
-      icon: Symbols.warning,
+      icon: Icons.warning,
       backgroundColor: colorScheme.secondaryContainer,
       foregroundColor: colorScheme.onSecondaryContainer,
       borderColor: colorScheme.secondary.withValues(alpha: 0.5),

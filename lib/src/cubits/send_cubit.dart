@@ -1,10 +1,11 @@
 import "dart:async";
 
+import "package:flutter_bloc/flutter_bloc.dart";
+import "package:flutter_rust_bridge/flutter_rust_bridge.dart";
+
 import "../../rust/progresses.dart";
 import "../../rust/types.dart";
 import "../services/transfer_service.dart";
-import "package:flutter_bloc/flutter_bloc.dart";
-import "package:flutter_rust_bridge/flutter_rust_bridge.dart";
 
 sealed class SendState {
   const SendState();
@@ -26,28 +27,14 @@ final class SendConnecting extends SendState {
 }
 
 final class SendReady extends SendState {
-  final String ticket;
+  final SendResult_Ok result;
   final List<ProgressState> progresses;
-  final List<String> addrs;
-  final BigInt size;
 
-  SendReady({
-    required this.ticket,
-    required this.size,
-    this.addrs = const [],
-    this.progresses = const [],
-  });
+  SendReady({required this.result, this.progresses = const []});
 
-  SendReady copyWith({
-    BigInt? size,
-    String? ticket,
-    List<String>? addrs,
-    List<ProgressState>? progresses,
-  }) {
+  SendReady copyWith({SendResult_Ok? result, List<ProgressState>? progresses}) {
     return SendReady(
-      ticket: ticket ?? this.ticket,
-      size: size ?? this.size,
-      addrs: addrs ?? this.addrs,
+      result: result ?? this.result,
       progresses: progresses ?? this.progresses,
     );
   }
@@ -102,13 +89,7 @@ class SendCubit extends Cubit<SendState> {
     });
     resultSub = resultSink.stream.listen((result) {
       if (result is SendResult_Ok) {
-        emit(
-          SendReady(
-            ticket: result.ticket,
-            size: result.size,
-            addrs: result.addrs,
-          ),
-        );
+        emit(SendReady(result: result));
       } else {
         emit(const SendInitial(isError: true));
       }
@@ -119,7 +100,7 @@ class SendCubit extends Cubit<SendState> {
     final curState = state;
     if (curState is SendReady) {
       try {
-        await _service.cancelSend(curState.ticket);
+        await _service.cancelSend(curState.result.ticket);
         emit(const SendInitial());
       } catch (_) {
         emit(const SendInitial(isError: true));

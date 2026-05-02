@@ -4,7 +4,6 @@ import "dart:io";
 import "package:file_picker/file_picker.dart";
 import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
-import "package:material_symbols_icons/material_symbols_icons.dart";
 
 import "../../../../cubits/send_cubit.dart";
 import "../../../../cubits/settings_cubit.dart";
@@ -47,7 +46,7 @@ class _SendInitialStateWidgetState extends State<SendInitialStateWidget> {
               borderRadius: BorderRadius.circular(32),
             ),
             child: Icon(
-              Symbols.upload_file,
+              Icons.upload_file,
               size: 56,
               weight: 300,
               color: theme.colorScheme.primary,
@@ -82,7 +81,7 @@ class _SendInitialStateWidgetState extends State<SendInitialStateWidget> {
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  icon: const Icon(Symbols.add_box),
+                  icon: const Icon(Icons.add_box),
                   label: const Text("Select Files"),
                 ),
                 const SizedBox(height: 12),
@@ -91,7 +90,7 @@ class _SendInitialStateWidgetState extends State<SendInitialStateWidget> {
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  icon: const Icon(Symbols.create_new_folder),
+                  icon: const Icon(Icons.create_new_folder),
                   label: const Text("Select Folder"),
                 ),
               ],
@@ -112,11 +111,7 @@ class _SendInitialStateWidgetState extends State<SendInitialStateWidget> {
           padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
           child: Row(
             children: [
-              Icon(
-                Symbols.task_alt,
-                size: 20,
-                color: theme.colorScheme.primary,
-              ),
+              Icon(Icons.task_alt, size: 20, color: theme.colorScheme.primary),
               const SizedBox(width: 12),
               Text(
                 "Selected Items",
@@ -188,7 +183,7 @@ class _SendInitialStateWidgetState extends State<SendInitialStateWidget> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Icon(
-                            isFile ? Symbols.description : Symbols.folder,
+                            isFile ? Icons.description : Icons.folder,
                             color: theme.colorScheme.primary,
                             size: 24,
                             weight: 300,
@@ -221,7 +216,7 @@ class _SendInitialStateWidgetState extends State<SendInitialStateWidget> {
                         ),
                         IconButton(
                           visualDensity: VisualDensity.compact,
-                          icon: const Icon(Symbols.close, size: 20),
+                          icon: const Icon(Icons.close, size: 20),
                           onPressed: () {
                             setState(() => _selectedPath.remove(key));
                           },
@@ -242,7 +237,7 @@ class _SendInitialStateWidgetState extends State<SendInitialStateWidget> {
             children: [
               TextButton.icon(
                 onPressed: () => setState(() => _selectedPath.clear()),
-                icon: const Icon(Symbols.delete_sweep, size: 20),
+                icon: const Icon(Icons.delete_sweep, size: 20),
                 label: const Text("Clear All"),
                 style: TextButton.styleFrom(
                   iconColor: theme.colorScheme.error,
@@ -257,6 +252,7 @@ class _SendInitialStateWidgetState extends State<SendInitialStateWidget> {
                     _selectedPath.keys.toList(),
                     ipv4Addr: state.ipv4Addr,
                     ipv6Addr: state.ipv6Addr,
+                    port: state.port,
                     relay: state.relay,
                   );
                 },
@@ -266,7 +262,7 @@ class _SendInitialStateWidgetState extends State<SendInitialStateWidget> {
                     vertical: 12,
                   ),
                 ),
-                icon: const Icon(Symbols.send),
+                icon: const Icon(Icons.send),
                 label: const Text("Share Now"),
               ),
             ],

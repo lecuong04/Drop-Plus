@@ -2,7 +2,7 @@ import "package:file_picker/file_picker.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
-import "package:material_symbols_icons/material_symbols_icons.dart";
+
 import "../../../../rust/types.dart";
 import "../../../cubits/settings_cubit.dart";
 import "../../logs_screen.dart";
@@ -96,14 +96,12 @@ class _SettingsViewState extends State<SettingsView> {
                 Card(
                   elevation: 0,
                   child: ListTile(
-                    leading: const Icon(Symbols.block),
+                    leading: const Icon(Icons.block),
                     title: const Text("Disabled"),
                     subtitle: const Text("Direct connection only"),
                     trailing: state.relay.maybeMap(
-                      disabled: (_) => Icon(
-                        Symbols.check_circle,
-                        color: colorScheme.primary,
-                      ),
+                      disabled: (_) =>
+                          Icon(Icons.check_circle, color: colorScheme.primary),
                       orElse: () => null,
                     ),
                     onTap: () {
@@ -115,14 +113,12 @@ class _SettingsViewState extends State<SettingsView> {
                 Card(
                   elevation: 0,
                   child: ListTile(
-                    leading: const Icon(Symbols.public),
+                    leading: const Icon(Icons.public),
                     title: const Text("Default"),
                     subtitle: const Text("Use iroh.network (N0)"),
                     trailing: state.relay.maybeMap(
-                      n0: (_) => Icon(
-                        Symbols.check_circle,
-                        color: colorScheme.primary,
-                      ),
+                      n0: (_) =>
+                          Icon(Icons.check_circle, color: colorScheme.primary),
                       orElse: () => null,
                     ),
                     onTap: () {
@@ -134,7 +130,7 @@ class _SettingsViewState extends State<SettingsView> {
                 Card(
                   elevation: 0,
                   child: ListTile(
-                    leading: const Icon(Symbols.dns),
+                    leading: const Icon(Icons.dns),
                     title: const Text("Custom"),
                     subtitle: Text(
                       state.relay.maybeMap(
@@ -143,10 +139,8 @@ class _SettingsViewState extends State<SettingsView> {
                       ),
                     ),
                     trailing: state.relay.maybeMap(
-                      custom: (_) => Icon(
-                        Symbols.check_circle,
-                        color: colorScheme.primary,
-                      ),
+                      custom: (_) =>
+                          Icon(Icons.check_circle, color: colorScheme.primary),
                       orElse: () => null,
                     ),
                     onTap: () async {
@@ -233,10 +227,7 @@ class _SettingsViewState extends State<SettingsView> {
                             ),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Icon(
-                            Symbols.door_open,
-                            color: colorScheme.primary,
-                          ),
+                          child: Icon(Icons.inbox, color: colorScheme.primary),
                         ),
                         title: const Text("Port"),
                         subtitle: Text(
@@ -246,7 +237,7 @@ class _SettingsViewState extends State<SettingsView> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        trailing: const Icon(Symbols.chevron_right, size: 20),
+                        trailing: const Icon(Icons.chevron_right, size: 20),
                         onTap: _showPortSelection,
                       ),
                     ),
@@ -254,7 +245,7 @@ class _SettingsViewState extends State<SettingsView> {
                     _AddressOption(
                       title: "Auto selection",
                       subtitle: "Recommended (use all interfaces)",
-                      icon: Symbols.magic_button,
+                      icon: Icons.smart_button,
                       isSelected:
                           state.ipv4Addr == null && state.ipv6Addr == null,
                       onTap: () {
@@ -281,7 +272,7 @@ class _SettingsViewState extends State<SettingsView> {
                         return _AddressOption(
                           title: entry.value,
                           subtitle: entry.key,
-                          icon: Symbols.lan,
+                          icon: Icons.lan,
                           isSelected: isSelected,
                           onTap: () {
                             final cubit = context.read<SettingsCubit>();
@@ -334,7 +325,7 @@ class _SettingsViewState extends State<SettingsView> {
                     children: [
                       _SectionHeader(
                         title: "Transfer Settings",
-                        icon: Symbols.swap_horiz,
+                        icon: Icons.swap_horiz,
                         color: theme.colorScheme.primary,
                       ),
                       const SizedBox(height: 16),
@@ -342,7 +333,7 @@ class _SettingsViewState extends State<SettingsView> {
                       const SizedBox(height: 32),
                       _SectionHeader(
                         title: "Appearance",
-                        icon: Symbols.palette,
+                        icon: Icons.palette,
                         color: theme.colorScheme.secondary,
                       ),
                       const SizedBox(height: 16),
@@ -350,7 +341,7 @@ class _SettingsViewState extends State<SettingsView> {
                       const SizedBox(height: 32),
                       _SectionHeader(
                         title: "System & Support",
-                        icon: Symbols.terminal,
+                        icon: Icons.terminal,
                         color: theme.colorScheme.tertiary,
                       ),
                       const SizedBox(height: 16),
@@ -395,7 +386,7 @@ class _SettingsViewState extends State<SettingsView> {
                 color: colorScheme.primaryContainer.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(Symbols.folder_open, color: colorScheme.primary),
+              child: Icon(Icons.folder_open, color: colorScheme.primary),
             ),
             title: const Text("Download Directory"),
             subtitle: Text(
@@ -403,7 +394,7 @@ class _SettingsViewState extends State<SettingsView> {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            trailing: const Icon(Symbols.chevron_right, size: 20),
+            trailing: const Icon(Icons.chevron_right, size: 20),
             onTap: !_isPick ? _pickDownloadDirectory : null,
           ),
           if (_isSupportNetwork) ...[
@@ -419,7 +410,7 @@ class _SettingsViewState extends State<SettingsView> {
                   color: colorScheme.primaryContainer.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Symbols.lan, color: colorScheme.primary),
+                child: Icon(Icons.lan, color: colorScheme.primary),
               ),
               title: const Text("Network Configurations"),
               subtitle: Text(
@@ -442,7 +433,7 @@ class _SettingsViewState extends State<SettingsView> {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              trailing: const Icon(Symbols.chevron_right, size: 20),
+              trailing: const Icon(Icons.chevron_right, size: 20),
               onTap: _showAddressSelection,
             ),
             const Divider(height: 1, indent: 72),
@@ -457,7 +448,7 @@ class _SettingsViewState extends State<SettingsView> {
                   color: colorScheme.primaryContainer.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Symbols.share_windows, color: colorScheme.primary),
+                child: Icon(Icons.share, color: colorScheme.primary),
               ),
               title: const Text("Relay Mode"),
               subtitle: Text(
@@ -470,7 +461,7 @@ class _SettingsViewState extends State<SettingsView> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              trailing: const Icon(Symbols.chevron_right, size: 20),
+              trailing: const Icon(Icons.chevron_right, size: 20),
               onTap: _showRelaySelection,
             ),
           ],
@@ -486,7 +477,7 @@ class _SettingsViewState extends State<SettingsView> {
                 color: colorScheme.primaryContainer.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(Symbols.notifications, color: colorScheme.primary),
+              child: Icon(Icons.notifications, color: colorScheme.primary),
             ),
             title: const Text("Notifications"),
             subtitle: const Text("Show transfer progress in system tray"),
@@ -507,21 +498,21 @@ class _SettingsViewState extends State<SettingsView> {
         children: [
           _ThemeOption(
             title: "System Default",
-            icon: Symbols.settings_suggest,
+            icon: Icons.settings_suggest,
             isSelected: state.themeMode == ThemeMode.system,
             onTap: () => cubit.setThemeMode(ThemeMode.system),
           ),
           const Divider(height: 1, indent: 72),
           _ThemeOption(
             title: "Light Mode",
-            icon: Symbols.light_mode,
+            icon: Icons.light_mode,
             isSelected: state.themeMode == ThemeMode.light,
             onTap: () => cubit.setThemeMode(ThemeMode.light),
           ),
           const Divider(height: 1, indent: 72),
           _ThemeOption(
             title: "Dark Mode",
-            icon: Symbols.dark_mode,
+            icon: Icons.dark_mode,
             isSelected: state.themeMode == ThemeMode.dark,
             onTap: () => cubit.setThemeMode(ThemeMode.dark),
           ),
@@ -549,11 +540,11 @@ class _SettingsViewState extends State<SettingsView> {
                 color: colorScheme.tertiaryContainer.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(Symbols.history, color: colorScheme.tertiary),
+              child: Icon(Icons.history, color: colorScheme.tertiary),
             ),
             title: const Text("View Logs"),
             subtitle: const Text("Technical logs for debugging"),
-            trailing: const Icon(Symbols.chevron_right, size: 20),
+            trailing: const Icon(Icons.chevron_right, size: 20),
             onTap: () {
               Navigator.push(
                 context,
@@ -573,11 +564,11 @@ class _SettingsViewState extends State<SettingsView> {
                 color: colorScheme.tertiaryContainer.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(Symbols.info, color: colorScheme.tertiary),
+              child: Icon(Icons.info, color: colorScheme.tertiary),
             ),
             title: const Text("About Drop Plus"),
             subtitle: const Text("Open source license and version info"),
-            trailing: const Icon(Symbols.chevron_right, size: 20),
+            trailing: const Icon(Icons.chevron_right, size: 20),
             onTap: () {
               showAboutDialog(
                 context: context,
@@ -650,7 +641,7 @@ class _AddressOption extends StatelessWidget {
           ),
         ),
         trailing: isSelected
-            ? Icon(Symbols.check_circle, color: colorScheme.primary, size: 24)
+            ? Icon(Icons.check_circle, color: colorScheme.primary, size: 24)
             : null,
         onTap: onTap,
       ),
@@ -736,7 +727,7 @@ class _ThemeOption extends StatelessWidget {
         ),
       ),
       trailing: isSelected
-          ? Icon(Symbols.check_circle, color: colorScheme.primary, size: 24)
+          ? Icon(Icons.check_circle, color: colorScheme.primary, size: 24)
           : null,
       onTap: onTap,
     );

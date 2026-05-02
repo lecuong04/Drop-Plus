@@ -1,7 +1,6 @@
 import "package:file_sizes/file_sizes.dart";
 import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
-import "package:material_symbols_icons/material_symbols_icons.dart";
 
 import "../../../../../rust/progresses.dart";
 import "../../../../cubits/receive_cubit.dart";
@@ -30,7 +29,7 @@ class ReceiveTransferringStateWidget extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              Symbols.downloading,
+              Icons.downloading,
               size: 32,
               color: colorScheme.primary,
             ),
@@ -85,7 +84,7 @@ class ReceiveTransferringStateWidget extends StatelessWidget {
                       Row(
                         children: [
                           Icon(
-                            Symbols.description,
+                            Icons.description,
                             size: 18,
                             color: colorScheme.primary,
                           ),
@@ -156,7 +155,7 @@ class ReceiveTransferringStateWidget extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),
-              icon: const Icon(Symbols.cancel, size: 20),
+              icon: const Icon(Icons.cancel, size: 20),
               label: const Text("Stop Receiving"),
             ),
           ),

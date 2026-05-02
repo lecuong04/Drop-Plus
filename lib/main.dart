@@ -1,3 +1,6 @@
+import "package:flutter/material.dart";
+import "package:flutter_bloc/flutter_bloc.dart";
+
 import "exts.dart";
 import "rust/frb_generated.dart";
 import "src/app_theme.dart";
@@ -7,8 +10,6 @@ import "src/presentation/home/home_screen.dart";
 import "src/services/other_service.dart";
 import "src/services/tracing_service.dart";
 import "src/services/transfer_service.dart";
-import "package:flutter/material.dart";
-import "package:flutter_bloc/flutter_bloc.dart";
 
 final navigatorKey = GlobalKey<NavigatorState>();
 

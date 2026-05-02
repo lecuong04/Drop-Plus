@@ -4,7 +4,6 @@ import "package:file_picker/file_picker.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
-import "package:material_symbols_icons/material_symbols_icons.dart";
 import "package:mobile_scanner/mobile_scanner.dart";
 
 import "../../../../../exts.dart";
@@ -155,7 +154,7 @@ class _ReceiveInitialStateWidgetState extends State<ReceiveInitialStateWidget> {
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                Symbols.download_for_offline,
+                Icons.download_for_offline,
                 size: 40,
                 color: colorScheme.primary,
               ),
@@ -182,9 +181,9 @@ class _ReceiveInitialStateWidgetState extends State<ReceiveInitialStateWidget> {
               decoration: InputDecoration(
                 labelText: "Transfer Code",
                 hintText: "Enter the code here",
-                prefixIcon: const Icon(Symbols.vpn_key),
+                prefixIcon: const Icon(Icons.vpn_key),
                 suffixIcon: IconButton(
-                  icon: const Icon(Symbols.qr_code_scanner),
+                  icon: const Icon(Icons.qr_code_scanner),
                   onPressed: !_isPick ? _handleScanQR : null,
                   tooltip: "Scan QR Code",
                 ),
@@ -209,7 +208,7 @@ class _ReceiveInitialStateWidgetState extends State<ReceiveInitialStateWidget> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
-                          Symbols.folder_open,
+                          Icons.folder_open,
                           size: 20,
                           color: colorScheme.onSecondaryContainer,
                         ),
@@ -246,10 +245,10 @@ class _ReceiveInitialStateWidgetState extends State<ReceiveInitialStateWidget> {
                         IconButton(
                           visualDensity: VisualDensity.compact,
                           onPressed: _handleResetDir,
-                          icon: const Icon(Symbols.restart_alt, size: 20),
+                          icon: const Icon(Icons.restart_alt, size: 20),
                           tooltip: "Reset to default",
                         ),
-                      const Icon(Symbols.chevron_right, size: 20),
+                      const Icon(Icons.chevron_right, size: 20),
                     ],
                   ),
                 ),
@@ -261,7 +260,7 @@ class _ReceiveInitialStateWidgetState extends State<ReceiveInitialStateWidget> {
                   (_downloadDir != null && _ticketController.text.isNotEmpty)
                   ? _handleReceive
                   : null,
-              icon: const Icon(Symbols.download),
+              icon: const Icon(Icons.download),
               label: const Text("Receive Now"),
               style: FilledButton.styleFrom(
                 minimumSize: const Size(double.infinity, 56),

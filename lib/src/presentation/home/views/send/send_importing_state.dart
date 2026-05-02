@@ -1,7 +1,6 @@
 import "package:file_sizes/file_sizes.dart";
 import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
-import "package:material_symbols_icons/material_symbols_icons.dart";
 
 import "../../../../../rust/progresses.dart";
 import "../../../../cubits/send_cubit.dart";
@@ -29,11 +28,7 @@ class SendImportingStateWidget extends StatelessWidget {
               color: colorScheme.secondaryContainer.withValues(alpha: 0.4),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              Symbols.sync_saved_locally,
-              size: 32,
-              color: colorScheme.primary,
-            ),
+            child: Icon(Icons.calculate, size: 32, color: colorScheme.primary),
           ),
           const SizedBox(height: 24),
           Text(
@@ -85,7 +80,7 @@ class SendImportingStateWidget extends StatelessWidget {
                       Row(
                         children: [
                           Icon(
-                            Symbols.description,
+                            Icons.description,
                             size: 18,
                             color: colorScheme.primary,
                           ),
@@ -157,7 +152,7 @@ class SendImportingStateWidget extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Symbols.cancel, size: 20),
+                  Icon(Icons.cancel, size: 20),
                   SizedBox(width: 12),
                   Text("Stop Preparation"),
                 ],

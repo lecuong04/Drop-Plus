@@ -43,17 +43,10 @@ class SendView extends StatelessWidget {
                       SendImporting(:final progresses) =>
                         SendImportingStateWidget(progresses: progresses),
                       SendConnecting() => const SendConnectingStateWidget(),
-                      SendReady(
-                        :final ticket,
-                        :final size,
-                        :final addrs,
-                        :final progresses,
-                      ) =>
+                      SendReady(:final result, :final progresses) =>
                         SendReadyStateWidget(
-                          ticket: ticket,
-                          size: size,
+                          result: result,
                           progresses: progresses.toList(),
-                          addrs: addrs,
                         ),
                     },
                   ),

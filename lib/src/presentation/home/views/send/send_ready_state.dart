@@ -5,25 +5,21 @@ import "package:file_sizes/file_sizes.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
-import "package:material_symbols_icons/material_symbols_icons.dart";
 import "package:pretty_qr_code/pretty_qr_code.dart";
 
 import "../../../../../exts.dart";
 import "../../../../../rust/progresses.dart";
+import "../../../../../rust/types.dart";
 import "../../../../cubits/send_cubit.dart";
 
 class SendReadyStateWidget extends StatelessWidget {
+  final SendResult_Ok result;
   final List<ProgressState> progresses;
-  final List<String> addrs;
-  final String ticket;
-  final BigInt size;
 
   const SendReadyStateWidget({
     super.key,
-    required this.ticket,
-    required this.size,
+    required this.result,
     required this.progresses,
-    required this.addrs,
   });
 
   @override
@@ -37,14 +33,17 @@ class SendReadyStateWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _HeaderSection(size: size),
+            _HeaderSection(size: result.size),
             const SizedBox(height: 32),
-            _QrCodeSection(ticket: ticket),
+            _QrCodeSection(ticket: result.ticket),
             const SizedBox(height: 32),
-            _TransferCodeSection(ticketCode: ticket),
-            _ConnectionAddressesSection(addrs: addrs),
+            _TransferCodeSection(ticketCode: result.ticket),
+            _ConnectionAddressesSection(addrs: result.addrs),
             if (progresses.any((p) => p.phase is Phase_Uploading))
-              _ActiveTransfersSection(progresses: progresses, size: size),
+              _ActiveTransfersSection(
+                progresses: progresses,
+                size: result.size,
+              ),
             const SizedBox(height: 24),
             const _FooterSection(),
           ],
@@ -111,7 +110,7 @@ class _ConnectionAddressesSection extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Symbols.link, size: 14, color: colorScheme.secondary),
+                    Icon(Icons.link, size: 14, color: colorScheme.secondary),
                     const SizedBox(width: 8),
                     Text(
                       addr,
@@ -217,14 +216,14 @@ class _ActiveTransfersSectionState extends State<_ActiveTransfersSection> {
             final statusText = "${(percent * 100).toStringAsFixed(1)}%";
 
             var statusColor = colorScheme.primary;
-            var statusIcon = Symbols.package;
+            var statusIcon = Icons.sync;
 
             if (phase.isCompleted) {
               statusColor = Colors.green;
-              statusIcon = Symbols.check_circle;
+              statusIcon = Icons.check_circle;
             } else if (phase.isFailed) {
               statusColor = colorScheme.error;
-              statusIcon = Symbols.error;
+              statusIcon = Icons.error;
             }
 
             return Dismissible(
@@ -294,7 +293,7 @@ class _HeaderSection extends StatelessWidget {
             shape: BoxShape.circle,
           ),
           child: Icon(
-            Symbols.check_circle,
+            Icons.check_circle,
             size: 48,
             color: theme.colorScheme.primary,
           ),
@@ -405,7 +404,7 @@ class _QrCodeSection extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Symbols.download, size: 20),
+                    Icon(Icons.download, size: 20),
                     SizedBox(width: 12),
                     Text("Save Image"),
                   ],
@@ -493,7 +492,7 @@ class _TransferCodeSection extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  Symbols.content_copy,
+                  Icons.content_copy,
                   size: 20,
                   color: theme.colorScheme.primary,
                 ),
@@ -520,7 +519,7 @@ class _TransferCodeSection extends StatelessWidget {
                 ),
               ),
               Icon(
-                Symbols.chevron_right,
+                Icons.chevron_right,
                 size: 20,
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -547,7 +546,7 @@ class _FooterSection extends StatelessWidget {
       children: [
         TextButton.icon(
           onPressed: context.read<SendCubit>().cancel,
-          icon: const Icon(Symbols.close),
+          icon: const Icon(Icons.close),
           label: const Text("Cancel Transfer"),
           style: TextButton.styleFrom(
             iconColor: theme.colorScheme.error,

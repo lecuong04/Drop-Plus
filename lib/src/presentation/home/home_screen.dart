@@ -1,8 +1,8 @@
 import "dart:math";
 
 import "package:flutter/material.dart";
-import "package:material_symbols_icons/material_symbols_icons.dart";
 import "package:particles_flutter/engine.dart";
+
 import "views/settings_view.dart";
 import "views/receive_view.dart";
 import "views/send_view.dart";
@@ -79,18 +79,18 @@ class _HomeScreenState extends State<HomeScreen> {
             setState(() => _selectedIndex = index),
         destinations: const [
           NavigationDestination(
-            icon: Icon(Symbols.upload),
-            selectedIcon: Icon(Symbols.upload),
+            icon: Icon(Icons.upload),
+            selectedIcon: Icon(Icons.upload),
             label: "Send",
           ),
           NavigationDestination(
-            icon: Icon(Symbols.download),
-            selectedIcon: Icon(Symbols.download),
+            icon: Icon(Icons.download),
+            selectedIcon: Icon(Icons.download),
             label: "Receive",
           ),
           NavigationDestination(
-            icon: Icon(Symbols.settings),
-            selectedIcon: Icon(Symbols.settings),
+            icon: Icon(Icons.settings),
+            selectedIcon: Icon(Icons.settings),
             label: "Settings",
           ),
         ],

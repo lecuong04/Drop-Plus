@@ -1,6 +1,5 @@
 import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
-import "package:material_symbols_icons/material_symbols_icons.dart";
 
 import "../../rust/types.dart";
 import "../cubits/tracing_cubit.dart";
@@ -49,7 +48,7 @@ class _LogsScreenState extends State<LogsScreen> {
             : const Text("System Logs"),
         actions: [
           IconButton(
-            icon: Icon(_isSearching ? Symbols.close : Symbols.search),
+            icon: Icon(_isSearching ? Icons.close : Icons.search),
             onPressed: () {
               setState(() {
                 if (_isSearching) {
@@ -61,7 +60,7 @@ class _LogsScreenState extends State<LogsScreen> {
             tooltip: _isSearching ? "Clear search" : "Search logs",
           ),
           IconButton(
-            icon: const Icon(Symbols.delete_sweep),
+            icon: const Icon(Icons.delete_sweep),
             color: theme.colorScheme.error,
             onPressed: () => context.read<TracingCubit>().clear(),
             tooltip: "Clear logs",
@@ -160,9 +159,7 @@ class _LogsScreenState extends State<LogsScreen> {
             child: Badge(
               label: _selectedLevel != null ? Text(_selectedLevel![0]) : null,
               isLabelVisible: _selectedLevel != null && !_isFilterExpanded,
-              child: Icon(
-                _isFilterExpanded ? Symbols.close : Symbols.filter_list,
-              ),
+              child: Icon(_isFilterExpanded ? Icons.close : Icons.filter_list),
             ),
           ),
         ],
@@ -178,7 +175,7 @@ class _LogsScreenState extends State<LogsScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Symbols.terminal,
+            Icons.terminal,
             size: 48,
             color: colorScheme.outline.withValues(alpha: 0.3),
           ),

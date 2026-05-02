@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-import "package:material_symbols_icons/material_symbols_icons.dart";
 
 class SendConnectingStateWidget extends StatelessWidget {
   const SendConnectingStateWidget({super.key});
@@ -40,11 +39,7 @@ class SendConnectingStateWidget extends StatelessWidget {
                     color: colorScheme.primaryContainer.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    Symbols.hub,
-                    size: 32,
-                    color: colorScheme.primary,
-                  ),
+                  child: Icon(Icons.hub, size: 32, color: colorScheme.primary),
                 ),
               ],
             ),
