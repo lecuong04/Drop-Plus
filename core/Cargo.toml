@@ -15,7 +15,7 @@ iroh = { version = "0.98.2", features = [
     "fast-apple-datapath",
     "portmapper",
 ], default-features = false }
-tokio = { version = "1.52.1", features = ["full"] }
+tokio = { version = "1.52.3", features = ["full"] }
 tokio-util = "0.7.18"
 futures-util = "0.3.32"
 futures-buffered = "0.2.13"
@@ -32,6 +32,10 @@ irpc-iroh = "0.14.0"
 serde = { version = "1.0.228", features = ["derive"] }
 getifaddrs = "0.6.1"
 scc = "3.7.0"
+
+[target.'cfg(target_os = "android")'.dependencies]
+jni = "0.22.4"
+ndk-context = "0.1.1"
 
 [profile.release]
 opt-level = 3

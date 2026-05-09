@@ -6,9 +6,11 @@
 import "dart:async";
 import "dart:convert";
 import "dart:ffi" as ffi;
+
+import "package:flutter_rust_bridge/flutter_rust_bridge_for_generated_io.dart";
+
 import "ffi.dart";
 import "frb_generated.dart";
-import "package:flutter_rust_bridge/flutter_rust_bridge_for_generated_io.dart";
 import "progresses.dart";
 import "types.dart";
 

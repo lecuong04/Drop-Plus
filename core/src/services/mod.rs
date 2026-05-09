@@ -52,12 +52,19 @@ pub fn cancel_send(ticket: String) -> Result<()> {
 }
 
 #[instrument(err, skip(stream, result))]
-pub fn receive(ticket: String, download_dir: String, relay: Option<String>, stream: StreamSink<Vec<ProgressState>>, result: StreamSink<ReceiveResult>) -> Result<()> {
+pub fn receive(
+    ticket: String,
+    download_dir: String,
+    temp_dir: Option<String>,
+    relay: Option<String>,
+    stream: StreamSink<Vec<ProgressState>>,
+    result: StreamSink<ReceiveResult>,
+) -> Result<()> {
     let handle = RUNTIME.handle().clone();
     block_in_place(|| {
         handle
             .block_on(async {
-                let args = ReceiveArgs::new(ticket, download_dir, relay)?;
+                let args = ReceiveArgs::new(ticket, download_dir, temp_dir, relay)?;
                 self::receive::start(args, SECRET_KEY.clone(), stream, &result).await
             })
             .inspect_err(|_| {

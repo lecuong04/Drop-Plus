@@ -2,7 +2,9 @@ import "dart:async";
 
 import "package:flutter_bloc/flutter_bloc.dart";
 import "package:flutter_rust_bridge/flutter_rust_bridge.dart";
+import "package:path_provider/path_provider.dart";
 
+import "../../global.dart";
 import "../../rust/progresses.dart";
 import "../../rust/types.dart";
 import "../services/transfer_service.dart";
@@ -74,6 +76,9 @@ class ReceiveCubit extends Cubit<ReceiveState> {
         .receive(
           ticket: ticket,
           downloadDir: downloadDir,
+          tempDir: !isDesktop
+              ? (await getApplicationCacheDirectory()).path
+              : null,
           stream: progressSink,
           result: resultSink,
         )

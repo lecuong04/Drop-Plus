@@ -45,17 +45,27 @@ pub(super) struct ReceiveArgs {
     ticket: BlobTicket,
     relay: RelayMode,
     download_dir: PathBuf,
+    temp_dir: Option<PathBuf>,
 }
 
 impl ReceiveArgs {
-    pub fn new(ticket: String, download_dir: String, relay: Option<String>) -> Result<Self> {
+    pub fn new(ticket: String, download_dir: String, temp_dir: Option<String>, relay: Option<String>) -> Result<Self> {
         let ticket = BlobTicket::from_str(&ticket)?;
         let download_dir = PathBuf::from_str(&download_dir)?;
+        let temp_dir = match temp_dir {
+            Some(temp_dir) => PathBuf::from_str(&temp_dir).ok(),
+            None => None,
+        };
         let relay = relay
             .map(|u| RelayUrl::from_str(&u).map(|url| RelayMode::Custom(RelayMap::from_iter(vec![url]))))
             .transpose()?
             .unwrap_or(RelayMode::Disabled);
-        Ok(Self { download_dir, relay, ticket })
+        Ok(Self {
+            download_dir,
+            relay,
+            ticket,
+            temp_dir,
+        })
     }
 }
 
@@ -82,7 +92,12 @@ fn connect_rpc(endpoint: &Endpoint, addr: &EndpointAddr) -> Client<SendServicePr
 }
 
 pub(super) async fn start(args: ReceiveArgs, secret_key: SecretKey, stream: StreamSink<Vec<ProgressState>>, result: &StreamSink<ReceiveResult>) -> Result<()> {
-    let ReceiveArgs { ticket, relay, download_dir } = args;
+    let ReceiveArgs {
+        ticket,
+        relay,
+        download_dir,
+        temp_dir,
+    } = args;
     let addr = ticket.addr().clone();
     let hash_and_format = ticket.hash_and_format();
     let builder = Endpoint::builder(Minimal)
@@ -102,7 +117,9 @@ pub(super) async fn start(args: ReceiveArgs, secret_key: SecretKey, stream: Stre
     if !accepted {
         return Ok(());
     }
-    let data_dir = download_dir.join(format!(".droplus-recv-{}", hash_and_format.hash.fmt_short().to_lowercase()));
+    let data_dir = temp_dir
+        .unwrap_or(download_dir.clone())
+        .join(format!(".droplus-recv-{}", hash_and_format.hash.fmt_short().to_lowercase()));
     let db = FsStore::load(&data_dir).await?;
     let receive_result = async {
         let cancel = CancellationToken::new();

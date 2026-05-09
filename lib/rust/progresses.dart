@@ -3,9 +3,11 @@
 
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
-import "frb_generated.dart";
 import "package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart";
 import "package:freezed_annotation/freezed_annotation.dart" hide protected;
+
+import "frb_generated.dart";
+
 part "progresses.freezed.dart";
 
 @freezed
@@ -13,15 +15,21 @@ sealed class Phase with _$Phase {
   const Phase._();
 
   const factory Phase.importing({required String name}) = Phase_Importing;
+
   const factory Phase.uploading({
     required String endpoint,
     required bool isCompleted,
     required bool isFailed,
   }) = Phase_Uploading;
+
   const factory Phase.pending() = Phase_Pending;
+
   const factory Phase.connecting() = Phase_Connecting;
+
   const factory Phase.validating() = Phase_Validating;
+
   const factory Phase.downloading() = Phase_Downloading;
+
   const factory Phase.exporting({required String name}) = Phase_Exporting;
 }
 

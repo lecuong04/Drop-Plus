@@ -105,8 +105,15 @@ pub fn cancel_send(ticket: String) -> Result<()> {
 }
 
 #[frb(name = "receive")]
-pub fn receive(ticket: String, download_dir: String, relay: Option<String>, stream: StreamSink<Vec<ProgressState>>, result: StreamSink<ReceiveResult>) -> Result<()> {
-    services::receive(ticket, download_dir, relay, stream, result)
+pub fn receive(
+    ticket: String,
+    download_dir: String,
+    temp_dir: Option<String>,
+    relay: Option<String>,
+    stream: StreamSink<Vec<ProgressState>>,
+    result: StreamSink<ReceiveResult>,
+) -> Result<()> {
+    services::receive(ticket, download_dir, temp_dir, relay, stream, result)
 }
 
 #[frb(name = "acceptReceive")]

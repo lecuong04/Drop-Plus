@@ -5,9 +5,9 @@ import "package:flutter_bloc/flutter_bloc.dart";
 import "package:particles_flutter/engine.dart";
 
 import "../../cubits/settings_cubit.dart";
-import "views/settings_view.dart";
 import "views/receive_view.dart";
 import "views/send_view.dart";
+import "views/settings_view.dart";
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

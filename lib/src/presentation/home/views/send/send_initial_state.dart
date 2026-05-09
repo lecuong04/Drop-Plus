@@ -4,7 +4,9 @@ import "dart:io";
 import "package:file_picker/file_picker.dart";
 import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
+import "package:flutter_file_dialog/flutter_file_dialog.dart";
 
+import "../../../../../global.dart";
 import "../../../../cubits/send_cubit.dart";
 import "../../../../cubits/settings_cubit.dart";
 
@@ -16,8 +18,9 @@ class SendInitialStateWidget extends StatefulWidget {
 }
 
 class _SendInitialStateWidgetState extends State<SendInitialStateWidget> {
-  final HashMap<String, bool> _selectedPath = HashMap<String, bool>();
+  final HashMap<String, bool> _selectedPaths = HashMap<String, bool>();
 
+  bool _isSend = false;
   bool _isPick = false;
 
   @override
@@ -25,7 +28,7 @@ class _SendInitialStateWidgetState extends State<SendInitialStateWidget> {
     return Card.filled(
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-      child: _selectedPath.isEmpty
+      child: _selectedPaths.isEmpty
           ? _buildEmptyState(context)
           : _buildFileListView(context),
     );
@@ -131,7 +134,7 @@ class _SendInitialStateWidgetState extends State<SendInitialStateWidget> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  _selectedPath.length.toString(),
+                  _selectedPaths.length.toString(),
                   style: theme.textTheme.labelMedium?.copyWith(
                     color: theme.colorScheme.onPrimaryContainer,
                     fontWeight: FontWeight.bold,
@@ -144,14 +147,15 @@ class _SendInitialStateWidgetState extends State<SendInitialStateWidget> {
         ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: 320),
           child: ListView.separated(
+            physics: const ClampingScrollPhysics(),
             shrinkWrap: true,
             padding: const EdgeInsets.symmetric(horizontal: 12),
-            itemCount: _selectedPath.length,
+            itemCount: _selectedPaths.length,
             separatorBuilder: (context, index) => const SizedBox(height: 8),
             itemBuilder: (context, index) {
-              final key = _selectedPath.keys.elementAt(index);
+              final key = _selectedPaths.keys.elementAt(index);
               final segments = key.split(Platform.pathSeparator);
-              final isFile = _selectedPath.values.elementAt(index);
+              final isFile = _selectedPaths.values.elementAt(index);
               final name = segments.last;
               final parentPath = segments.length > 1
                   ? segments
@@ -159,71 +163,70 @@ class _SendInitialStateWidgetState extends State<SendInitialStateWidget> {
                         .join(Platform.pathSeparator)
                   : "";
 
-              return Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () {},
-                  borderRadius: BorderRadius.circular(16),
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: theme.colorScheme.outlineVariant.withValues(
-                          alpha: 0.5,
+              return InkWell(
+                onTap: () {},
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: theme.colorScheme.outlineVariant.withValues(
+                        alpha: 0.5,
+                      ),
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          isFile ? Icons.description : Icons.folder,
+                          color: theme.colorScheme.primary,
+                          size: 24,
+                          weight: 300,
                         ),
                       ),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(
-                            isFile ? Icons.description : Icons.folder,
-                            color: theme.colorScheme.primary,
-                            size: 24,
-                            weight: 300,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                name,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.labelLarge?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                fontWeight: FontWeight.w600,
                               ),
-                              if (parentPath.isNotEmpty)
-                                Text(
+                            ),
+                            if (parentPath.isNotEmpty)
+                              SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Text(
                                   parentPath,
                                   maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     color: theme.colorScheme.onSurfaceVariant,
                                   ),
                                 ),
-                            ],
-                          ),
+                              ),
+                          ],
                         ),
-                        IconButton(
-                          visualDensity: VisualDensity.compact,
-                          icon: const Icon(Icons.close, size: 20),
-                          onPressed: () {
-                            setState(() => _selectedPath.remove(key));
-                          },
-                          color: theme.colorScheme.error,
-                        ),
-                      ],
-                    ),
+                      ),
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
+                        icon: const Icon(Icons.close, size: 20),
+                        onPressed: () {
+                          setState(() => _selectedPaths.remove(key));
+                        },
+                        color: theme.colorScheme.error,
+                      ),
+                    ],
                   ),
                 ),
               );
@@ -236,7 +239,7 @@ class _SendInitialStateWidgetState extends State<SendInitialStateWidget> {
           child: Row(
             children: [
               TextButton.icon(
-                onPressed: () => setState(() => _selectedPath.clear()),
+                onPressed: () => setState(() => _selectedPaths.clear()),
                 icon: const Icon(Icons.delete_sweep, size: 20),
                 label: const Text("Clear All"),
                 style: TextButton.styleFrom(
@@ -246,16 +249,7 @@ class _SendInitialStateWidgetState extends State<SendInitialStateWidget> {
               ),
               const Spacer(),
               FilledButton.icon(
-                onPressed: () {
-                  final state = context.read<SettingsCubit>().state;
-                  context.read<SendCubit>().startSend(
-                    _selectedPath.keys.toList(),
-                    ipv4Addr: state.ipv4Addr,
-                    ipv6Addr: state.ipv6Addr,
-                    port: state.port,
-                    relay: state.relay,
-                  );
-                },
+                onPressed: !_isSend ? _handleSend : null,
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,
@@ -272,6 +266,19 @@ class _SendInitialStateWidgetState extends State<SendInitialStateWidget> {
     );
   }
 
+  void _handleSend() async {
+    setState(() => _isSend = true);
+    final state = context.read<SettingsCubit>().state;
+    context.read<SendCubit>().startSend(
+      _selectedPaths,
+      ipv4Addr: state.ipv4Addr,
+      ipv6Addr: state.ipv6Addr,
+      port: state.port,
+      relay: state.relay,
+    );
+    setState(() => _isSend = false);
+  }
+
   void _handlePickFiles() async {
     setState(() => _isPick = true);
     final res = await FilePicker.pickFiles(
@@ -280,19 +287,26 @@ class _SendInitialStateWidgetState extends State<SendInitialStateWidget> {
       lockParentWindow: true,
     );
     for (final path in res?.xFiles.map((e) => e.path).toList() ?? <String>[]) {
-      _selectedPath[path] = true;
+      _selectedPaths[path] = true;
     }
     setState(() => _isPick = false);
   }
 
   void _handlePickDir() async {
     setState(() => _isPick = true);
-    final res = await FilePicker.getDirectoryPath(
-      dialogTitle: "Select folder to share",
-      lockParentWindow: true,
-    );
-    if (res != null) {
-      _selectedPath[res] = false;
+    if (isDesktop) {
+      final res = await FilePicker.getDirectoryPath(
+        dialogTitle: "Select folder to share",
+        lockParentWindow: true,
+      );
+      if (res != null) {
+        _selectedPaths[res] = false;
+      }
+    } else {
+      final res = await FlutterFileDialog.pickDirectory();
+      if (res != null) {
+        _selectedPaths[res.toString()] = false;
+      }
     }
     setState(() => _isPick = false);
   }

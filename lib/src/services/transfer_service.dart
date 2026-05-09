@@ -29,6 +29,7 @@ class TransferService {
 
   Future<void> receive({
     String? relay,
+    String? tempDir,
     required String ticket,
     required String downloadDir,
     required RustStreamSink<List<ProgressState>> stream,
@@ -37,6 +38,7 @@ class TransferService {
     await ffi.receive(
       relay: relay,
       ticket: ticket,
+      tempDir: tempDir,
       downloadDir: downloadDir,
       stream: stream,
       result: result,

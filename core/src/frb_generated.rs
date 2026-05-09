@@ -250,13 +250,14 @@ fn wire__crate__ffi__receive_impl(
             let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_ticket = <String>::sse_decode(&mut deserializer);
             let api_download_dir = <String>::sse_decode(&mut deserializer);
+            let api_temp_dir = <Option<String>>::sse_decode(&mut deserializer);
             let api_relay = <Option<String>>::sse_decode(&mut deserializer);
             let api_stream = <StreamSink<Vec<crate::progresses::ProgressState>, flutter_rust_bridge::for_generated::SseCodec>>::sse_decode(&mut deserializer);
             let api_result = <StreamSink<crate::types::ReceiveResult, flutter_rust_bridge::for_generated::SseCodec>>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>((move || {
-                    let output_ok = crate::ffi::receive(api_ticket, api_download_dir, api_relay, api_stream, api_result)?;
+                    let output_ok = crate::ffi::receive(api_ticket, api_download_dir, api_temp_dir, api_relay, api_stream, api_result)?;
                     Ok(output_ok)
                 })())
             }

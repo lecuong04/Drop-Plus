@@ -1,8 +1,8 @@
 import "package:file_picker/file_picker.dart";
-import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
 
+import "../../../../global.dart";
 import "../../../../rust/types.dart";
 import "../../../cubits/settings_cubit.dart";
 import "../../logs_screen.dart";
@@ -15,12 +15,6 @@ class SettingsView extends StatefulWidget {
 }
 
 class _SettingsViewState extends State<SettingsView> {
-  final bool _isSupportNetwork = {
-    TargetPlatform.windows,
-    TargetPlatform.linux,
-    TargetPlatform.macOS,
-  }.contains(defaultTargetPlatform);
-
   static const double maxWidth = 600;
 
   bool _isPick = false;
@@ -389,15 +383,11 @@ class _SettingsViewState extends State<SettingsView> {
               child: Icon(Icons.folder_open, color: colorScheme.primary),
             ),
             title: const Text("Download Directory"),
-            subtitle: Text(
-              state.downloadFolder ?? "Not set",
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+            subtitle: Text(state.downloadFolder ?? "Not set"),
             trailing: const Icon(Icons.chevron_right, size: 20),
             onTap: !_isPick ? _pickDownloadDirectory : null,
           ),
-          if (_isSupportNetwork) ...[
+          if (isDesktop) ...[
             const Divider(height: 1, indent: 72),
             ListTile(
               contentPadding: const EdgeInsets.symmetric(
@@ -436,35 +426,35 @@ class _SettingsViewState extends State<SettingsView> {
               trailing: const Icon(Icons.chevron_right, size: 20),
               onTap: _showAddressSelection,
             ),
-            const Divider(height: 1, indent: 72),
-            ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 8,
-              ),
-              leading: Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(Icons.share, color: colorScheme.primary),
-              ),
-              title: const Text("Relay Mode"),
-              subtitle: Text(
-                state.relay.maybeMap(
-                  disabled: (_) => "Disabled",
-                  n0: (_) => "Default (N0)",
-                  custom: (c) => "Custom: ${c.url}",
-                  orElse: () => "Unknown",
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              trailing: const Icon(Icons.chevron_right, size: 20),
-              onTap: _showRelaySelection,
-            ),
           ],
+          const Divider(height: 1, indent: 72),
+          ListTile(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 8,
+            ),
+            leading: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: colorScheme.primaryContainer.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(Icons.share, color: colorScheme.primary),
+            ),
+            title: const Text("Relay Mode"),
+            subtitle: Text(
+              state.relay.maybeMap(
+                disabled: (_) => "Disabled",
+                n0: (_) => "Default (N0)",
+                custom: (c) => "Custom: ${c.url}",
+                orElse: () => "Unknown",
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            trailing: const Icon(Icons.chevron_right, size: 20),
+            onTap: _showRelaySelection,
+          ),
           const Divider(height: 1, indent: 72),
           SwitchListTile(
             contentPadding: const EdgeInsets.symmetric(

@@ -3,8 +3,9 @@
 
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
-import "frb_generated.dart";
 import "package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart";
+
+import "frb_generated.dart";
 import "progresses.dart";
 import "types.dart";
 
@@ -36,12 +37,14 @@ Future<void> cancelSend({required String ticket}) =>
 Future<void> receive({
   required String ticket,
   required String downloadDir,
+  String? tempDir,
   String? relay,
   required RustStreamSink<List<ProgressState>> stream,
   required RustStreamSink<ReceiveResult> result,
 }) => RustLib.instance.api.crateFfiReceive(
   ticket: ticket,
   downloadDir: downloadDir,
+  tempDir: tempDir,
   relay: relay,
   stream: stream,
   result: result,

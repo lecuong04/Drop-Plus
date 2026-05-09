@@ -1,7 +1,9 @@
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
 
 import "exts.dart";
+import "global.dart";
 import "rust/frb_generated.dart";
 import "src/app_theme.dart";
 import "src/cubits/settings_cubit.dart";
@@ -10,8 +12,6 @@ import "src/presentation/home/home_screen.dart";
 import "src/services/other_service.dart";
 import "src/services/tracing_service.dart";
 import "src/services/transfer_service.dart";
-
-final navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,16 +54,10 @@ class MainApp extends StatelessWidget {
             return MaterialApp(
               navigatorKey: navigatorKey,
               title: "Drop Plus",
-              debugShowCheckedModeBanner: false,
+              debugShowCheckedModeBanner: kDebugMode,
               theme: AppTheme.light,
               darkTheme: AppTheme.dark,
               themeMode: state.themeMode,
-              builder: (context, child) {
-                return ScrollConfiguration(
-                  behavior: const ScrollBehavior().copyWith(scrollbars: true),
-                  child: child!,
-                );
-              },
               home: const HomeScreen(),
             );
           },

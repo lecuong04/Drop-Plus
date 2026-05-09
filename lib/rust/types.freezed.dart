@@ -11,58 +11,138 @@ part of 'types.dart';
 
 // dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$ReceiveResult {
 
 
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is ReceiveResult);
+  }
 
 
+  @override
+  int get hashCode => runtimeType.hashCode;
 
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReceiveResult);
-}
-
-
-@override
-int get hashCode => runtimeType.hashCode;
-
-@override
-String toString() {
-  return 'ReceiveResult()';
-}
+  @override
+  String toString() {
+    return 'ReceiveResult()';
+  }
 
 
 }
 
 /// @nodoc
-class $ReceiveResultCopyWith<$Res>  {
-$ReceiveResultCopyWith(ReceiveResult _, $Res Function(ReceiveResult) __);
+class $ReceiveResultCopyWith<$Res> {
+  $ReceiveResultCopyWith(ReceiveResult _, $Res Function(ReceiveResult) __);
 }
 
 
 /// Adds pattern-matching-related methods to [ReceiveResult].
 extension ReceiveResultPatterns on ReceiveResult {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( ReceiveResult_Pending value)?  pending,TResult Function( ReceiveResult_Ok value)?  ok,TResult Function( ReceiveResult_Err value)?  err,required TResult orElse(),}){
+  @optionalTypeArgs TResult maybeMap
+
+  <
+
+  TResult
+
+  extends
+
+  Object?
+
+  >
+
+  (
+
+  {
+
+  TResult
+
+  Function
+
+  (
+
+  ReceiveResult_Pending
+
+  value
+
+  )
+
+  ?
+
+  pending
+
+  ,
+
+  TResult
+
+  Function
+
+  (
+
+  ReceiveResult_Ok
+
+  value
+
+  )
+
+  ?
+
+  ok
+
+  ,
+
+  TResult
+
+  Function
+
+  (
+
+  ReceiveResult_Err
+
+  value
+
+  )
+
+  ?
+
+  err
+
+  ,
+
+  required
+
+  TResult
+
+  orElse
+
+  (
+
+  )
+
+  ,
+}){
 final _that = this;
 switch (_that) {
 case ReceiveResult_Pending() when pending != null:
 return pending(_that);case ReceiveResult_Ok() when ok != null:
 return ok(_that);case ReceiveResult_Err() when err != null:
 return err(_that);case _:
-  return orElse();
+return orElse();
 
 }
 }
@@ -79,14 +159,20 @@ return err(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( ReceiveResult_Pending value)  pending,required TResult Function( ReceiveResult_Ok value)  ok,required TResult Function( ReceiveResult_Err value)  err,}){
-final _that = this;
-switch (_that) {
-case ReceiveResult_Pending():
-return pending(_that);case ReceiveResult_Ok():
-return ok(_that);case ReceiveResult_Err():
-return err(_that);}
+@optionalTypeArgs
+TResult map<TResult extends Object?>(
+    {required TResult Function( ReceiveResult_Pending value) pending, required TResult Function( ReceiveResult_Ok value) ok, required TResult Function( ReceiveResult_Err value) err,}) {
+  final _that = this;
+  switch (_that) {
+    case ReceiveResult_Pending():
+      return pending(_that);
+    case ReceiveResult_Ok():
+      return ok(_that);
+    case ReceiveResult_Err():
+      return err(_that);
+  }
 }
+
 /// A variant of `map` that fallback to returning `null`.
 ///
 /// It is equivalent to doing:
@@ -99,17 +185,22 @@ return err(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( ReceiveResult_Pending value)?  pending,TResult? Function( ReceiveResult_Ok value)?  ok,TResult? Function( ReceiveResult_Err value)?  err,}){
-final _that = this;
-switch (_that) {
-case ReceiveResult_Pending() when pending != null:
-return pending(_that);case ReceiveResult_Ok() when ok != null:
-return ok(_that);case ReceiveResult_Err() when err != null:
-return err(_that);case _:
-  return null;
+@optionalTypeArgs
+TResult? mapOrNull<TResult extends Object?>(
+    {TResult? Function( ReceiveResult_Pending value)? pending, TResult? Function( ReceiveResult_Ok value)? ok, TResult? Function( ReceiveResult_Err value)? err,}) {
+  final _that = this;
+  switch (_that) {
+    case ReceiveResult_Pending() when pending != null:
+      return pending(_that);
+    case ReceiveResult_Ok() when ok != null:
+      return ok(_that);
+    case ReceiveResult_Err() when err != null:
+      return err(_that);
+    case _:
+      return null;
+  }
+}
 
-}
-}
 /// A variant of `when` that fallback to an `orElse` callback.
 ///
 /// It is equivalent to doing:
@@ -122,13 +213,53 @@ return err(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( List<BlobInfo> files)?  pending,TResult Function( BigInt totalFiles,  BigInt payloadSize,  BigInt elapsedSecs)?  ok,TResult Function()?  err,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen
+<
+TResult extends Object?>(
+{
+TResult
+Function
+(
+List
+<
+BlobInfo
+>
+files
+)
+?
+pending
+,
+TResult
+Function
+(
+BigInt
+totalFiles
+,
+BigInt
+payloadSize
+,
+BigInt
+elapsedSecs
+)
+?
+ok
+,
+TResult
+Function
+(
+)
+?
+err
+,
+required
+TResult
+orElse(),}) {final _that = this;
 switch (_that) {
 case ReceiveResult_Pending() when pending != null:
 return pending(_that.files);case ReceiveResult_Ok() when ok != null:
 return ok(_that.totalFiles,_that.payloadSize,_that.elapsedSecs);case ReceiveResult_Err() when err != null:
 return err();case _:
-  return orElse();
+return orElse();
 
 }
 }
@@ -145,7 +276,7 @@ return err();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( List<BlobInfo> files)  pending,required TResult Function( BigInt totalFiles,  BigInt payloadSize,  BigInt elapsedSecs)  ok,required TResult Function()  err,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( List<BlobInfo> files) pending,required TResult Function( BigInt totalFiles, BigInt payloadSize, BigInt elapsedSecs) ok,required TResult Function() err,}) {final _that = this;
 switch (_that) {
 case ReceiveResult_Pending():
 return pending(_that.files);case ReceiveResult_Ok():
@@ -164,13 +295,13 @@ return err();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( List<BlobInfo> files)?  pending,TResult? Function( BigInt totalFiles,  BigInt payloadSize,  BigInt elapsedSecs)?  ok,TResult? Function()?  err,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( List<BlobInfo> files)? pending,TResult? Function( BigInt totalFiles, BigInt payloadSize, BigInt elapsedSecs)? ok,TResult? Function()? err,}) {final _that = this;
 switch (_that) {
 case ReceiveResult_Pending() when pending != null:
 return pending(_that.files);case ReceiveResult_Ok() when ok != null:
 return ok(_that.totalFiles,_that.payloadSize,_that.elapsedSecs);case ReceiveResult_Err() when err != null:
 return err();case _:
-  return null;
+return null;
 
 }
 }
@@ -181,14 +312,14 @@ return err();case _:
 
 
 class ReceiveResult_Pending extends ReceiveResult {
-  const ReceiveResult_Pending({required final  List<BlobInfo> files}): _files = files,super._();
-  
+const ReceiveResult_Pending({required final List<BlobInfo> files}): _files = files,super._();
 
- final  List<BlobInfo> _files;
- List<BlobInfo> get files {
-  if (_files is EqualUnmodifiableListView) return _files;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_files);
+
+final List<BlobInfo> _files;
+List<BlobInfo> get files {
+if (_files is EqualUnmodifiableListView) return _files;
+// ignore: implicit_dynamic_type
+return EqualUnmodifiableListView(_files);
 }
 
 
@@ -199,10 +330,9 @@ class ReceiveResult_Pending extends ReceiveResult {
 $ReceiveResult_PendingCopyWith<ReceiveResult_Pending> get copyWith => _$ReceiveResult_PendingCopyWithImpl<ReceiveResult_Pending>(this, _$identity);
 
 
-
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReceiveResult_Pending&&const DeepCollectionEquality().equals(other._files, _files));
+return identical(this, other) || (other.runtimeType == runtimeType&&other is ReceiveResult_Pending&&const DeepCollectionEquality().equals(other._files, _files));
 }
 
 
@@ -211,7 +341,7 @@ int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(
 
 @override
 String toString() {
-  return 'ReceiveResult.pending(files: $files)';
+return 'ReceiveResult.pending(files: $files)';
 }
 
 
@@ -219,31 +349,29 @@ String toString() {
 
 /// @nodoc
 abstract mixin class $ReceiveResult_PendingCopyWith<$Res> implements $ReceiveResultCopyWith<$Res> {
-  factory $ReceiveResult_PendingCopyWith(ReceiveResult_Pending value, $Res Function(ReceiveResult_Pending) _then) = _$ReceiveResult_PendingCopyWithImpl;
+factory $ReceiveResult_PendingCopyWith(ReceiveResult_Pending value, $Res Function(ReceiveResult_Pending) _then) = _$ReceiveResult_PendingCopyWithImpl;
 @useResult
 $Res call({
- List<BlobInfo> files
+List<BlobInfo> files
 });
-
-
 
 
 }
 /// @nodoc
 class _$ReceiveResult_PendingCopyWithImpl<$Res>
-    implements $ReceiveResult_PendingCopyWith<$Res> {
-  _$ReceiveResult_PendingCopyWithImpl(this._self, this._then);
+implements $ReceiveResult_PendingCopyWith<$Res> {
+_$ReceiveResult_PendingCopyWithImpl(this._self, this._then);
 
-  final ReceiveResult_Pending _self;
-  final $Res Function(ReceiveResult_Pending) _then;
+final ReceiveResult_Pending _self;
+final $Res Function(ReceiveResult_Pending) _then;
 
 /// Create a copy of ReceiveResult
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? files = null,}) {
-  return _then(ReceiveResult_Pending(
+return _then(ReceiveResult_Pending(
 files: null == files ? _self._files : files // ignore: cast_nullable_to_non_nullable
 as List<BlobInfo>,
-  ));
+));
 }
 
 
@@ -253,12 +381,12 @@ as List<BlobInfo>,
 
 
 class ReceiveResult_Ok extends ReceiveResult {
-  const ReceiveResult_Ok({required this.totalFiles, required this.payloadSize, required this.elapsedSecs}): super._();
-  
+const ReceiveResult_Ok({required this.totalFiles, required this.payloadSize, required this.elapsedSecs}): super._();
 
- final  BigInt totalFiles;
- final  BigInt payloadSize;
- final  BigInt elapsedSecs;
+
+final BigInt totalFiles;
+final BigInt payloadSize;
+final BigInt elapsedSecs;
 
 /// Create a copy of ReceiveResult
 /// with the given fields replaced by the non-null parameter values.
@@ -267,10 +395,9 @@ class ReceiveResult_Ok extends ReceiveResult {
 $ReceiveResult_OkCopyWith<ReceiveResult_Ok> get copyWith => _$ReceiveResult_OkCopyWithImpl<ReceiveResult_Ok>(this, _$identity);
 
 
-
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReceiveResult_Ok&&(identical(other.totalFiles, totalFiles) || other.totalFiles == totalFiles)&&(identical(other.payloadSize, payloadSize) || other.payloadSize == payloadSize)&&(identical(other.elapsedSecs, elapsedSecs) || other.elapsedSecs == elapsedSecs));
+return identical(this, other) || (other.runtimeType == runtimeType&&other is ReceiveResult_Ok&&(identical(other.totalFiles, totalFiles) || other.totalFiles == totalFiles)&&(identical(other.payloadSize, payloadSize) || other.payloadSize == payloadSize)&&(identical(other.elapsedSecs, elapsedSecs) || other.elapsedSecs == elapsedSecs));
 }
 
 
@@ -279,7 +406,7 @@ int get hashCode => Object.hash(runtimeType,totalFiles,payloadSize,elapsedSecs);
 
 @override
 String toString() {
-  return 'ReceiveResult.ok(totalFiles: $totalFiles, payloadSize: $payloadSize, elapsedSecs: $elapsedSecs)';
+return 'ReceiveResult.ok(totalFiles: $totalFiles, payloadSize: $payloadSize, elapsedSecs: $elapsedSecs)';
 }
 
 
@@ -287,33 +414,31 @@ String toString() {
 
 /// @nodoc
 abstract mixin class $ReceiveResult_OkCopyWith<$Res> implements $ReceiveResultCopyWith<$Res> {
-  factory $ReceiveResult_OkCopyWith(ReceiveResult_Ok value, $Res Function(ReceiveResult_Ok) _then) = _$ReceiveResult_OkCopyWithImpl;
+factory $ReceiveResult_OkCopyWith(ReceiveResult_Ok value, $Res Function(ReceiveResult_Ok) _then) = _$ReceiveResult_OkCopyWithImpl;
 @useResult
 $Res call({
- BigInt totalFiles, BigInt payloadSize, BigInt elapsedSecs
+BigInt totalFiles, BigInt payloadSize, BigInt elapsedSecs
 });
-
-
 
 
 }
 /// @nodoc
 class _$ReceiveResult_OkCopyWithImpl<$Res>
-    implements $ReceiveResult_OkCopyWith<$Res> {
-  _$ReceiveResult_OkCopyWithImpl(this._self, this._then);
+implements $ReceiveResult_OkCopyWith<$Res> {
+_$ReceiveResult_OkCopyWithImpl(this._self, this._then);
 
-  final ReceiveResult_Ok _self;
-  final $Res Function(ReceiveResult_Ok) _then;
+final ReceiveResult_Ok _self;
+final $Res Function(ReceiveResult_Ok) _then;
 
 /// Create a copy of ReceiveResult
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? totalFiles = null,Object? payloadSize = null,Object? elapsedSecs = null,}) {
-  return _then(ReceiveResult_Ok(
+return _then(ReceiveResult_Ok(
 totalFiles: null == totalFiles ? _self.totalFiles : totalFiles // ignore: cast_nullable_to_non_nullable
 as BigInt,payloadSize: null == payloadSize ? _self.payloadSize : payloadSize // ignore: cast_nullable_to_non_nullable
 as BigInt,elapsedSecs: null == elapsedSecs ? _self.elapsedSecs : elapsedSecs // ignore: cast_nullable_to_non_nullable
 as BigInt,
-  ));
+));
 }
 
 
@@ -323,17 +448,12 @@ as BigInt,
 
 
 class ReceiveResult_Err extends ReceiveResult {
-  const ReceiveResult_Err(): super._();
-  
-
-
-
-
+const ReceiveResult_Err(): super._();
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReceiveResult_Err);
+return identical(this, other) || (other.runtimeType == runtimeType&&other is ReceiveResult_Err);
 }
 
 
@@ -342,25 +462,20 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'ReceiveResult.err()';
+return 'ReceiveResult.err()';
 }
 
 
 }
-
-
 
 
 /// @nodoc
 mixin _$RelayModeOption {
 
 
-
-
-
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RelayModeOption);
+return identical(this, other) || (other.runtimeType == runtimeType&&other is RelayModeOption);
 }
 
 
@@ -369,14 +484,14 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'RelayModeOption()';
+return 'RelayModeOption()';
 }
 
 
 }
 
 /// @nodoc
-class $RelayModeOptionCopyWith<$Res>  {
+class $RelayModeOptionCopyWith<$Res> {
 $RelayModeOptionCopyWith(RelayModeOption _, $Res Function(RelayModeOption) __);
 }
 
@@ -395,14 +510,14 @@ extension RelayModeOptionPatterns on RelayModeOption {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( RelayModeOption_Disabled value)?  disabled,TResult Function( RelayModeOption_N0 value)?  n0,TResult Function( RelayModeOption_Custom value)?  custom,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( RelayModeOption_Disabled value)? disabled,TResult Function( RelayModeOption_N0 value)? n0,TResult Function( RelayModeOption_Custom value)? custom,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case RelayModeOption_Disabled() when disabled != null:
 return disabled(_that);case RelayModeOption_N0() when n0 != null:
 return n0(_that);case RelayModeOption_Custom() when custom != null:
 return custom(_that);case _:
-  return orElse();
+return orElse();
 
 }
 }
@@ -419,7 +534,7 @@ return custom(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( RelayModeOption_Disabled value)  disabled,required TResult Function( RelayModeOption_N0 value)  n0,required TResult Function( RelayModeOption_Custom value)  custom,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( RelayModeOption_Disabled value) disabled,required TResult Function( RelayModeOption_N0 value) n0,required TResult Function( RelayModeOption_Custom value) custom,}){
 final _that = this;
 switch (_that) {
 case RelayModeOption_Disabled():
@@ -439,14 +554,14 @@ return custom(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( RelayModeOption_Disabled value)?  disabled,TResult? Function( RelayModeOption_N0 value)?  n0,TResult? Function( RelayModeOption_Custom value)?  custom,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( RelayModeOption_Disabled value)? disabled,TResult? Function( RelayModeOption_N0 value)? n0,TResult? Function( RelayModeOption_Custom value)? custom,}){
 final _that = this;
 switch (_that) {
 case RelayModeOption_Disabled() when disabled != null:
 return disabled(_that);case RelayModeOption_N0() when n0 != null:
 return n0(_that);case RelayModeOption_Custom() when custom != null:
 return custom(_that);case _:
-  return null;
+return null;
 
 }
 }
@@ -462,13 +577,13 @@ return custom(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  disabled,TResult Function()?  n0,TResult Function( String url)?  custom,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()? disabled,TResult Function()? n0,TResult Function( String url)? custom,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case RelayModeOption_Disabled() when disabled != null:
 return disabled();case RelayModeOption_N0() when n0 != null:
 return n0();case RelayModeOption_Custom() when custom != null:
 return custom(_that.url);case _:
-  return orElse();
+return orElse();
 
 }
 }
@@ -485,7 +600,7 @@ return custom(_that.url);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  disabled,required TResult Function()  n0,required TResult Function( String url)  custom,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function() disabled,required TResult Function() n0,required TResult Function( String url) custom,}) {final _that = this;
 switch (_that) {
 case RelayModeOption_Disabled():
 return disabled();case RelayModeOption_N0():
@@ -504,13 +619,13 @@ return custom(_that.url);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  disabled,TResult? Function()?  n0,TResult? Function( String url)?  custom,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()? disabled,TResult? Function()? n0,TResult? Function( String url)? custom,}) {final _that = this;
 switch (_that) {
 case RelayModeOption_Disabled() when disabled != null:
 return disabled();case RelayModeOption_N0() when n0 != null:
 return n0();case RelayModeOption_Custom() when custom != null:
 return custom(_that.url);case _:
-  return null;
+return null;
 
 }
 }
@@ -521,17 +636,12 @@ return custom(_that.url);case _:
 
 
 class RelayModeOption_Disabled extends RelayModeOption {
-  const RelayModeOption_Disabled(): super._();
-  
-
-
-
-
+const RelayModeOption_Disabled(): super._();
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RelayModeOption_Disabled);
+return identical(this, other) || (other.runtimeType == runtimeType&&other is RelayModeOption_Disabled);
 }
 
 
@@ -540,30 +650,23 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'RelayModeOption.disabled()';
+return 'RelayModeOption.disabled()';
 }
 
 
 }
-
-
 
 
 /// @nodoc
 
 
 class RelayModeOption_N0 extends RelayModeOption {
-  const RelayModeOption_N0(): super._();
-  
-
-
-
-
+const RelayModeOption_N0(): super._();
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RelayModeOption_N0);
+return identical(this, other) || (other.runtimeType == runtimeType&&other is RelayModeOption_N0);
 }
 
 
@@ -572,23 +675,21 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'RelayModeOption.n0()';
+return 'RelayModeOption.n0()';
 }
 
 
 }
-
-
 
 
 /// @nodoc
 
 
 class RelayModeOption_Custom extends RelayModeOption {
-  const RelayModeOption_Custom({required this.url}): super._();
-  
+const RelayModeOption_Custom({required this.url}): super._();
 
- final  String url;
+
+final String url;
 
 /// Create a copy of RelayModeOption
 /// with the given fields replaced by the non-null parameter values.
@@ -597,10 +698,9 @@ class RelayModeOption_Custom extends RelayModeOption {
 $RelayModeOption_CustomCopyWith<RelayModeOption_Custom> get copyWith => _$RelayModeOption_CustomCopyWithImpl<RelayModeOption_Custom>(this, _$identity);
 
 
-
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RelayModeOption_Custom&&(identical(other.url, url) || other.url == url));
+return identical(this, other) || (other.runtimeType == runtimeType&&other is RelayModeOption_Custom&&(identical(other.url, url) || other.url == url));
 }
 
 
@@ -609,7 +709,7 @@ int get hashCode => Object.hash(runtimeType,url);
 
 @override
 String toString() {
-  return 'RelayModeOption.custom(url: $url)';
+return 'RelayModeOption.custom(url: $url)';
 }
 
 
@@ -617,31 +717,29 @@ String toString() {
 
 /// @nodoc
 abstract mixin class $RelayModeOption_CustomCopyWith<$Res> implements $RelayModeOptionCopyWith<$Res> {
-  factory $RelayModeOption_CustomCopyWith(RelayModeOption_Custom value, $Res Function(RelayModeOption_Custom) _then) = _$RelayModeOption_CustomCopyWithImpl;
+factory $RelayModeOption_CustomCopyWith(RelayModeOption_Custom value, $Res Function(RelayModeOption_Custom) _then) = _$RelayModeOption_CustomCopyWithImpl;
 @useResult
 $Res call({
- String url
+String url
 });
-
-
 
 
 }
 /// @nodoc
 class _$RelayModeOption_CustomCopyWithImpl<$Res>
-    implements $RelayModeOption_CustomCopyWith<$Res> {
-  _$RelayModeOption_CustomCopyWithImpl(this._self, this._then);
+implements $RelayModeOption_CustomCopyWith<$Res> {
+_$RelayModeOption_CustomCopyWithImpl(this._self, this._then);
 
-  final RelayModeOption_Custom _self;
-  final $Res Function(RelayModeOption_Custom) _then;
+final RelayModeOption_Custom _self;
+final $Res Function(RelayModeOption_Custom) _then;
 
 /// Create a copy of RelayModeOption
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? url = null,}) {
-  return _then(RelayModeOption_Custom(
+return _then(RelayModeOption_Custom(
 url: null == url ? _self.url : url // ignore: cast_nullable_to_non_nullable
 as String,
-  ));
+));
 }
 
 
@@ -651,12 +749,9 @@ as String,
 mixin _$SendResult {
 
 
-
-
-
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SendResult);
+return identical(this, other) || (other.runtimeType == runtimeType&&other is SendResult);
 }
 
 
@@ -665,14 +760,14 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'SendResult()';
+return 'SendResult()';
 }
 
 
 }
 
 /// @nodoc
-class $SendResultCopyWith<$Res>  {
+class $SendResultCopyWith<$Res> {
 $SendResultCopyWith(SendResult _, $Res Function(SendResult) __);
 }
 
@@ -691,13 +786,13 @@ extension SendResultPatterns on SendResult {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( SendResult_Ok value)?  ok,TResult Function( SendResult_Err value)?  err,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( SendResult_Ok value)? ok,TResult Function( SendResult_Err value)? err,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case SendResult_Ok() when ok != null:
 return ok(_that);case SendResult_Err() when err != null:
 return err(_that);case _:
-  return orElse();
+return orElse();
 
 }
 }
@@ -714,7 +809,7 @@ return err(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( SendResult_Ok value)  ok,required TResult Function( SendResult_Err value)  err,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( SendResult_Ok value) ok,required TResult Function( SendResult_Err value) err,}){
 final _that = this;
 switch (_that) {
 case SendResult_Ok():
@@ -733,13 +828,13 @@ return err(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( SendResult_Ok value)?  ok,TResult? Function( SendResult_Err value)?  err,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( SendResult_Ok value)? ok,TResult? Function( SendResult_Err value)? err,}){
 final _that = this;
 switch (_that) {
 case SendResult_Ok() when ok != null:
 return ok(_that);case SendResult_Err() when err != null:
 return err(_that);case _:
-  return null;
+return null;
 
 }
 }
@@ -755,12 +850,12 @@ return err(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String ticket,  BigInt size,  List<String> addrs)?  ok,TResult Function()?  err,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String ticket, BigInt size, List<String> addrs)? ok,TResult Function()? err,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case SendResult_Ok() when ok != null:
 return ok(_that.ticket,_that.size,_that.addrs);case SendResult_Err() when err != null:
 return err();case _:
-  return orElse();
+return orElse();
 
 }
 }
@@ -777,7 +872,7 @@ return err();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String ticket,  BigInt size,  List<String> addrs)  ok,required TResult Function()  err,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String ticket, BigInt size, List<String> addrs) ok,required TResult Function() err,}) {final _that = this;
 switch (_that) {
 case SendResult_Ok():
 return ok(_that.ticket,_that.size,_that.addrs);case SendResult_Err():
@@ -795,12 +890,12 @@ return err();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String ticket,  BigInt size,  List<String> addrs)?  ok,TResult? Function()?  err,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String ticket, BigInt size, List<String> addrs)? ok,TResult? Function()? err,}) {final _that = this;
 switch (_that) {
 case SendResult_Ok() when ok != null:
 return ok(_that.ticket,_that.size,_that.addrs);case SendResult_Err() when err != null:
 return err();case _:
-  return null;
+return null;
 
 }
 }
@@ -811,16 +906,16 @@ return err();case _:
 
 
 class SendResult_Ok extends SendResult {
-  const SendResult_Ok({required this.ticket, required this.size, required final  List<String> addrs}): _addrs = addrs,super._();
-  
+const SendResult_Ok({required this.ticket, required this.size, required final List<String> addrs}): _addrs = addrs,super._();
 
- final  String ticket;
- final  BigInt size;
- final  List<String> _addrs;
- List<String> get addrs {
-  if (_addrs is EqualUnmodifiableListView) return _addrs;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_addrs);
+
+final String ticket;
+final BigInt size;
+final List<String> _addrs;
+List<String> get addrs {
+if (_addrs is EqualUnmodifiableListView) return _addrs;
+// ignore: implicit_dynamic_type
+return EqualUnmodifiableListView(_addrs);
 }
 
 
@@ -831,10 +926,9 @@ class SendResult_Ok extends SendResult {
 $SendResult_OkCopyWith<SendResult_Ok> get copyWith => _$SendResult_OkCopyWithImpl<SendResult_Ok>(this, _$identity);
 
 
-
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SendResult_Ok&&(identical(other.ticket, ticket) || other.ticket == ticket)&&(identical(other.size, size) || other.size == size)&&const DeepCollectionEquality().equals(other._addrs, _addrs));
+return identical(this, other) || (other.runtimeType == runtimeType&&other is SendResult_Ok&&(identical(other.ticket, ticket) || other.ticket == ticket)&&(identical(other.size, size) || other.size == size)&&const DeepCollectionEquality().equals(other._addrs, _addrs));
 }
 
 
@@ -843,7 +937,7 @@ int get hashCode => Object.hash(runtimeType,ticket,size,const DeepCollectionEqua
 
 @override
 String toString() {
-  return 'SendResult.ok(ticket: $ticket, size: $size, addrs: $addrs)';
+return 'SendResult.ok(ticket: $ticket, size: $size, addrs: $addrs)';
 }
 
 
@@ -851,33 +945,31 @@ String toString() {
 
 /// @nodoc
 abstract mixin class $SendResult_OkCopyWith<$Res> implements $SendResultCopyWith<$Res> {
-  factory $SendResult_OkCopyWith(SendResult_Ok value, $Res Function(SendResult_Ok) _then) = _$SendResult_OkCopyWithImpl;
+factory $SendResult_OkCopyWith(SendResult_Ok value, $Res Function(SendResult_Ok) _then) = _$SendResult_OkCopyWithImpl;
 @useResult
 $Res call({
- String ticket, BigInt size, List<String> addrs
+String ticket, BigInt size, List<String> addrs
 });
-
-
 
 
 }
 /// @nodoc
 class _$SendResult_OkCopyWithImpl<$Res>
-    implements $SendResult_OkCopyWith<$Res> {
-  _$SendResult_OkCopyWithImpl(this._self, this._then);
+implements $SendResult_OkCopyWith<$Res> {
+_$SendResult_OkCopyWithImpl(this._self, this._then);
 
-  final SendResult_Ok _self;
-  final $Res Function(SendResult_Ok) _then;
+final SendResult_Ok _self;
+final $Res Function(SendResult_Ok) _then;
 
 /// Create a copy of SendResult
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? ticket = null,Object? size = null,Object? addrs = null,}) {
-  return _then(SendResult_Ok(
+return _then(SendResult_Ok(
 ticket: null == ticket ? _self.ticket : ticket // ignore: cast_nullable_to_non_nullable
 as String,size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
 as BigInt,addrs: null == addrs ? _self._addrs : addrs // ignore: cast_nullable_to_non_nullable
 as List<String>,
-  ));
+));
 }
 
 
@@ -887,17 +979,12 @@ as List<String>,
 
 
 class SendResult_Err extends SendResult {
-  const SendResult_Err(): super._();
-  
-
-
-
-
+const SendResult_Err(): super._();
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SendResult_Err);
+return identical(this, other) || (other.runtimeType == runtimeType&&other is SendResult_Err);
 }
 
 
@@ -906,13 +993,11 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'SendResult.err()';
+return 'SendResult.err()';
 }
 
 
 }
-
-
 
 
 // dart format on

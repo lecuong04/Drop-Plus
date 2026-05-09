@@ -8,6 +8,7 @@ import "package:flutter_bloc/flutter_bloc.dart";
 import "package:pretty_qr_code/pretty_qr_code.dart";
 
 import "../../../../../exts.dart";
+import "../../../../../global.dart";
 import "../../../../../rust/progresses.dart";
 import "../../../../../rust/types.dart";
 import "../../../../cubits/send_cubit.dart";
@@ -112,10 +113,15 @@ class _ConnectionAddressesSection extends StatelessWidget {
                   children: [
                     Icon(Icons.link, size: 14, color: colorScheme.secondary),
                     const SizedBox(width: 8),
-                    Text(
-                      addr,
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                    Flexible(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Text(
+                          addr,
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -352,7 +358,7 @@ class _QrCodeSection extends StatelessWidget {
         elevation: 2,
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          onTap: () => _showLargeQr(context),
+          onTap: isDesktop ? () => _showLargeQr(context) : null,
           onLongPress: () => _saveQrCode(context),
           child: Container(
             padding: const EdgeInsets.all(12),

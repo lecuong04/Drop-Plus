@@ -1,12 +1,12 @@
 import "dart:convert";
 
 import "package:file_picker/file_picker.dart";
-import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
 import "package:mobile_scanner/mobile_scanner.dart";
 
 import "../../../../../exts.dart";
+import "../../../../../global.dart";
 import "../../../../cubits/receive_cubit.dart";
 import "../../../../cubits/settings_cubit.dart";
 import "../../../../services/other_service.dart";
@@ -20,10 +20,6 @@ class ReceiveInitialStateWidget extends StatefulWidget {
 }
 
 class _ReceiveInitialStateWidgetState extends State<ReceiveInitialStateWidget> {
-  final bool _isSupportScanner = {
-    TargetPlatform.android,
-    TargetPlatform.iOS,
-  }.contains(defaultTargetPlatform);
   final TextEditingController _ticketController = TextEditingController();
 
   bool _isPick = false;
@@ -59,7 +55,7 @@ class _ReceiveInitialStateWidgetState extends State<ReceiveInitialStateWidget> {
   }
 
   void _handleScanQR() async {
-    if (_isSupportScanner) {
+    if (!isDesktop) {
       final result = await showDialog<String>(
         context: context,
         builder: (context) {
@@ -225,18 +221,20 @@ class _ReceiveInitialStateWidgetState extends State<ReceiveInitialStateWidget> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            Text(
-                              _downloadDir ?? "Select destination",
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: _downloadDir != null
-                                    ? FontWeight.bold
-                                    : null,
-                                color: _downloadDir == null
-                                    ? colorScheme.error
-                                    : null,
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Text(
+                                _downloadDir ?? "Select destination",
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: _downloadDir != null
+                                      ? FontWeight.bold
+                                      : null,
+                                  color: _downloadDir == null
+                                      ? colorScheme.error
+                                      : null,
+                                ),
+                                maxLines: 1,
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ),

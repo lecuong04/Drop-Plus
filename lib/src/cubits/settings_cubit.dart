@@ -3,7 +3,9 @@ import "dart:async";
 import "package:connectivity_plus/connectivity_plus.dart";
 import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
+import "package:path_provider/path_provider.dart";
 
+import "../../global.dart";
 import "../../rust/types.dart";
 import "../services/other_service.dart";
 
@@ -110,6 +112,13 @@ class SettingsCubit extends Cubit<SettingsState> {
 
   SettingsCubit(this._service, {this.onConnectivityLost})
     : super(const SettingsState()) {
+    if (isDesktop) {
+      getDownloadsDirectory().then((value) {
+        if (value != null) {
+          emit(state.copyWith(downloadFolder: value.path));
+        }
+      });
+    }
     _service.getAddrs().then((addrs) {
       emit(
         state.copyWith(
@@ -118,10 +127,10 @@ class SettingsCubit extends Cubit<SettingsState> {
           ),
         ),
       );
+      _subscription = Connectivity().onConnectivityChanged.listen(
+        (_) => refreshAddrs(),
+      );
     });
-    _subscription = Connectivity().onConnectivityChanged.listen(
-      (e) => refreshAddrs(),
-    );
   }
 
   @override

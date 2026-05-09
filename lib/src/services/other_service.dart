@@ -8,14 +8,6 @@ class OtherService {
   }
 
   Future<Map<String, String>> getAddrs() async {
-    final bool isSupportNetwork = {
-      TargetPlatform.windows,
-      TargetPlatform.linux,
-      TargetPlatform.macOS,
-    }.contains(defaultTargetPlatform);
-    if (isSupportNetwork) {
-      return await ffi.getAddrs();
-    }
-    return {};
+    return await ffi.getAddrs();
   }
 }

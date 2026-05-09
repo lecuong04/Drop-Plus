@@ -5,11 +5,13 @@
 
 import "dart:async";
 import "dart:convert";
+
+import "package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart";
+
 import "ffi.dart";
 import "frb_generated.dart";
 import "frb_generated.io.dart"
     if (dart.library.js_interop) "frb_generated.web.dart";
-import "package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart";
 import "progresses.dart";
 import "types.dart";
 
@@ -97,6 +99,7 @@ abstract class RustLibApi extends BaseApi {
   Future<void> crateFfiReceive({
     required String ticket,
     required String downloadDir,
+    String? tempDir,
     String? relay,
     required RustStreamSink<List<ProgressState>> stream,
     required RustStreamSink<ReceiveResult> result,
@@ -336,6 +339,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   Future<void> crateFfiReceive({
     required String ticket,
     required String downloadDir,
+    String? tempDir,
     String? relay,
     required RustStreamSink<List<ProgressState>> stream,
     required RustStreamSink<ReceiveResult> result,
@@ -346,6 +350,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(ticket, serializer);
           sse_encode_String(downloadDir, serializer);
+          sse_encode_opt_String(tempDir, serializer);
           sse_encode_opt_String(relay, serializer);
           sse_encode_StreamSink_list_progress_state_Sse(stream, serializer);
           sse_encode_StreamSink_receive_result_Sse(result, serializer);
@@ -361,7 +366,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeErrorData: sse_decode_AnyhowException,
         ),
         constMeta: kCrateFfiReceiveConstMeta,
-        argValues: [ticket, downloadDir, relay, stream, result],
+        argValues: [ticket, downloadDir, tempDir, relay, stream, result],
         apiImpl: this,
       ),
     );
@@ -369,7 +374,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   TaskConstMeta get kCrateFfiReceiveConstMeta => const TaskConstMeta(
     debugName: "receive(dart_style=receive)",
-    argNames: ["ticket", "downloadDir", "relay", "stream", "result"],
+    argNames: ["ticket", "downloadDir", "tempDir", "relay", "stream", "result"],
   );
 
   @override

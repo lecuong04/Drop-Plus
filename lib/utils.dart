@@ -1,3 +1,8 @@
+import "dart:collection";
+import "dart:convert";
+
+import "package:crypto/crypto.dart";
+
 import "rust/types.dart";
 import "src/models/tree_node.dart";
 
@@ -25,4 +30,9 @@ List<TreeNode> buildTree(List<BlobInfo> files) {
     }
   }
   return roots.values.map((root) => root..computeSize()).toList();
+}
+
+String mapHash(Map data) {
+  final sorted = SplayTreeMap.from(data);
+  return sha256.convert(utf8.encode(jsonEncode(sorted))).toString();
 }

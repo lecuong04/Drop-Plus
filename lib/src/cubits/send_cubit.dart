@@ -1,10 +1,16 @@
 import "dart:async";
+import "dart:collection";
+import "dart:io";
 
 import "package:flutter_bloc/flutter_bloc.dart";
 import "package:flutter_rust_bridge/flutter_rust_bridge.dart";
+import "package:path/path.dart" as p;
+import "package:path_provider/path_provider.dart";
 
 import "../../rust/progresses.dart";
 import "../../rust/types.dart";
+import "../../utils.dart";
+import "../services/android_service.dart";
 import "../services/transfer_service.dart";
 
 sealed class SendState {
@@ -19,6 +25,7 @@ final class SendInitial extends SendState {
 
 final class SendImporting extends SendState {
   final List<ProgressState> progresses;
+
   const SendImporting({this.progresses = const []});
 }
 
@@ -45,13 +52,43 @@ class SendCubit extends Cubit<SendState> {
 
   SendCubit(this._service) : super(const SendInitial());
 
+  static Future<(Directory?, Iterable<String>)> _prepareSend(
+    HashMap<String, bool> map,
+  ) async {
+    if (Platform.isAndroid) {
+      final cache = Directory(
+        p.join((await getApplicationCacheDirectory()).path, mapHash(map)),
+      );
+      if (!await cache.exists()) {
+        await cache.create(recursive: true);
+      }
+      final paths = List<String>.empty(growable: true);
+      for (final p in map.entries) {
+        paths.add(
+          (await AndroidService.copyToLocal(
+            srcUri: p.key,
+            dstParent: cache.path,
+          ))!,
+        );
+      }
+      return (cache, paths);
+    } else if (Platform.isIOS) {
+      return (null, map.keys);
+    } else {
+      return (null, map.keys);
+    }
+  }
+
   void startSend(
-    List<String> paths, {
+    HashMap<String, bool> map, {
     String? ipv4Addr,
     String? ipv6Addr,
     int port = 0,
     RelayModeOption relay = const RelayModeOption.disabled(),
-  }) {
+  }) async {
+    emit(const SendImporting());
+
+    final prepareSend = await _prepareSend(map);
     final progressSink = RustStreamSink<List<ProgressState>>();
     final resultSink = RustStreamSink<SendResult>();
 
@@ -60,7 +97,7 @@ class SendCubit extends Cubit<SendState> {
 
     _service
         .send(
-          paths: paths,
+          paths: prepareSend.$2.toList(growable: false),
           ipv4Addr: ipv4Addr != null ? "$ipv4Addr:$port" : null,
           ipv6Addr: ipv6Addr != null ? "[$ipv6Addr]:$port" : null,
           relay: relay,
@@ -70,6 +107,7 @@ class SendCubit extends Cubit<SendState> {
         .whenComplete(() async {
           await progressSub?.cancel();
           await resultSub?.cancel();
+          await prepareSend.$1?.delete(recursive: true);
         });
     progressSub = progressSink.stream.listen((e) {
       if (e.any((p) => p.phase is Phase_Importing)) {

@@ -3,9 +3,11 @@
 
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
-import "frb_generated.dart";
 import "package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart";
 import "package:freezed_annotation/freezed_annotation.dart" hide protected;
+
+import "frb_generated.dart";
+
 part "types.freezed.dart";
 
 class BlobInfo {
@@ -60,11 +62,13 @@ sealed class ReceiveResult with _$ReceiveResult {
 
   const factory ReceiveResult.pending({required List<BlobInfo> files}) =
       ReceiveResult_Pending;
+
   const factory ReceiveResult.ok({
     required BigInt totalFiles,
     required BigInt payloadSize,
     required BigInt elapsedSecs,
   }) = ReceiveResult_Ok;
+
   const factory ReceiveResult.err() = ReceiveResult_Err;
 }
 
@@ -73,7 +77,9 @@ sealed class RelayModeOption with _$RelayModeOption {
   const RelayModeOption._();
 
   const factory RelayModeOption.disabled() = RelayModeOption_Disabled;
+
   const factory RelayModeOption.n0() = RelayModeOption_N0;
+
   const factory RelayModeOption.custom({required String url}) =
       RelayModeOption_Custom;
 }
@@ -87,5 +93,6 @@ sealed class SendResult with _$SendResult {
     required BigInt size,
     required List<String> addrs,
   }) = SendResult_Ok;
+
   const factory SendResult.err() = SendResult_Err;
 }
