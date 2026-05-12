@@ -1,10 +1,12 @@
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 
-final isDesktop = {
+const String channelName = "vn.lecuong04.drop_plus";
+
+final bool isDesktop = {
   TargetPlatform.windows,
   TargetPlatform.linux,
   TargetPlatform.macOS,
 }.contains(defaultTargetPlatform);
 
-final navigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey();

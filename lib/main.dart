@@ -26,9 +26,9 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
       providers: [
-        RepositoryProvider(create: (context) => TransferService()),
-        RepositoryProvider(create: (context) => TracingService()),
-        RepositoryProvider(create: (context) => OtherService()),
+        RepositoryProvider(create: (_) => TransferService()),
+        RepositoryProvider(create: (_) => TracingService()),
+        RepositoryProvider(create: (_) => OtherService()),
       ],
       child: MultiBlocProvider(
         providers: [

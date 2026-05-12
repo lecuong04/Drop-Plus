@@ -1,13 +1,13 @@
 package vn.lecuong04.drop_plus
 
+import java.io.File
 import android.content.Intent
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
+import androidx.core.net.toUri
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
-import java.io.File
-import androidx.core.net.toUri
 
 class MainActivity : FlutterActivity() {
 	init {
@@ -15,7 +15,7 @@ class MainActivity : FlutterActivity() {
 	}
 
 	companion object {
-		private const val CHANNEL = "native"
+		private const val CHANNEL = "vn.lecuong04.drop_plus"
 		private const val BUFFER_SIZE = 64 * 1024
 	}
 

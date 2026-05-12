@@ -1,7 +1,9 @@
 import "package:flutter/services.dart";
 
+import "../../global.dart";
+
 class AndroidService {
-  static const _channel = MethodChannel("native");
+  static const _channel = MethodChannel(channelName);
 
   static Future<String?> copyToLocal({
     required String srcUri,
