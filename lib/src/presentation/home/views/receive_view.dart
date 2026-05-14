@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
 
 import "../../../../exts.dart";
+import "../../../../global.dart";
 import "../../../cubits/receive_cubit.dart";
 import "receive/receive_connecting_state.dart";
 import "receive/receive_exporting_state.dart";
@@ -39,7 +40,9 @@ class _ReceiveViewState extends State<ReceiveView> {
                 return SingleChildScrollView(
                   child: Container(
                     alignment: Alignment.center,
-                    padding: const EdgeInsets.all(24),
+                    padding: isDesktop
+                        ? const EdgeInsets.all(24)
+                        : const EdgeInsets.all(8),
                     constraints: BoxConstraints(
                       minHeight: constraints.maxHeight,
                     ),

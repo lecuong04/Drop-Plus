@@ -3,11 +3,11 @@ import "dart:async";
 import "package:connectivity_plus/connectivity_plus.dart";
 import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
-import "package:path_provider/path_provider.dart";
 
 import "../../global.dart";
 import "../../rust/types.dart";
 import "../services/other_service.dart";
+import "../services/platform_service.dart";
 
 final class SettingsState {
   final ThemeMode themeMode;
@@ -105,37 +105,38 @@ final class SettingsState {
 }
 
 class SettingsCubit extends Cubit<SettingsState> {
-  late final StreamSubscription _subscription;
-
   final OtherService _service;
   final void Function(String addr)? onConnectivityLost;
 
+  StreamSubscription? _subscription;
+
   SettingsCubit(this._service, {this.onConnectivityLost})
     : super(const SettingsState()) {
+    PlatformService.getPublicTransferFolder().then((value) {
+      if (value != null) {
+        emit(state.copyWith(downloadFolder: value));
+      }
+    });
     if (isDesktop) {
-      getDownloadsDirectory().then((value) {
-        if (value != null) {
-          emit(state.copyWith(downloadFolder: value.path));
-        }
+      _service.getAddrs().then((addrs) {
+        emit(
+          state.copyWith(
+            availableAddrs: Map.fromEntries(
+              addrs.entries.toList()
+                ..sort((a, b) => a.value.compareTo(b.value)),
+            ),
+          ),
+        );
+        _subscription ??= Connectivity().onConnectivityChanged.listen(
+          (_) => refreshAddrs(),
+        );
       });
     }
-    _service.getAddrs().then((addrs) {
-      emit(
-        state.copyWith(
-          availableAddrs: Map.fromEntries(
-            addrs.entries.toList()..sort((a, b) => a.value.compareTo(b.value)),
-          ),
-        ),
-      );
-      _subscription = Connectivity().onConnectivityChanged.listen(
-        (_) => refreshAddrs(),
-      );
-    });
   }
 
   @override
   Future<void> close() async {
-    await _subscription.cancel();
+    await _subscription?.cancel();
     return super.close();
   }
 

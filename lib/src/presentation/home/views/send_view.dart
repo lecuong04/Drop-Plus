@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
 
 import "../../../../exts.dart";
+import "../../../../global.dart";
 import "../../../cubits/send_cubit.dart";
 import "send/send_connecting_state.dart";
 import "send/send_importing_state.dart";
@@ -32,7 +33,9 @@ class SendView extends StatelessWidget {
               return SingleChildScrollView(
                 child: Container(
                   alignment: Alignment.center,
-                  padding: const EdgeInsets.all(24),
+                  padding: isDesktop
+                      ? const EdgeInsets.all(24)
+                      : const EdgeInsets.all(8),
                   constraints: BoxConstraints(minHeight: constraints.maxHeight),
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(

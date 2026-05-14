@@ -90,9 +90,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               boundType: .Bounce,
             ),
           ),
-          IndexedStack(
-            index: _selectedIndex,
-            children: const [SendView(), ReceiveView(), SettingsView()],
+          SafeArea(
+            child: IndexedStack(
+              index: _selectedIndex,
+              children: const [SendView(), ReceiveView(), SettingsView()],
+            ),
           ),
         ],
       ),

@@ -308,7 +308,9 @@ class _SettingsViewState extends State<SettingsView> {
             return SingleChildScrollView(
               child: Container(
                 alignment: Alignment.topCenter,
-                padding: const EdgeInsets.all(24),
+                padding: isDesktop
+                    ? const EdgeInsets.all(24)
+                    : const EdgeInsets.all(8),
                 constraints: BoxConstraints(minHeight: constraints.maxHeight),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(

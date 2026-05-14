@@ -129,10 +129,6 @@ class _ReceiveInitialStateWidgetState extends State<ReceiveInitialStateWidget> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final defaultDownloadFolder = context
-        .watch<SettingsCubit>()
-        .state
-        .downloadFolder;
 
     return Card.filled(
       clipBehavior: Clip.antiAlias,
@@ -239,13 +235,23 @@ class _ReceiveInitialStateWidgetState extends State<ReceiveInitialStateWidget> {
                           ],
                         ),
                       ),
-                      if (_downloadDir != defaultDownloadFolder)
-                        IconButton(
-                          visualDensity: VisualDensity.compact,
-                          onPressed: _handleResetDir,
-                          icon: const Icon(Icons.restart_alt, size: 20),
-                          tooltip: "Reset to default",
+                      BlocConsumer<SettingsCubit, SettingsState>(
+                        listener: (BuildContext context, SettingsState state) {
+                          if (state.downloadFolder != null &&
+                              _downloadDir == null) {
+                            setState(() => _downloadDir = state.downloadFolder);
+                          }
+                        },
+                        builder: (context, state) => Visibility(
+                          visible: _downloadDir != state.downloadFolder,
+                          child: IconButton(
+                            visualDensity: VisualDensity.compact,
+                            onPressed: _handleResetDir,
+                            icon: const Icon(Icons.restart_alt, size: 20),
+                            tooltip: "Reset to default",
+                          ),
                         ),
+                      ),
                       const Icon(Icons.chevron_right, size: 20),
                     ],
                   ),

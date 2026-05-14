@@ -1,3 +1,5 @@
+import "dart:io";
+
 import "package:flutter/services.dart";
 
 import "../../global.dart";
@@ -9,9 +11,14 @@ class AndroidService {
     required String srcUri,
     required String dstParent,
   }) async {
-    return _channel.invokeMethod<String>("copyToLocal", {
+    return await _channel.invokeMethod<String>("copyToLocal", {
       "srcUri": srcUri,
       "dstParent": dstParent,
     });
+  }
+
+  static Future<Directory?> publicDownloadFolder() async {
+    final path = await _channel.invokeMethod<String>("publicDownloadFolder");
+    return path != null ? Directory(path) : null;
   }
 }

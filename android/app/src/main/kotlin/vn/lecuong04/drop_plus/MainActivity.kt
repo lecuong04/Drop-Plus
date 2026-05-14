@@ -3,6 +3,7 @@ package vn.lecuong04.drop_plus
 import java.io.File
 import android.content.Intent
 import android.net.Uri
+import android.os.Environment
 import androidx.documentfile.provider.DocumentFile
 import androidx.core.net.toUri
 import io.flutter.embedding.android.FlutterActivity
@@ -61,10 +62,16 @@ class MainActivity : FlutterActivity() {
 						)
 					}
 				}
-
+				"publicDownloadFolder" -> {
+					result.success(publicDownloadFolder())
+				}
 				else -> result.notImplemented()
 			}
 		}
+	}
+
+	private fun publicDownloadFolder(): String {
+		return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath
 	}
 
 	private fun copyToLocal(
